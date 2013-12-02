@@ -1,0 +1,1 @@
+{"date": "2013-08-27 21:21:26", "record_type": "disk_usage", "vdi_name": "ROOT-36597", "storage_type": "lvm", "hostname": "cnode01-m.pod3.kr-1.epc.ucloud.com","vdi_size":2147483648, "vdi_using_size":234881024,"device":"xvda", "vm_uuid": "d402d686-83f9-4576-b98d-82725dc017bf"} 
