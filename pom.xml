@@ -3,18 +3,18 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.ktcloudware</groupId>
-	<artifactId>crams-indexer</artifactId>
-	<version>0.3</version>
+	<artifactId>crams-consumer</artifactId>
+	<version>0.6.0</version>
 	<packaging>jar</packaging>
 
-	<name>crams-indexer</name>
+	<name>crams-consumer</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<build>
-		<finalName>crams-indexer-${project.version}</finalName>
+		<finalName>crams-consumer-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

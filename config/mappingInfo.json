@@ -2,8 +2,9 @@
    "vm":{
       "_routing":{
          "required":true,
-         "path":"vm_account_name"
+         "path":"vm_pod_name"
       },
+      "_all" : {"enabled" : false},
       "properties":{
          "datetime":{
             "type":"date",
