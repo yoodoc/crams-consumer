@@ -5,7 +5,7 @@ JAVA_HOME=/usr/lib/jvm/jre1.7.0_45
 JSVC=jsvc
 DAEMON_USER=cdp
 DAEMON_HOME=$(dirname $0)/..
-PID_FILE=$DAEMON_HOME/crams-indexer.pid
+PID_FILE=$DAEMON_HOME/crams-consumer.pid
 CLASSPATH=\
 $JAVA_HOME:\
 $DAEMON_HOME:\
@@ -23,11 +23,12 @@ exec $JSVC \
 -user $DAEMON_USER \
 -debug \
 -home $JAVA_HOME \
--outfile $DAEMON_HOME/jsvc-error.log \
--pidfile $DAEMON_HOME/crams-indexer.pid \
--errfile $DAEMON_HOME/jsvc-error.log \
+-outfile $DAEMON_HOME/error-jsvc.log \
+-pidfile $DAEMON_HOME/jsvc.pid \
+-errfile $DAEMON_HOME/error-jsvc.log \
 -cp $CLASSPATH \
-com.ktcloudware.crams.indexer.IndexerDaemon
+-Ddaemon.home=$DAEMON_HOME \
+com.ktcloudware.crams.consumer.MainDaemon
 #
 # To get a verbose JVM
 #-verbose \
@@ -42,8 +43,8 @@ stop)
 #
 $JSVC \
 -stop \
--pidfile $DAEMON_HOME/crams-indexer.pid \
-com.ktcloudware.crams.indexer.IndexerDaemon
+-pidfile $DAEMON_HOME/jsvc.pid \
+com.ktcloudware.crams.consumer.IndexerDaemon
 exit $?
 ;;
 #
