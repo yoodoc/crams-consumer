@@ -18,20 +18,20 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 public class ESIndexingPluginTest {
 
 	@Test
-	public void test() {
+	public void test(){
 		int numOfThread = 10;
 		String setting = FileUtil.readJsonFromConfigPath("indexSettings.json");
 		String mapping = FileUtil.readJsonFromConfigPath("mappingInfo.json");
 		ESConfig esConfig = new ESConfig();
-		try {
+		try{
 			esConfig.setESAddress("localhost:9300");
-		} catch (ParseException e) {
+		}catch(ParseException e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		List<ESIndexingPlugin> plugins = new ArrayList<ESIndexingPlugin>();
 		
-		for (ESIndexingPlugin esPlugin: plugins) {
+		for(ESIndexingPlugin esPlugin: plugins){
 			ESBulkIndexer esBulkIndexer = new ESBulkIndexer(esConfig.esAddressList,
 					"elasticsearch", "yoodoc", "vm_pod_name",
 					setting, mapping);

@@ -18,7 +18,7 @@ import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.message.MessageAndMetadata;
 
-import com.ktcloudware.crams.consumer.plugins.CramsIndexerPlugin;
+import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
 
 /**
  * date format is hardcoded
@@ -30,7 +30,7 @@ public class KafkaConsumerService implements Runnable {
 	public List<String> result;
 
 	private KafkaStream<byte[], byte[]> stream;
-	private List<CramsIndexerPlugin> plugins;
+	private List<CramsConsumerPlugin> plugins;
 	private ObjectMapper mapper;
 	private String topicName;
 	private Logger logger;
@@ -38,14 +38,14 @@ public class KafkaConsumerService implements Runnable {
 
 
 	public KafkaConsumerService(KafkaStream<byte[], byte[]> kafkaStream,
-			List<CramsIndexerPlugin> plugins, String topicName) {
+			List<CramsConsumerPlugin> plugins, String topicName){
 		this.topicName = topicName;
 		logger = LogManager.getLogger("INDEXER.MAIN");
 		logger2 = LogManager.getLogger("INDEXER.KAFKADATA");
 
 		stream = kafkaStream;
 		this.plugins = plugins;
-		for (CramsIndexerPlugin plugin : plugins) {
+		for(CramsConsumerPlugin plugin : plugins){
 			logger.info("load plugin" + plugin.getClass().getName());
 		}
 		mapper = new ObjectMapper();
@@ -54,17 +54,17 @@ public class KafkaConsumerService implements Runnable {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void run() {
-		try {
+	public void run(){
+		try{
 			Map<Integer, Long> lastOffsetForPartition = new HashMap<Integer, Long>();
 			ConsumerIterator<byte[], byte[]> it = stream.iterator();
 			int kafkaCount = 0;
-			while (it.hasNext()) {
+			while (it.hasNext()){
 				// read a single kafka message
 				Map<String, Object> userData = null;
 				byte[] message = null;
 				String dataTag = null;
-				try {
+				try{
 					MessageAndMetadata<byte[], byte[]> kafkaData = it.next();
 					message = kafkaData.message();
 					int partition = kafkaData.partition();
@@ -76,37 +76,39 @@ public class KafkaConsumerService implements Runnable {
 							+ new String(message));
 					userData = mapper.readValue(message, Map.class);
 					kafkaCount++;
-				} catch (Exception e) {
+				}catch(Exception e){
 					// json format exception
 					logger2.warn("json parsing error : " + new String(message));
 					continue;
 				}
 
 				// kafka message processing
-				try {
-					for (CramsIndexerPlugin plugin : plugins) {
+				try{
+					for(CramsConsumerPlugin plugin : plugins){
 						userData = plugin.excute(userData, dataTag);
 						logger.trace("PLUGIN_RESULT:filtering kafka message with "
 								+ plugin.getClass().getName()
 								+ ", filtered message:" + userData);
-						if (userData == null) {
+						if(userData == null){
 							break;
 						}
 					}
-				} catch (Exception e) {
+				}catch(Exception e){
 					logger.error(e.getMessage());
 					e.printStackTrace();
+					
+					//TODO 데몬 동작을 종료해야하는 에러에 대한 처리가 필요하다. 
 				}
 
 				logger.trace("total processing data : " + kafkaCount);
-				for (Integer partition : lastOffsetForPartition.keySet()) {
+				for(Integer partition : lastOffsetForPartition.keySet()){
 					logger.trace("last [" + partition + "] offset is "
 							+ lastOffsetForPartition.get(partition));
 				}
 			}
 			logger.info("kafka broker session closed.");
 			return;
-		} catch (Exception e) {
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return;

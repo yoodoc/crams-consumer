@@ -17,9 +17,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class FileUtil {
 	private static final String CONFIG_PATH = "/config/";
 
-	public static Map<String, Object> readJsonToMap(String fileName) {
+	public static Map<String, Object> readJsonToMap(String fileName){
 		ObjectMapper mapper = new ObjectMapper();
-		try {
+		try{
 				InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(fileName);
 			if(is == null){
 				System.out.println("Can't read file");
@@ -30,16 +30,16 @@ public class FileUtil {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> dataMap = mapper.readValue(reader, Map.class);
 			return dataMap;
-		} catch (Exception e) {
+		}catch(Exception e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public static String readJsonToString(String fileName) {
+	public static String readJsonToString(String fileName){
 		String jsonStr = null;
-		try {
+		try{
 			InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(fileName);
 			if(is == null){
 				System.out.println("Can't read file");
@@ -49,24 +49,24 @@ public class FileUtil {
 			BufferedReader reader = new BufferedReader(in);
 			jsonStr = new String();
 			String str;
-			while ((str = reader.readLine()) != null) {
+			while ((str = reader.readLine()) != null){
 				jsonStr += str;
 			}
 			return jsonStr;
-		} catch (Exception e) {
+		}catch(Exception e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 		}
 		
-	public static String readJsonFromConfigPath(String fileName) {
+	public static String readJsonFromConfigPath(String fileName){
 		String jsonStr = null;
-		try {
+		try{
 			Properties systemProperty = System.getProperties();
 			String dir = (String) systemProperty.get("user.dir");
 			String daemonHomeDir = (String) systemProperty.get("daemon.home");
-			if (daemonHomeDir != null) {
+			if(daemonHomeDir != null){
 				dir = daemonHomeDir;
 			}
 			File file = new File(dir + CONFIG_PATH + fileName);
@@ -74,38 +74,38 @@ public class FileUtil {
 			BufferedReader reader = new BufferedReader(fileReader);
 			jsonStr = new String();
 			String str;
-			while ((str = reader.readLine()) != null) {
+			while ((str = reader.readLine()) != null){
 				jsonStr += str;
 			}
 			reader.close();
 			fileReader.close();
 			return jsonStr;
-		} catch (Exception e) {
+		}catch(Exception e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 		}
 	
-		public static Properties readPropertiesFromConfigPath(String fileName) {
+		public static Properties readPropertiesFromConfigPath(String fileName){
 			Properties systemProperty = System.getProperties();
 			String dir = (String) systemProperty.get("user.dir");
 			String daemonHomeDir = (String) systemProperty.get("daemon.home");
-			if (daemonHomeDir != null) {
+			if(daemonHomeDir != null){
 				dir = daemonHomeDir;
 			}
 			File file = new File(dir + CONFIG_PATH + fileName);
 			InputStream is = null;
-			try {
+			try{
 				is = new FileInputStream(file);
 				Properties property = new Properties();
 				property.load(is);
 				is.close();
 				return property;
-			} catch (FileNotFoundException e1) {
+			}catch(FileNotFoundException e1){
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (IOException e) {
+			}catch(IOException e){
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -120,14 +120,14 @@ public class FileUtil {
 		int closeCount = 0;
 		int jsonStartIndex = jsonStr.indexOf("{");
 		openCount++;
-		while (true) {
+		while (true){
 			int newOpenIndex = jsonStr.indexOf("{",newIndex);
-			if (newOpenIndex == -1) {
+			if(newOpenIndex == -1){
 				return jsonList;
 			}
 			
 			int newCloseIndex = jsonStr.indexOf("}", newIndex);
-			if(newOpenIndex > newCloseIndex) {
+			if(newOpenIndex > newCloseIndex){
 				openCount++;
 				newIndex = newOpenIndex + 1;
 			} else {
@@ -135,7 +135,7 @@ public class FileUtil {
 				newIndex = newCloseIndex + 1;
 			}
 			
-			if(openCount == closeCount) {
+			if(openCount == closeCount){
 				String singleJson = jsonStr.substring(jsonStartIndex, newCloseIndex+1);
 				jsonStartIndex = jsonStr.indexOf("{", newCloseIndex);
 				jsonList.add(singleJson);

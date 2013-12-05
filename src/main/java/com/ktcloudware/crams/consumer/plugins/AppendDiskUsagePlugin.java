@@ -8,45 +8,45 @@ import org.apache.log4j.Logger;
 import com.ktcloudware.crams.consumer.clients.CacheClient;
 import com.ktcloudware.crams.consumer.clients.RedisClient;
 
-public class AppendDiskUsagePlugin implements CramsIndexerPlugin {
+public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
 	private CacheClient cacheClient;
 	private String properties;
 	private static final String DISK_AVG_USAGE = "vbd_usage";
 
 	Logger logger = LogManager.getLogger("PLUGINS");
 
-	public AppendDiskUsagePlugin() {
+	public AppendDiskUsagePlugin(){
 		initCacheClient("localhost");
 	}
 
 	@Override
-	public void setProperties(String pluginProperties) {
+	public void setProperties(String pluginProperties){
 		this.properties = pluginProperties;
 		initCacheClient(pluginProperties);
 
 	}
 
-	private void initCacheClient(String cacheAddress) {
+	private void initCacheClient(String cacheAddress){
 		this.cacheClient = new RedisClient(cacheAddress);
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
 		long totalDisk = 0;
 		long totalUsingDisk = 0;
 		String vmUuid = null;
 
 		// get diskMapping
-		try {
+		try{
 			vmUuid = String.valueOf(dataMap.get("vm_uuid"));
-			if (vmUuid == null || vmUuid.isEmpty()) {
+			if(vmUuid == null || vmUuid.isEmpty()){
 				logger.trace("can't find vm_uuid field");
 				dataMap = createEmptyDiskUsageData(dataMap);
 				return dataMap;
 			}
 
 			String vdi = cacheClient.get(vmUuid);
-			if (vdi == null || vdi.isEmpty()) {
+			if(vdi == null || vdi.isEmpty()){
 				logger.trace("can't find vdiset for vmUUID= " + vmUuid);
 				dataMap = createEmptyDiskUsageData(dataMap);
 				return dataMap;
@@ -54,10 +54,10 @@ public class AppendDiskUsagePlugin implements CramsIndexerPlugin {
 
 			String[] vdiSet = vdi.split(",");
 
-			for (String vdiName : vdiSet) {
+			for(String vdiName : vdiSet){
 				String[] vdiNames = cacheClient.get(vdiName).split(",");
 
-				if (vdiNames.length != 3) {
+				if(vdiNames.length != 3){
 					throw new Exception(
 							"wrong formmated vdi usage values in cache object. :"
 									+ vdi);
@@ -72,7 +72,7 @@ public class AppendDiskUsagePlugin implements CramsIndexerPlugin {
 				dataMap.put(newDeviceName + "_using_size",
 						Long.valueOf(vdiNames[2]));
 			}
-		} catch (Exception e1) {
+		}catch(Exception e1){
 			logger.warn("failed to get disk usage information for" + vmUuid
 					+ ":" + e1.getMessage());
 			return dataMap;
@@ -80,7 +80,7 @@ public class AppendDiskUsagePlugin implements CramsIndexerPlugin {
 
 		// calculate disk usage rate
 		float diskUsageRate = 0;
-		if (totalDisk != 0) {
+		if(totalDisk != 0){
 			diskUsageRate = (float) ((double) totalUsingDisk / totalDisk);
 		}
 
@@ -89,18 +89,18 @@ public class AppendDiskUsagePlugin implements CramsIndexerPlugin {
 	}
 
 	@Override
-	public String getProperties() {
+	public String getProperties(){
 		return properties;
 	}
 
 	@Override
-	public boolean needProperties() {
+	public boolean needProperties(){
 		// TODO Auto-generated method stub
 		return true;
 	}
 
 	private Map<String, Object> createEmptyDiskUsageData(
-			Map<String, Object> data) {
+			Map<String, Object> data){
 		data.put("vbd_a_size", 0);
 		data.put("vbd_a_using_size",
 				0);

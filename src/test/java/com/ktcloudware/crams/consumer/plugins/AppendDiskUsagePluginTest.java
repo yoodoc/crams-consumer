@@ -14,7 +14,7 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 public class AppendDiskUsagePluginTest {
 	//@Ignore
 	@Test
-	public void testDiskAvgUsagePlugin() {
+	public void testDiskAvgUsagePlugin(){
 		DiskUsageCachePlugin cachePlugin = new DiskUsageCachePlugin();
 		cachePlugin.setProperties("localhost,60");
 		AppendDiskUsagePlugin avgUsagePlugin = new AppendDiskUsagePlugin();

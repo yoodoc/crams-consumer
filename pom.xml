@@ -48,9 +48,7 @@
 			<resource>
 				<directory>${basedir}/src/test/resources</directory>
 			</resource>
-			<!-- <resource>
-				<directory>${basedir}/src/main/lib</directory>
-			</resource> -->
+			<!-- <resource> <directory>${basedir}/src/main/lib</directory> </resource> -->
 		</resources>
 	</build>
 	<dependencies>
@@ -58,11 +56,9 @@
 			<groupId>commons-daemon</groupId>
 			<artifactId>commons-daemon</artifactId>
 			<version>1.0.15</version>
-		 </dependency>
-		<!--
-		<dependency> <groupId>com.sksamuel.kafka</groupId> <artifactId>kafka_2.10</artifactId> 
-			<version>0.8.0-beta1</version> </dependency> 
-		-->
+		</dependency>
+		<!-- <dependency> <groupId>com.sksamuel.kafka</groupId> <artifactId>kafka_2.10</artifactId> 
+			<version>0.8.0-beta1</version> </dependency> -->
 		<dependency>
 			<groupId>com.ktcloudware.kafka</groupId>
 			<artifactId>kafka_2.8.0</artifactId>
@@ -113,6 +109,11 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.13</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.27</version>
 		</dependency>
 	</dependencies>
 </project>

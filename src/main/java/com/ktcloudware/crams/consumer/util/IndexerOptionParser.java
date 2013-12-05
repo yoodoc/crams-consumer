@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.ktcloudware.crams.consumer.dataType.ESConfig;
 import com.ktcloudware.crams.consumer.dataType.KafkaConfig;
-import com.ktcloudware.crams.consumer.plugins.CramsIndexerPlugin;
+import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
 
 public class IndexerOptionParser {
 
@@ -47,11 +47,11 @@ public class IndexerOptionParser {
 	 * @param esPropertiesPath
 	 * @return
 	 */
-	public static ESConfig parseESProperties(String esPropertiesPath) {
+	public static ESConfig parseESProperties(String esPropertiesPath){
 		Properties properties = FileUtil.readPropertiesFromConfigPath(esPropertiesPath);
 		ESConfig esConfig = new ESConfig();
 
-		try {
+		try{
 			esConfig.bulkRequestSize = Integer.valueOf(properties
 					.getProperty(IndexerOptionParser.OPTION_ES_BULKSIZE));
 			esConfig.maxRequestIntervalSec = Integer.valueOf(properties
@@ -73,14 +73,14 @@ public class IndexerOptionParser {
 			esConfig.mappingInfoFileName = properties
 					.getProperty(IndexerOptionParser.OPTION_MAPPING_INFO_FILE);
 			esConfig.mappings = FileUtil.readJsonFromConfigPath(esConfig.mappingInfoFileName);
-		} catch (Exception e) {
+		}catch(Exception e){
 			logger.error(e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 
 
-		if (!esConfig.validateConfigVals()) {
+		if(!esConfig.validateConfigVals()){
 			logger.error("es config validation error occurs.");
 			return null;
 		}
@@ -97,7 +97,7 @@ public class IndexerOptionParser {
 	 * @param kafkaPropertiesPath
 	 * @return
 	 */
-	public static KafkaConfig parseKafkaConsumerProperties(String kafkaPropertiesPath) {
+	public static KafkaConfig parseKafkaConsumerProperties(String kafkaPropertiesPath){
 		Properties properties = FileUtil
 				.readPropertiesFromConfigPath(kafkaPropertiesPath);
 		KafkaConfig kafkaConfig = new KafkaConfig();
@@ -107,7 +107,7 @@ public class IndexerOptionParser {
 		kafkaConfig.cacheServer = properties.getProperty(IndexerOptionParser.OPTION_CACHE_SERVER);
 		String topics = properties.getProperty(IndexerOptionParser.OPTION_TOPIC);
 		kafkaConfig.resetPolicy =  properties.getProperty(IndexerOptionParser.OPTION_RESET_OFFSET);
-		for (String topic : topics.split(",")) {
+		for(String topic : topics.split(",")){
 			kafkaConfig.topics.add(topic);
 		}
 		kafkaConfig.numOfThread = 1;
@@ -116,30 +116,35 @@ public class IndexerOptionParser {
 		
 	}
 	
-	public static List<CramsIndexerPlugin> loadKafkaPlugins(String topic) {
-		List<CramsIndexerPlugin> plugins = new ArrayList<CramsIndexerPlugin>();
+	public static List<CramsConsumerPlugin> loadKafkaPlugins(String topic) throws Exception{
+		List<CramsConsumerPlugin> plugins = new ArrayList<CramsConsumerPlugin>();
 		Properties properties = FileUtil
 				.readPropertiesFromConfigPath("cramsIndexerPlugins.properties");
 		String pluginNames = properties.getProperty(topic);
-		for (String pluginName: pluginNames.split(",")){
-			try {
+		for(String pluginName: pluginNames.split(",")){
+			try{
 				Class<?> pluginClass = Class.forName("com.ktcloudware.crams.consumer.plugins." + pluginName);
-				try {
-					CramsIndexerPlugin plugin = (CramsIndexerPlugin) pluginClass.newInstance();
+				try{
+					CramsConsumerPlugin plugin = (CramsConsumerPlugin) pluginClass.newInstance();
 					String pluginProperties = properties.getProperty(pluginName);
-					if (pluginProperties != null) {
-						plugin.setProperties(pluginProperties);
+					if(pluginProperties != null){
+						try {
+							plugin.setProperties(pluginProperties);
+						} catch (Exception e) {
+							logger.error("failed to set property", e);
+							throw e;
+						}
 					}
 					plugins.add(plugin);
 					logger.info("load pluging : " + pluginClass.getName());
-				} catch (InstantiationException e) {
+				}catch(InstantiationException e){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (IllegalAccessException e) {
+				}catch(IllegalAccessException e){
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} catch (ClassNotFoundException e) {
+			}catch(ClassNotFoundException e){
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -154,9 +159,9 @@ public class IndexerOptionParser {
 		CommandLineParser parser = new GnuParser();
 		CommandLine cmd = parser.parse(options, args);
 
-		if (!cmd.hasOption(IndexerOptionParser.OPTION_ZOOKEEPER)
+		if(!cmd.hasOption(IndexerOptionParser.OPTION_ZOOKEEPER)
 				|| !cmd.hasOption(IndexerOptionParser.OPTION_GROUP)
-				|| !cmd.hasOption(IndexerOptionParser.OPTION_TOPIC)) {
+				|| !cmd.hasOption(IndexerOptionParser.OPTION_TOPIC)){
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("kafka2es [OPTION]...", options);
 			return null;
@@ -192,7 +197,7 @@ public class IndexerOptionParser {
 		map.put(IndexerOptionParser.OPTION_ES_BULKSIZE, esBulkSize);
 		map.put(IndexerOptionParser.OPTION_ES_BULK_INTERVAL_SEC, esBulkMaxIntervalSec);
 
-		if (esAddress != null && esClusterName != null) {
+		if(esAddress != null && esClusterName != null){
 			map.put(IndexerOptionParser.OPTION_ES_ADDRESS, esAddress);
 			map.put(IndexerOptionParser.OPTION_ES_CLUSTER_NAME, esClusterName);
 		} else {
@@ -205,7 +210,7 @@ public class IndexerOptionParser {
 		} 
 
 		System.out.println("paring cli options");
-		for (Entry<String, String> entry : map.entrySet()) {
+		for(Entry<String, String> entry : map.entrySet()){
 			System.out.println(entry.getKey() + "=" + entry.getValue());
 		}
 
@@ -216,7 +221,7 @@ public class IndexerOptionParser {
 	 * 
 	 * @return
 	 */
-	public static Options buildOptions() {
+	public static Options buildOptions(){
 		@SuppressWarnings("static-access")
 		Option listener = OptionBuilder
 				.withArgName("urls")

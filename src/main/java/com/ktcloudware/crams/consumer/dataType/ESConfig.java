@@ -25,33 +25,33 @@ public class ESConfig {
 	public String indexSettingsFileName;
 	public String mappingInfoFileName;
 
-	public ESConfig() {
+	public ESConfig(){
 		esAddressList = new ArrayList<InetSocketTransportAddress>();
 	}
 
-	public boolean validateConfigVals() {
-		if (esAddressList.size() < 1 || clusterName.isEmpty() || type.isEmpty()
+	public boolean validateConfigVals(){
+		if(esAddressList.size() < 1 || clusterName.isEmpty() || type.isEmpty()
 				|| indexSettingsFileName.isEmpty()
 				|| mappingInfoFileName.isEmpty() || settings.isEmpty()
-				|| mappings.isEmpty()) {
+				|| mappings.isEmpty()){
 			return false;
 		}
 		ObjectMapper mapper = new ObjectMapper();
 		InputStream settingsIs = null;
 		InputStream mappingsIs = null;
-		try {
+		try{
 			settingsIs = new ByteArrayInputStream(settings.getBytes("UTF-8"));
 			 mappingsIs = new ByteArrayInputStream(mappings.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
+		}catch(UnsupportedEncodingException e1){
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			return false;
 		}
 		
-		try {
+		try{
 			mapper.readValue(settingsIs, Map.class);
 			mapper.readValue(mappingsIs, Map.class);
-		} catch (Exception e) {
+		}catch(Exception e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
@@ -64,9 +64,9 @@ public class ESConfig {
 		String[] urls = esAddress.split(",");
 		int port;
 
-		for (String address : urls) {
+		for(String address : urls){
 			String[] ipAndPort = address.split(":");
-			if (ipAndPort.length == 2) {
+			if(ipAndPort.length == 2){
 				port = Integer.valueOf(ipAndPort[1]);
 				esAddressList.add(new InetSocketTransportAddress(ipAndPort[0],
 						port));

@@ -3,14 +3,14 @@ package com.ktcloudware.crams.consumer.plugins;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DoubleToFloatPlugin implements CramsIndexerPlugin{
+public class DoubleToFloatPlugin implements CramsConsumerPlugin{
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
 		Map<String, Object> newData = new HashMap<String, Object>();
-		for (String dataKey: dataMap.keySet()) {
+		for(String dataKey: dataMap.keySet()){
 			Object value =  dataMap.get(dataKey);
-			if (value instanceof Double) {
+			if(value instanceof Double){
 				value = (Float) value ;
 			}
 			newData.put(dataKey, value);
@@ -19,19 +19,19 @@ public class DoubleToFloatPlugin implements CramsIndexerPlugin{
 	}
 
 	@Override
-	public void setProperties(String pluginProperties) {
+	public void setProperties(String pluginProperties){
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public String getProperties() {
+	public String getProperties(){
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean needProperties() {
+	public boolean needProperties(){
 		// TODO Auto-generated method stub
 		return false;
 	}

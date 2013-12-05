@@ -11,7 +11,7 @@ public class KafkaConfig {
 	public String cacheServer;
 	public String resetPolicy;
 	
-	public KafkaConfig() {
+	public KafkaConfig(){
 		topics = new ArrayList<String>();
 	}
 }

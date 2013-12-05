@@ -41,7 +41,7 @@ public class MainDaemon implements Daemon {
 
 		// create empty thread pool for each kafka topic
 		executorMap = new HashMap<String, ExecutorService>();
-		for (String topic : kafkaConfig.topics) {
+		for(String topic : kafkaConfig.topics){
 			ExecutorService executor = Executors
 					.newFixedThreadPool(kafkaConfig.numOfThread);
 			executorMap.put(topic, executor);
@@ -49,8 +49,8 @@ public class MainDaemon implements Daemon {
 	}
 
 	@Override
-	public void destroy() {
-		for (String topic : executorMap.keySet()) {
+	public void destroy(){
+		for(String topic : executorMap.keySet()){
 			executorMap.get(topic).shutdownNow();
 		}
 
@@ -67,13 +67,13 @@ public class MainDaemon implements Daemon {
 		consumerGroupList.add(consumerGroup);
 
 		// get kafka consuming streams for each kafka topic. and assign consumer service thread for them 
-		for (String topic : kafkaConfig.topics) {
+		for(String topic : kafkaConfig.topics){
 			ExecutorService executor = executorMap.get(topic);
 			List<KafkaStream<byte[], byte[]>> streams = consumerGroup
 					.getKafkaStreams(topic);
 
-			try {
-				for (int i = 0; i < streams.size(); i++) {
+			try{
+				for(int i = 0; i < streams.size(); i++){
 					logger.info("start thread=" + i + " for topic=" + topic + " "
 							+ streams.size());
 					System.out.println("start thread=" + i + " for topic=" + topic + " "
@@ -82,9 +82,8 @@ public class MainDaemon implements Daemon {
 							IndexerOptionParser.loadKafkaPlugins(topic), topic);
 					executor.execute(worker);
 				}
-			} catch (Exception e) {
-				logger.error("service init fail :" + e.getMessage());
-				logger.error(e.getMessage());
+			}catch(Exception e){
+				logger.error("service init fail :" + e.getMessage(), e);
 				e.printStackTrace();
 				stop();
 				return;
@@ -96,26 +95,26 @@ public class MainDaemon implements Daemon {
 
 	@Override
 	public void stop() throws Exception {
-		for (KafkaConsumerGroup consumerGroup : consumerGroupList) {
+		for(KafkaConsumerGroup consumerGroup : consumerGroupList){
 			consumerGroup.shutdown();
 		}
-		for (String topic : executorMap.keySet()) {
+		for(String topic : executorMap.keySet()){
 			executorMap.get(topic).shutdown();
 		}
-		if (esBulkIndexer != null) {
+		if(esBulkIndexer != null){
 			esBulkIndexer.shutdown();
 		}
 	}
 
-	/*private List<CramsIndexerPlugin> getPluginsForTopic(String topic) {
+	/*private List<CramsIndexerPlugin> getPluginsForTopic(String topic){
 		// load plugins
 		// TODO Fixme
 		
 		List<CramsIndexerPlugin> plugins = new ArrayList<CramsIndexerPlugin>();
-		if (topic.endsWith("usage")) {
+		if(topic.endsWith("usage")){
 			plugins.add(new DiskUsageCachePlugin());
 			
-		} else if (topic.endsWith("rrd")) {
+		} else if(topic.endsWith("rrd")){
 			plugins.add(new FiveMinutesFilterPlugin());
 			plugins.add(new DateFormatPlugin());
 			plugins.add(new AppendDiskUsagePlugin());

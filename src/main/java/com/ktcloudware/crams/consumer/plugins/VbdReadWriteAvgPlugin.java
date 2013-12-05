@@ -7,22 +7,24 @@ import org.apache.log4j.Logger;
 
 import com.ktcloudware.crams.consumer.util.KafkaConsumerPluginUtil;
 
-public class VbdReadWriteAvgPlugin implements CramsIndexerPlugin {
+public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
 	private ReplaceDiskFieldNamePlugin replaceName;
+	public static final String VBD_READ_AVG = "vbd_read_avg";
+	public static final String VBD_WRITE_AVG = "vbd_write_avg";
 	private Logger logger;
 
-	public VbdReadWriteAvgPlugin() {
+	public VbdReadWriteAvgPlugin(){
 		logger = LogManager.getLogger("PLUGINS");
 		replaceName = new ReplaceDiskFieldNamePlugin();
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
 		dataMap = replaceName.excute(dataMap, dataTag);
 		Map<String, Object> resultMap = KafkaConsumerPluginUtil.addAverageValue("vbd_[a-z]+_read",
-				"vbd_read_avg", (KafkaConsumerPluginUtil.addAverageValue(
-						"vbd_[a-z]+_write", "vbd_write_avg", dataMap)));
-		if (resultMap == null) {
+				VBD_READ_AVG, (KafkaConsumerPluginUtil.addAverageValue(
+						"vbd_[a-z]+_write", VBD_WRITE_AVG, dataMap)));
+		if(resultMap == null){
 			logger.warn("can't get average vbd r/w values from data=" + dataMap);
 			return dataMap;
 		}
@@ -30,19 +32,19 @@ public class VbdReadWriteAvgPlugin implements CramsIndexerPlugin {
 	}
 
 	@Override
-	public void setProperties(String pluginProperties) {
+	public void setProperties(String pluginProperties){
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public String getProperties() {
+	public String getProperties(){
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean needProperties() {
+	public boolean needProperties(){
 		// TODO Auto-generated method stub
 		return false;
 	}

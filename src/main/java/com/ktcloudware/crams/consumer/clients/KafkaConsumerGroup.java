@@ -30,7 +30,7 @@ public class KafkaConsumerGroup {
 	 * @param topicList
 	 * @param resetPolicy 
 	 */
-	public KafkaConsumerGroup(String zkAddress, String consumerGroupId, int numOfThread, List<String> topicList, String resetPolicy) {
+	public KafkaConsumerGroup(String zkAddress, String consumerGroupId, int numOfThread, List<String> topicList, String resetPolicy){
 		this.consumerGroupId = consumerGroupId;
 		this.zkAddress = zkAddress;
 		this.m_numOfThread = numOfThread > 0 ? numOfThread : 1;
@@ -43,35 +43,35 @@ public class KafkaConsumerGroup {
 	 * @param groupId
 	 * @param topicList 
 	 */
-	void connect(String zk, String groupId, List<String> topicList, String resetPolicy) {
+	void connect(String zk, String groupId, List<String> topicList, String resetPolicy){
 	   ConsumerConfig consumerConfig = createConsumerConfig(zk, groupId, resetPolicy);
-		try {
+		try{
 			this.kakfaConnector = kafka.consumer.Consumer
 					.createJavaConsumerConnector(consumerConfig);
-		} catch (Exception e) {
+		}catch(Exception e){
 			throw new RuntimeException(e);
 		}
 		topicCountMap = new HashMap<String, Integer>();
-		for (String topic: topicList) {
+		for(String topic: topicList){
 			topicCountMap.put(topic, m_numOfThread);
 		}
 		consumerMap = kakfaConnector
 				.createMessageStreams(topicCountMap);
 	}
 
-	public List<KafkaStream<byte[], byte[]>> getKafkaStreams(String topic) {
-		if (consumerMap == null)
+	public List<KafkaStream<byte[], byte[]>> getKafkaStreams(String topic){
+		if(consumerMap == null)
 			return null;
 		List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);
 		return streams;
 	}
 
-	public void shutdown() {
+	public void shutdown(){
 		kakfaConnector.shutdown();
 		kakfaConnector = null;
 	}
 
-	private static ConsumerConfig createConsumerConfig(String zookeeper, String groupId, String resetPolicy) {
+	private static ConsumerConfig createConsumerConfig(String zookeeper, String groupId, String resetPolicy){
 		Properties props = new Properties();
 		props.put("zookeeper.connect", zookeeper);
 		props.put("group.id", groupId);

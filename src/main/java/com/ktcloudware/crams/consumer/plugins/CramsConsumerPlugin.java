@@ -2,12 +2,13 @@ package com.ktcloudware.crams.consumer.plugins;
 
 import java.util.Map;
 
-public interface CramsIndexerPlugin {
+public interface CramsConsumerPlugin {
 	/**
 	 * pluginProperties : comma seperatied properties for each kafkaConsumerPlugin implements
 	 * @param pluginProperties
+	 * @throws Exception 
 	 */
-	public void setProperties(String pluginProperties);
+	public void setProperties(String pluginProperties) throws Exception;
 
 	public String getProperties();
 	/**
@@ -18,5 +19,5 @@ public interface CramsIndexerPlugin {
 		
 	public boolean needProperties();
 
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag);
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws Exception;
 }

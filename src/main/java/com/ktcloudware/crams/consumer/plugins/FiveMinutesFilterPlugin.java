@@ -9,46 +9,46 @@ import java.util.Map;
  * @author yoodoc
  * 
  */
-public class FiveMinutesFilterPlugin implements CramsIndexerPlugin {
+public class FiveMinutesFilterPlugin implements CramsConsumerPlugin {
 	private String dateFieldName = "datetime";
 	private int baseMinute = 3;
 
-	public FiveMinutesFilterPlugin() {
+	public FiveMinutesFilterPlugin(){
 
 	}
 
 	@Override
-	public void setProperties(String properties) {
+	public void setProperties(String properties){
 		String[] propertiesArray = properties.split(",");
 		this.dateFieldName = propertiesArray[0];
 		this.baseMinute = new Integer((String) propertiesArray[1]);
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
-		if (dataMap == null || dataMap.isEmpty()) {
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+		if(dataMap == null || dataMap.isEmpty()){
 			return dataMap;
 		}
-		try {
+		try{
 			String dateStr = (String) dataMap.get(dateFieldName);
 			String minutesStr = dateStr.split(":")[1];
-			if (minutesStr.endsWith(String.valueOf(baseMinute))
-					|| minutesStr.endsWith(String.valueOf(baseMinute + 5))) {
+			if(minutesStr.endsWith(String.valueOf(baseMinute))
+					|| minutesStr.endsWith(String.valueOf(baseMinute + 5))){
 				return dataMap;
 			}
-		} catch (Exception e) {
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return null;
 	}
 
 	@Override
-	public String getProperties() {
+	public String getProperties(){
 		return dateFieldName;
 	}
 
 	@Override
-	public boolean needProperties() {
+	public boolean needProperties(){
 		return true;
 	}
 }

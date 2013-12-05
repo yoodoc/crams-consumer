@@ -9,14 +9,14 @@ import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
 import com.ktcloudware.crams.consumer.dataType.ESConfig;
 import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
-public class ESIndexingPlugin implements CramsIndexerPlugin{
+public class ESIndexingPlugin implements CramsConsumerPlugin{
 	private ESBulkIndexer esBulkIndexer;
 	private ESConfig esConfig;
 	
 	private static final String ES_PROPERTIES_PATH = "esIndexer.properties";
 	Logger logger;
 
-	public ESIndexingPlugin() {
+	public ESIndexingPlugin(){
 		logger = LogManager.getLogger("PLUGINS");
 		
 		// read ES client configuration
@@ -30,18 +30,18 @@ public class ESIndexingPlugin implements CramsIndexerPlugin{
 				esConfig.settings, esConfig.mappings);
 	}
 
-	public ESIndexingPlugin(ESBulkIndexer esBulkIndexer) {
+	public ESIndexingPlugin(ESBulkIndexer esBulkIndexer){
 		this.esBulkIndexer = esBulkIndexer;
 	}
 	
 	@Override
-	public void setProperties(String pluginProperties) {
+	public void setProperties(String pluginProperties){
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public String getProperties() {
+	public String getProperties(){
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -55,12 +55,12 @@ public class ESIndexingPlugin implements CramsIndexerPlugin{
 	 * @return
 	 */
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
 		long startTime = System.currentTimeMillis();
 		String index = null;
-		if (dataMap != null && !dataMap.isEmpty()) {
+		if(dataMap != null && !dataMap.isEmpty()){
 			index = parseIndexField(dataMap);
-			if (index != null && !index.isEmpty()) {
+			if(index != null && !index.isEmpty()){
 				esBulkIndexer.addRequestData(index, dataMap, dataTag);
 				logger.trace("append bulk request data " + dataMap);
 			} else {
@@ -70,14 +70,14 @@ public class ESIndexingPlugin implements CramsIndexerPlugin{
 		}
 	
 		long currentTime = System.currentTimeMillis();
-		if (esBulkIndexer.getSizeOfBulkRequest() >= esConfig.bulkRequestSize
+		if(esBulkIndexer.getSizeOfBulkRequest() >= esConfig.bulkRequestSize
 				|| ((esBulkIndexer.getSizeOfBulkRequest() != 0) && (currentTime - esBulkIndexer
-						.getLastSendTime()) > esConfig.maxRequestIntervalSec * 1000)) {
+						.getLastSendTime()) > esConfig.maxRequestIntervalSec * 1000)){
 			// insert data To ElasticSearch
 			int count = esBulkIndexer.sendBulkRequest();
 			logger.info("send bulk " + index + " request : " + count);
 			
-			if (count == 0) {
+			if(count == 0){
 				esBulkIndexer.initESClient();
 			}
 		}
@@ -89,7 +89,7 @@ public class ESIndexingPlugin implements CramsIndexerPlugin{
 	}
 
 	@Override
-	public boolean needProperties() {
+	public boolean needProperties(){
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -99,14 +99,14 @@ public class ESIndexingPlugin implements CramsIndexerPlugin{
 	 * @param dataMap
 	 * @return
 	 */
-	private String parseIndexField(Map<String, Object> dataMap) {
+	private String parseIndexField(Map<String, Object> dataMap){
 		String DATETIME = "datetime";
 
-		if (dataMap == null || dataMap.isEmpty()) {
+		if(dataMap == null || dataMap.isEmpty()){
 			return null;
 		}
 		String date = (String) dataMap.get(DATETIME);
-		if (date == null)
+		if(date == null)
 			return null;
 		// TODO fix parsing index name from datetime field
 		return "cdp-" + date.split("T")[0];

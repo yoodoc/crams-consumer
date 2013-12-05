@@ -12,7 +12,7 @@ import com.ktcloudware.crams.consumer.util.KafkaConsumerPluginUtil;
 public class KafkaConsumerPluginUtilTest {
 	
 	@Test
-	public void test() {
+	public void test(){
 		Map<String, Object> message = new HashMap<String, Object>();
 		message.put("cpu1", new Double(100));
 		message.put("cpu2", new Float(50));
@@ -22,7 +22,7 @@ public class KafkaConsumerPluginUtilTest {
 	}
 	
 	@Test
-	public void testVbd() {
+	public void testVbd(){
 		Map<String, Object> message = new HashMap<String, Object>();
 		message.put("vbd_hda_write", 100);
 		message.put("vbd_hdb_write", 50);

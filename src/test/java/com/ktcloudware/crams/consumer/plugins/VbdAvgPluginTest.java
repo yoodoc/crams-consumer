@@ -12,7 +12,7 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 public class VbdAvgPluginTest {
 
 	@Test
-	public void test() {
+	public void test(){
 		Map<String, Object> testData = FileUtil.readJsonToMap("singleRrdData1.json");
 		VbdReadWriteAvgPlugin plugin = new VbdReadWriteAvgPlugin();
 		Map<String, Object> resultMessage = plugin.excute(testData, null);
@@ -22,7 +22,7 @@ public class VbdAvgPluginTest {
 
 
 	@Test
-	public void testForZeroValue() {
+	public void testForZeroValue(){
 		Map<String, Object> testData = FileUtil.readJsonToMap("singleRrdData2.json");
 		VbdReadWriteAvgPlugin plugin = new VbdReadWriteAvgPlugin();
 		Map<String, Object> resultMessage = plugin.excute(testData, null);

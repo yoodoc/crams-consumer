@@ -50,7 +50,7 @@ public class KafkaConsumerIntergratedTest {
 		List<KafkaStream<byte[], byte[]>> streams = consumerGroup
 				.getKafkaStreams(topic);
 		executor = Executors.newFixedThreadPool(streams.size());
-		for (int i = 0; i < streams.size(); i++) {
+		for(int i = 0; i < streams.size(); i++){
 				System.out.println("start thread=" + i + "for topic=" + topic
 						+ streams.size());
 				Runnable worker = new KafkaConsumerServiceMock(streams.get(i));

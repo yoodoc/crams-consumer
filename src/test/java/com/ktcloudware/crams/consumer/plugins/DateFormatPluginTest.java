@@ -12,7 +12,7 @@ import com.ktcloudware.crams.consumer.plugins.DateFormatPlugin;
 public class DateFormatPluginTest {
 
 	@Test
-	public void test() {
+	public void test(){
 		DateFormatPlugin plugin = new DateFormatPlugin();
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("datetime", "2013-01-01 11:13:11");

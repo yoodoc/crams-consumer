@@ -5,35 +5,35 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DateFormatPlugin implements CramsIndexerPlugin {
+public class DateFormatPlugin implements CramsConsumerPlugin {
 	String dateFieldName;
 	private SimpleDateFormat originDateFormat;
 	private SimpleDateFormat newDateFormat;
 	private String properties;
 	
-	public DateFormatPlugin() {
+	public DateFormatPlugin(){
 		this.dateFieldName = "datetime";
 		this.originDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		this.newDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
 	}
 	
-/*	public DateFormatPlugin(String dateFieldName, String originDateFormatStr, String newDateFormatStr) {
+/*	public DateFormatPlugin(String dateFieldName, String originDateFormatStr, String newDateFormatStr){
 		this.dateFieldName = "datetime";
 		this.originDateFormat = new SimpleDateFormat(originDateFormatStr);
 		this.newDateFormat = new SimpleDateFormat(newDateFormatStr);
 	}*/
 	
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
 		Map<String, Object> newDataMap = new HashMap<String, Object>();
 		newDataMap.putAll(dataMap);
-		try {
+		try{
 			String datetime = (String) newDataMap.get(this.dateFieldName);
 			Date date = originDateFormat.parse(datetime);
 			String newDateTime = newDateFormat.format(date);
 			newDataMap.put(dateFieldName, newDateTime);
 			return newDataMap;
-		} catch (Exception e) {
+		}catch(Exception e){
 				e.printStackTrace();
 			}
 		return null;
@@ -44,7 +44,7 @@ public class DateFormatPlugin implements CramsIndexerPlugin {
  * pluginProperties : "dateFieldName,originDateFormatStr,newDateFormatStr"
  * 
  */
-public void setProperties(String pluginProperties) {
+public void setProperties(String pluginProperties){
 	this.properties = pluginProperties;
 	String[] properties = pluginProperties.split(",");
 	this.dateFieldName = properties[0];
@@ -54,12 +54,12 @@ public void setProperties(String pluginProperties) {
 }
 
 @Override
-public boolean needProperties() {
+public boolean needProperties(){
 	return true;
 }
 
 @Override
-public String getProperties() {
+public String getProperties(){
 	return properties;
 }
 
