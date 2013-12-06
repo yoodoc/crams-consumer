@@ -63,9 +63,8 @@ public class ESBulkIndexer {
 		this.clusterName = clusterName;
 		this.esAddressList = esAddressList;
 		lastSendTime = System.currentTimeMillis();
-
 		initESClient();
-
+	
 	}
 
 	public void initESClient(){
@@ -75,12 +74,16 @@ public class ESBulkIndexer {
 		for(InetSocketTransportAddress address : esAddressList){
 			// FIXME 일부 es master 접속 불가시에 가용한 es master에만 접속하도록 하는 부분이며, 수정이
 			// 필요하다.
+			System.out.println("!!!!! init es");
+
 			try{
 				this.client = transportClient.addTransportAddress(address);
 			}catch(Exception e){
 				logger.error("ES connection error. failed to connect to "
 						+ address.toString());
 				e.printStackTrace();
+				System.out.println("!!!!!!!!!! init es");
+
 			}
 		}
 

@@ -48,6 +48,7 @@ public class KafkaConsumerService implements Runnable {
 		for(CramsConsumerPlugin plugin : plugins){
 			logger.info("load plugin" + plugin.getClass().getName());
 		}
+		logger.info("total " + plugins.size() + " plugins are loaded.");
 		mapper = new ObjectMapper();
 		// mapper.configure(Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
 	}

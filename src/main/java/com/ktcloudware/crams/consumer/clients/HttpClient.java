@@ -58,6 +58,7 @@ public class HttpClient {
         	}
         	e.printStackTrace();
         	logger.error(e.getMessage(), e);
+        	return null;
 		}finally{
         	if(httpConnection != null){
                 //httpConnection.disconnect();

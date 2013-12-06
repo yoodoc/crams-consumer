@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.cli.ParseException;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
@@ -17,11 +18,14 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 
 public class ESIndexingPluginTest {
 
+	//@Ignore
 	@Test
 	public void test(){
 		int numOfThread = 10;
-		String setting = FileUtil.readJsonFromConfigPath("indexSettings.json");
-		String mapping = FileUtil.readJsonFromConfigPath("mappingInfo.json");
+		String setting = FileUtil.readFile("indexSettings.json");
+		System.out.println(setting);
+		String mapping = FileUtil.readFile("mappingInfo.json");
+		System.out.println(mapping);
 		ESConfig esConfig = new ESConfig();
 		try{
 			esConfig.setESAddress("localhost:9300");
@@ -40,8 +44,10 @@ public class ESIndexingPluginTest {
 		ExecutorService executor = Executors
 				.newFixedThreadPool(numOfThread);
 		
-		MockRunableClassForKafkaConsumerPlugins worker = new MockRunableClassForKafkaConsumerPlugins(plugins.get(0));
-		executor.execute(worker);
+		for(ESIndexingPlugin esPlugin: plugins){
+			MockRunableClassForKafkaConsumerPlugins worker = new MockRunableClassForKafkaConsumerPlugins(plugins.get(0));
+			executor.execute(worker);
+		}
 	}
 
 }

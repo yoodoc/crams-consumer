@@ -19,6 +19,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	private static final Object VM_TYPE = "vm_type";
 	private static final Object VM_UUID = "vm_uuid";
 	private static final Object VM_NAME = "vm_name";
+	private static final int MAX_RETRY = 5;
 	
 	private Logger logger;
 	private List<CramsConsumerPlugin> plugins;
@@ -113,15 +114,20 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		// send metric data
 		String ucloudWatchRequestParmaeter = createPutMatricRequest(namespace,
 				owner, ucloudWatchMetricData);
-		send(ucloudWatchRequestParmaeter);
-
+		
+		for(int i = 0; i < MAX_RETRY; i++){
+			String response = send(ucloudWatchRequestParmaeter);
+			if(response == null){
+				logger.error("failed to send watch request at " + dataTag + ", data map :" + rrdMap);
+			} else {
+				break;
+			}
+		}
 		return null;
 	}
 
-	private void send(String ucloudWatchRequestParmaeter) {
-		HttpClient.sendRequest(ucloudWatchRequestParmaeter);
-		System.out.println(ucloudWatchRequestParmaeter);
-
+	private String send(String ucloudWatchRequestParmaeter) {
+		return HttpClient.sendRequest(ucloudWatchRequestParmaeter);
 	}
 
 	private String createPutMatricRequest(String namespace, String owner,

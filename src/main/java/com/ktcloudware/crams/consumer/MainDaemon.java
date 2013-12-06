@@ -21,8 +21,7 @@ import com.ktcloudware.crams.consumer.dataType.KafkaConfig;
 import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
 public class MainDaemon implements Daemon {
-	private static final String KAFKA_PROPERTIES_PATH = "kafkaConsumer.properties";
-
+	
 	private KafkaConfig kafkaConfig = null;
 	private List<KafkaConsumerGroup> consumerGroupList;
 	private ESBulkIndexer esBulkIndexer;
@@ -37,7 +36,7 @@ public class MainDaemon implements Daemon {
 		
 		// read kafka client configuration
 		kafkaConfig = IndexerOptionParser
-				.parseKafkaConsumerProperties(KAFKA_PROPERTIES_PATH);
+				.parseKafkaConsumerProperties();
 
 		// create empty thread pool for each kafka topic
 		executorMap = new HashMap<String, ExecutorService>();

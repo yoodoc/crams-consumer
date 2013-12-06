@@ -1,5 +1,6 @@
 package com.ktcloudware.crams.consumer.util;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,9 +49,13 @@ public class IndexerOptionParser {
 	 * @return
 	 */
 	public static ESConfig parseESProperties(String esPropertiesPath){
-		Properties properties = FileUtil.readPropertiesFromConfigPath(esPropertiesPath);
+		Properties properties = FileUtil.getProperties(esPropertiesPath);
+		PrintWriter stdoutWriter = new PrintWriter(System.out);
+		stdoutWriter.append("-- es config ");
+		properties.list(stdoutWriter);
+		stdoutWriter.flush();
+	
 		ESConfig esConfig = new ESConfig();
-
 		try{
 			esConfig.bulkRequestSize = Integer.valueOf(properties
 					.getProperty(IndexerOptionParser.OPTION_ES_BULKSIZE));
@@ -69,10 +74,10 @@ public class IndexerOptionParser {
 			esConfig.indexSettingsFileName = properties
 					.getProperty(IndexerOptionParser.OPTION_INDEX_SETTING_FILE);
 			esConfig.settings = FileUtil
-					.readJsonFromConfigPath(esConfig.indexSettingsFileName);
+					.readFile(esConfig.indexSettingsFileName);
 			esConfig.mappingInfoFileName = properties
 					.getProperty(IndexerOptionParser.OPTION_MAPPING_INFO_FILE);
-			esConfig.mappings = FileUtil.readJsonFromConfigPath(esConfig.mappingInfoFileName);
+			esConfig.mappings = FileUtil.readFile(esConfig.mappingInfoFileName);
 		}catch(Exception e){
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -97,9 +102,15 @@ public class IndexerOptionParser {
 	 * @param kafkaPropertiesPath
 	 * @return
 	 */
-	public static KafkaConfig parseKafkaConsumerProperties(String kafkaPropertiesPath){
+	public static KafkaConfig parseKafkaConsumerProperties(){
 		Properties properties = FileUtil
-				.readPropertiesFromConfigPath(kafkaPropertiesPath);
+				.getProperties("kafkaConsumer.properties");
+		
+		PrintWriter stdoutWriter = new PrintWriter(System.out);
+		stdoutWriter.append("-- kafka consumer config ");
+		properties.list(stdoutWriter);
+		stdoutWriter.flush();
+		
 		KafkaConfig kafkaConfig = new KafkaConfig();
 		kafkaConfig.zookeeper = properties
 				.getProperty(IndexerOptionParser.OPTION_ZOOKEEPER);
@@ -119,9 +130,16 @@ public class IndexerOptionParser {
 	public static List<CramsConsumerPlugin> loadKafkaPlugins(String topic) throws Exception{
 		List<CramsConsumerPlugin> plugins = new ArrayList<CramsConsumerPlugin>();
 		Properties properties = FileUtil
-				.readPropertiesFromConfigPath("cramsIndexerPlugins.properties");
+				.getProperties("cramsIndexerPlugins.properties");
+		
+		PrintWriter stdoutWriter = new PrintWriter(System.out);
+		stdoutWriter.append("-- plugins config ");
+		properties.list(stdoutWriter);
+		stdoutWriter.flush();
+		
 		String pluginNames = properties.getProperty(topic);
-		for(String pluginName: pluginNames.split(",")){
+		String[] pluginNameArray = pluginNames.split(",");
+		for(String pluginName: pluginNameArray){
 			try{
 				Class<?> pluginClass = Class.forName("com.ktcloudware.crams.consumer.plugins." + pluginName);
 				try{

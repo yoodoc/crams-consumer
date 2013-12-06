@@ -60,34 +60,37 @@ public class FileUtil {
 		return null;
 		}
 		
-	public static String readJsonFromConfigPath(String fileName){
-		String jsonStr = null;
-		try{
-			Properties systemProperty = System.getProperties();
-			String dir = (String) systemProperty.get("user.dir");
-			String daemonHomeDir = (String) systemProperty.get("daemon.home");
-			if(daemonHomeDir != null){
-				dir = daemonHomeDir;
-			}
-			File file = new File(dir + CONFIG_PATH + fileName);
-			FileReader fileReader = new FileReader(file);
-			BufferedReader reader = new BufferedReader(fileReader);
-			jsonStr = new String();
-			String str;
-			while ((str = reader.readLine()) != null){
-				jsonStr += str;
-			}
-			reader.close();
-			fileReader.close();
-			return jsonStr;
-		}catch(Exception e){
+	public static String readFile(String fileName){
+		InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(fileName);
+		StringBuffer sb = new StringBuffer();
+	     byte[] b = new byte[4096];
+	     try {
+			for (int n; (n = is.read(b)) != -1;) {
+			     sb.append(new String(b, 0, n));
+			 }
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+	     return sb.toString();
 		}
 	
+		public static Properties getProperties(String propertyName) {
+			Properties properties = new Properties();
+
+			InputStream is = FileUtil.class.getClassLoader().getResourceAsStream(propertyName);
+			try {
+				properties.load(is);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return properties;
+			
+		}
+		
 		public static Properties readPropertiesFromConfigPath(String fileName){
+			
 			Properties systemProperty = System.getProperties();
 			String dir = (String) systemProperty.get("user.dir");
 			String daemonHomeDir = (String) systemProperty.get("daemon.home");

@@ -5,21 +5,23 @@
     <formats>
         <format>tar.gz</format>
     </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
     <fileSets>
          <fileSet>
-            <directory>config</directory>
-            <outputDirectory>/config</outputDirectory>
+            <directory>conf</directory>
+            <outputDirectory>/conf</outputDirectory>
 			<includes>
 				<include>*.*</include>
 			</includes>
         </fileSet>
+        
         <fileSet>
             <directory>bin</directory>
             <outputDirectory>/bin</outputDirectory>
 			<includes>
 				<include>*.sh</include>
 			</includes>
-			<fileMode>0700</fileMode>
+			<fileMode>755</fileMode>
         </fileSet>
     </fileSets>
     <dependencySets>
@@ -27,7 +29,7 @@
             <outputDirectory>lib</outputDirectory>
             <useStrictFiltering>true</useStrictFiltering>
             <useProjectArtifact>true</useProjectArtifact>
-			<fileMode>644</fileMode>
+			<unpack>false</unpack>
             <scope>runtime</scope>
         </dependencySet>
     </dependencySets>

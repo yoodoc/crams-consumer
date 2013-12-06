@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import scala.Array;
-
 public class UcloudWatchPluginTest {
 
 	@Test
@@ -26,7 +24,7 @@ public class UcloudWatchPluginTest {
 		//make test data
 		List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 		
-		int testDataSize = 50000;
+		int testDataSize = 500;
 		long starttime = System.currentTimeMillis();
 		for(int i = 0; i < testDataSize; i++){
 			Map<String, Object> data = new HashMap<String, Object>();
