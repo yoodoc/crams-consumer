@@ -25,13 +25,13 @@ public class LoggingNullDataPlugin implements CramsConsumerPlugin {
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
 		String[] keyNamesForCheckNullValue = properties.split(",");
 		for(String keyName : keyNamesForCheckNullValue){
 			Object value = dataMap.get(keyName);
 			if(value == null){
 				logger.info("NULL_VMUUID:recieved data has null " + keyName + " value:" + dataMap);
-				return null;
+				throw new CramsPluginException("NULL_VMUUID:recieved data has null " + keyName + " value:" + dataMap);
 			}
 		}
 	

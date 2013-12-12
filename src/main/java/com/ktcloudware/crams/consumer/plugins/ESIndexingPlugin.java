@@ -53,9 +53,10 @@ public class ESIndexingPlugin implements CramsConsumerPlugin{
 	 * @param index
 	 * @param data
 	 * @return
+	 * @throws CramsPluginException 
 	 */
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
 		long startTime = System.currentTimeMillis();
 		String index = null;
 		if(dataMap != null && !dataMap.isEmpty()){
@@ -64,8 +65,8 @@ public class ESIndexingPlugin implements CramsConsumerPlugin{
 				esBulkIndexer.addRequestData(index, dataMap, dataTag);
 				logger.trace("append bulk request data " + dataMap);
 			} else {
-				logger.error("fail to add bulk request data " + dataMap);
-				return null;
+				logger.error("fail to add bulk request data, " + dataMap);
+				throw new CramsPluginException("fail to add bulk request data, " + dataMap);
 			}
 		}
 	

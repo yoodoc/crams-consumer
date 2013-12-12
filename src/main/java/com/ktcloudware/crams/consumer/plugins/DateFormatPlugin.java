@@ -10,57 +10,59 @@ public class DateFormatPlugin implements CramsConsumerPlugin {
 	private SimpleDateFormat originDateFormat;
 	private SimpleDateFormat newDateFormat;
 	private String properties;
-	
-	public DateFormatPlugin(){
+
+	public DateFormatPlugin() {
 		this.dateFieldName = "datetime";
 		this.originDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		this.newDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
 	}
-	
-/*	public DateFormatPlugin(String dateFieldName, String originDateFormatStr, String newDateFormatStr){
-		this.dateFieldName = "datetime";
-		this.originDateFormat = new SimpleDateFormat(originDateFormatStr);
-		this.newDateFormat = new SimpleDateFormat(newDateFormatStr);
-	}*/
-	
+
+	/*
+	 * public DateFormatPlugin(String dateFieldName, String originDateFormatStr,
+	 * String newDateFormatStr){ this.dateFieldName = "datetime";
+	 * this.originDateFormat = new SimpleDateFormat(originDateFormatStr);
+	 * this.newDateFormat = new SimpleDateFormat(newDateFormatStr); }
+	 */
+
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap,
+			String dataTag) throws CramsPluginException {
 		Map<String, Object> newDataMap = new HashMap<String, Object>();
 		newDataMap.putAll(dataMap);
-		try{
+		try {
 			String datetime = (String) newDataMap.get(this.dateFieldName);
 			Date date = originDateFormat.parse(datetime);
 			String newDateTime = newDateFormat.format(date);
 			newDataMap.put(dateFieldName, newDateTime);
 			return newDataMap;
-		}catch(Exception e){
-				e.printStackTrace();
-			}
-		return null;
+		} catch (Exception e) {
+			//e.printStackTrace();
+			throw new CramsPluginException(e);
+		}
 	}
 
-@Override
-/**
- * pluginProperties : "dateFieldName,originDateFormatStr,newDateFormatStr"
- * 
- */
-public void setProperties(String pluginProperties){
-	this.properties = pluginProperties;
-	String[] properties = pluginProperties.split(",");
-	this.dateFieldName = properties[0];
-	this.originDateFormat = new SimpleDateFormat(properties[1]);
-	this.newDateFormat = new SimpleDateFormat(properties[2]);
-	
-}
+	@Override
+	/**
+	 * pluginProperties : "dateFieldName,originDateFormatStr,newDateFormatStr"
+	 * 
+	 */
+	public void setProperties(String pluginProperties) {
+		this.properties = pluginProperties;
+		String[] properties = pluginProperties.split(",");
+		this.dateFieldName = properties[0];
+		this.originDateFormat = new SimpleDateFormat(properties[1]);
+		this.newDateFormat = new SimpleDateFormat(properties[2]);
 
-@Override
-public boolean needProperties(){
-	return true;
-}
+	}
 
-@Override
-public String getProperties(){
-	return properties;
-}
+	@Override
+	public boolean needProperties() {
+		return true;
+	}
+
+	@Override
+	public String getProperties() {
+		return properties;
+	}
 
 }

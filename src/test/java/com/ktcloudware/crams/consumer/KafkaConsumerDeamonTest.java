@@ -10,12 +10,13 @@ import com.ktcloudware.crams.consumer.MainDaemon;
 
 public class KafkaConsumerDeamonTest {
 	MainDaemon deamon;
+
 	@After
 	public void after() throws Exception {
 		deamon.stop();
 		deamon.destroy();
 	}
-	
+
 	@Ignore
 	@Test
 	public void test() throws DaemonInitException, Exception {
@@ -23,6 +24,6 @@ public class KafkaConsumerDeamonTest {
 		DaemonContext arg0 = null;
 		deamon.init(arg0);
 		deamon.start();
-		Thread.sleep(60*1000);
+		Thread.sleep(60 * 1000);
 	}
 }

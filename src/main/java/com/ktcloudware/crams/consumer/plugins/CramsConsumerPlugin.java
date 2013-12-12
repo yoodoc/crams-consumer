@@ -8,7 +8,7 @@ public interface CramsConsumerPlugin {
 	 * @param pluginProperties
 	 * @throws Exception 
 	 */
-	public void setProperties(String pluginProperties) throws Exception;
+	public void setProperties(String pluginProperties) throws CramsPluginException;
 
 	public String getProperties();
 	/**
@@ -19,5 +19,5 @@ public interface CramsConsumerPlugin {
 		
 	public boolean needProperties();
 
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws Exception;
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException;
 }

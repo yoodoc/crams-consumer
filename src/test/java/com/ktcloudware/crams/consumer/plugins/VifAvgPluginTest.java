@@ -12,8 +12,9 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 public class VifAvgPluginTest {
 
 	@Test
-	public void test(){
-		Map<String, Object> testData = FileUtil.readJsonToMap("singleRrdData1.json");
+	public void test() {
+		Map<String, Object> testData = FileUtil
+				.readJsonToMap("singleRrdData1.json");
 		VifAvgPlugin plugin = new VifAvgPlugin();
 		Map<String, Object> resultMessage = plugin.excute(testData, null);
 		System.out.println(resultMessage);

@@ -19,21 +19,21 @@ import com.ktcloudware.crams.consumer.dataType.ESConfig;
 import com.ktcloudware.crams.consumer.util.FileUtil;
 
 /**
- * integerated test 
- * so, redis, es, kafka servers are needed.
+ * integerated test so, redis, es, kafka servers are needed.
+ * 
  * @author yoodoc
- *
+ * 
  */
 public class ESBulkIndexerIntergratedTest {
 
 	private ESConfig esConfig;
-	
+
 	@Before
-	public void setup(){
+	public void setup() {
 		ESConfig esConfig = new ESConfig();
-		try{
+		try {
 			esConfig.setESAddress("14.63.226.175:9300");
-		}catch(ParseException e){
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -41,63 +41,68 @@ public class ESBulkIndexerIntergratedTest {
 		esConfig.type = "vm";
 		this.esConfig = esConfig;
 	}
-	
+
 	@Ignore
 	@Test
-	public void testIndexingWithRoutingKey(){  
+	public void testIndexingWithRoutingKey() {
 		esConfig.routingKey = "owner";
 		esConfig.indexKey = "datetime";
 		esConfig.settings = FileUtil.readJsonToString("indexSettings.json");
 		esConfig.mappings = FileUtil.readJsonToString("mappingInfo.json");
 		assertEquals(true, esConfig.validateConfigVals());
 		String owner = "yoodoc";
-		
+
 		// create ESBulkIndexer instance
 		ESBulkIndexer esBulkIndexer = new ESBulkIndexer(esConfig.esAddressList,
-								esConfig.clusterName, esConfig.type, esConfig.routingKey,
-								esConfig.settings, esConfig.mappings);
+				esConfig.clusterName, esConfig.type, esConfig.routingKey,
+				esConfig.settings, esConfig.mappings);
 		String index = null;
-		try{
-			//create index & mapping info, then indexing
-			Map<String, Object> rrdJson = FileUtil.readJsonToMap("singleRrdData1.json");
-			
-			//set new test owner
+		try {
+			// create index & mapping info, then indexing
+			Map<String, Object> rrdJson = FileUtil
+					.readJsonToMap("singleRrdData1.json");
+
+			// set new test owner
 			rrdJson.remove("owner");
 			rrdJson.put("owner", owner);
-			
-			//index = parseIndexField(rrdJson);
+
+			// index = parseIndexField(rrdJson);
 			index = "yoodoctest";
 			esBulkIndexer.addRequestData(index, rrdJson, "testdata");
 			esBulkIndexer.sendBulkRequest();
-			
+
 			Thread.sleep(1000);
-			
-			//varify indexing data
-			assertTrue(isSameShard(esBulkIndexer.getClient(), index, esConfig.type, owner));
+
+			// varify indexing data
+			assertTrue(isSameShard(esBulkIndexer.getClient(), index,
+					esConfig.type, owner));
 			Thread.sleep(1000);
-	
-			//delete index
+
+			// delete index
 			esBulkIndexer.deleteIndex(index, esConfig.type);
-		}catch(Exception e){
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	private boolean isSameShard(Client client, String index, String type, String owner){
-		SearchResponse response = client.prepareSearch(index).setTypes(type).setQuery(QueryBuilders.termQuery("owner", owner))
-		        .setExplain(true).execute().actionGet();
-		//System.out.println("!!" + response.toString());
-		Pattern shardPattern = Pattern.compile("\"_shard\"[\\s]*:[\\s]*([0-9]+),");
+
+	private boolean isSameShard(Client client, String index, String type,
+			String owner) {
+		SearchResponse response = client.prepareSearch(index).setTypes(type)
+				.setQuery(QueryBuilders.termQuery("owner", owner))
+				.setExplain(true).execute().actionGet();
+		// System.out.println("!!" + response.toString());
+		Pattern shardPattern = Pattern
+				.compile("\"_shard\"[\\s]*:[\\s]*([0-9]+),");
 		Matcher matcher = shardPattern.matcher(response.toString());
 		String lastGroup = null;
-		while (matcher.find()){
+		while (matcher.find()) {
 			String group = matcher.group(1);
 			System.out.println("\"shard\" : " + group);
-			if(lastGroup == null){
+			if (lastGroup == null) {
 				lastGroup = group;
-			} else if(!group.equals(lastGroup)){
-					return false;
+			} else if (!group.equals(lastGroup)) {
+				return false;
 			}
 		}
 		return true;

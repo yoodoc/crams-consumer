@@ -21,12 +21,12 @@ public class ESConfigTest {
 		esConfig.mappings = "{}";
 		assertTrue(esConfig.validateConfigVals());
 	}
-	
+
 	@Test
 	public void testMissingClusterName() throws ParseException {
 		ESConfig esConfig = new ESConfig();
 		esConfig.bulkRequestSize = 0;
-		//esConfig.clusterName = "testCluster";
+		// esConfig.clusterName = "testCluster";
 		esConfig.setESAddress("192.168.12.11:9092");
 		esConfig.type = "testType";
 		assertFalse(esConfig.validateConfigVals());

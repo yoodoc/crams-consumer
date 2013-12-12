@@ -18,34 +18,34 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 
 public class ESIndexingPluginTest {
 
-	//@Ignore
+	// @Ignore
 	@Test
-	public void test(){
+	public void test() {
 		int numOfThread = 10;
 		String setting = FileUtil.readFile("indexSettings.json");
 		System.out.println(setting);
 		String mapping = FileUtil.readFile("mappingInfo.json");
 		System.out.println(mapping);
 		ESConfig esConfig = new ESConfig();
-		try{
+		try {
 			esConfig.setESAddress("localhost:9300");
-		}catch(ParseException e){
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		List<ESIndexingPlugin> plugins = new ArrayList<ESIndexingPlugin>();
-		
-		for(ESIndexingPlugin esPlugin: plugins){
-			ESBulkIndexer esBulkIndexer = new ESBulkIndexer(esConfig.esAddressList,
-					"elasticsearch", "yoodoc", "vm_pod_name",
-					setting, mapping);
+
+		for (ESIndexingPlugin esPlugin : plugins) {
+			ESBulkIndexer esBulkIndexer = new ESBulkIndexer(
+					esConfig.esAddressList, "elasticsearch", "yoodoc",
+					"vm_pod_name", setting, mapping);
 			esPlugin = new ESIndexingPlugin();
 		}
-		ExecutorService executor = Executors
-				.newFixedThreadPool(numOfThread);
-		
-		for(ESIndexingPlugin esPlugin: plugins){
-			MockRunableClassForKafkaConsumerPlugins worker = new MockRunableClassForKafkaConsumerPlugins(plugins.get(0));
+		ExecutorService executor = Executors.newFixedThreadPool(numOfThread);
+
+		for (ESIndexingPlugin esPlugin : plugins) {
+			MockRunableClassForKafkaConsumerPlugins worker = new MockRunableClassForKafkaConsumerPlugins(
+					plugins.get(0));
 			executor.execute(worker);
 		}
 	}

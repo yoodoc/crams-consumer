@@ -20,7 +20,7 @@ public class MemoryUsagePlugin implements CramsConsumerPlugin {
 	}
 	
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
 		try{
 			Object freeMemObj = (float) 0.0;
 			Object totalMemObj = (float) 0.0;
@@ -57,19 +57,18 @@ public class MemoryUsagePlugin implements CramsConsumerPlugin {
 
 			//get usage value & append dataMap
 			if(totalMem == (double) 0){
-				throw new Exception("totol memory is 0" + ", data log = " + dataMap.toString());
+				throw new CramsPluginException("totol memory is 0" + ", data log = " + dataMap.toString());
 			}
 
 			double usedMemory = totalMem - (freeMem * 1024);
 			if(usedMemory < 0){
-				throw new Exception("negative value for memory usage");
+				throw new CramsPluginException("negative value for memory usage");
 			}
 			double memoryUsageRate = (usedMemory / totalMem);
 			dataMap.put(memoryUsageName, memoryUsageRate);
 			return dataMap;
 		}catch(Exception e){
-			e.printStackTrace();
-			return dataMap;
+			throw new CramsPluginException(e.getMessage(), e);
 		}
 	}
 

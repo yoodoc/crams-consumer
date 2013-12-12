@@ -13,7 +13,7 @@ public class HttpClient {
 	private static  Logger logger;
 
 	public static String sendRequest(String requestUrl) {
-		logger = LogManager.getLogger("httpclient");
+		logger = LogManager.getLogger("HTTP");
         HttpURLConnection httpConnection = null;
         InputStream responseStream = null;
         long elapsedTime = -1;
@@ -36,8 +36,8 @@ public class HttpClient {
             }
             responseStream.close();
             
-            String responseStr = sb.toString();
-         	logger.trace("response:" +  responseStr);            	
+            response = sb.toString();
+         	logger.trace("response:" +  response);            	
          	int responseCode = httpConnection.getResponseCode();
          	if(responseCode != HttpURLConnection.HTTP_OK){
          		throw new IOException("abnormal HTTP response code:"+responseCode);

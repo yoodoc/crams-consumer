@@ -11,8 +11,9 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 public class ReplaceVmAccountNamePluginTest {
 
 	@Test
-	public void test(){
-		Map<String, Object> testData = FileUtil.readJsonToMap("singleRrdData1.json");
+	public void test() {
+		Map<String, Object> testData = FileUtil
+				.readJsonToMap("singleRrdData1.json");
 		ReplaceVmAccountNamePlugin plugin = new ReplaceVmAccountNamePlugin();
 		Map<String, Object> resultMessage = plugin.excute(testData, null);
 		System.out.println(resultMessage);

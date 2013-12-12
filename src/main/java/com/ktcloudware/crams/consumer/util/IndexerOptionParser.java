@@ -40,16 +40,18 @@ public class IndexerOptionParser {
 	private static final String OPTION_INDEX_SETTING_FILE = "indexSettingJsonFile";
 	private static final String OPTION_MAPPING_INFO_FILE = "mappingInfoJsonFile";
 	private static final String OPTION_RESET_OFFSET = "resetOffset";
-
-	static Logger logger = LogManager.getLogger("INDEXER");
+	
+	private static final String ES_PROPERTIES_PATH = "esIndexer.properties";
+	
+	static Logger logger = LogManager.getLogger("MAIN");
 	
 	/**
-	 * elasticsearch.properties를 ESConfig.class 로 parsing 한다. 
-	 * @param esPropertiesPath
+	 * esIndexer.properties를 ESConfig.class 로 parsing 한다. 
+	 * @param esPropertiesFileName
 	 * @return
 	 */
-	public static ESConfig parseESProperties(String esPropertiesPath){
-		Properties properties = FileUtil.getProperties(esPropertiesPath);
+	public static ESConfig parseESProperties(String esPropertiesFileName){
+		Properties properties = FileUtil.getProperties(esPropertiesFileName);
 		PrintWriter stdoutWriter = new PrintWriter(System.out);
 		stdoutWriter.append("-- es config ");
 		properties.list(stdoutWriter);
@@ -130,7 +132,7 @@ public class IndexerOptionParser {
 	public static List<CramsConsumerPlugin> loadKafkaPlugins(String topic) throws Exception{
 		List<CramsConsumerPlugin> plugins = new ArrayList<CramsConsumerPlugin>();
 		Properties properties = FileUtil
-				.getProperties("cramsIndexerPlugins.properties");
+				.getProperties("cramsConsumerPlugins.properties");
 		
 		PrintWriter stdoutWriter = new PrintWriter(System.out);
 		stdoutWriter.append("-- plugins config ");

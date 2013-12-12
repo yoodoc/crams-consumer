@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ktcloudware.crams.consumer.plugins.CpuAvgPlugin;
+import com.ktcloudware.crams.consumer.plugins.UcloudWatchPlugin;
+import com.ktcloudware.crams.consumer.plugins.VbdReadWriteAvgPlugin;
+import com.ktcloudware.crams.consumer.plugins.VifAvgPlugin;
+
 public class UcloudWatchMetricData {
 	// metric data
 	public String metricName;

@@ -30,17 +30,17 @@ public class DiskUsageCachePlugin implements CramsConsumerPlugin {
 		}
 	}
 
-	private void initCacheClient(String cacheAddress) throws Exception {
+	private void initCacheClient(String cacheAddress) throws CramsPluginException {
 		try{
 		this.cacheClient = new RedisClient(cacheAddress);
 		logger.info("success to connect");
 		}catch(Exception e){
-			throw e;
+			throw new CramsPluginException(e);
 		}
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
 		// calculate disk usage rate
 		if(dataMap == null || dataMap.isEmpty())
 			return null;
@@ -61,9 +61,8 @@ public class DiskUsageCachePlugin implements CramsConsumerPlugin {
 					|| vdiUsingSize == null)
 				throw new Exception("null data");
 		}catch(Exception e){
-			logger.warn("disk usage parsing error, " + e.getMessage() + ":"
-					+ dataMap);
-			return null;
+			logger.warn("disk usage parsing error," + dataMap, e);
+			throw new CramsPluginException(e);
 		}
 
 		try{
@@ -82,8 +81,8 @@ public class DiskUsageCachePlugin implements CramsConsumerPlugin {
 					+ " , vdi_name=" + vdiName + " expire time:"
 					+ expireTimeInMinutes);
 		}catch(Exception e){
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("disk usage cache write error," + dataMap, e);
+			throw new CramsPluginException(e);
 		}
 		return null;
 	}

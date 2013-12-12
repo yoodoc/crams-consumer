@@ -31,7 +31,7 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) {
 		long totalDisk = 0;
 		long totalUsingDisk = 0;
 		String vmUuid = null;
@@ -42,14 +42,14 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
 			if(vmUuid == null || vmUuid.isEmpty()){
 				logger.trace("can't find vm_uuid field");
 				dataMap = createEmptyDiskUsageData(dataMap);
-				return dataMap;
+				throw new CramsPluginException("can't find vm_uuid field");
 			}
 
 			String vdi = cacheClient.get(vmUuid);
 			if(vdi == null || vdi.isEmpty()){
 				logger.trace("can't find vdiset for vmUUID= " + vmUuid);
 				dataMap = createEmptyDiskUsageData(dataMap);
-				return dataMap;
+				throw new CramsPluginException("can't find vdiset for vmUUID= " + vmUuid);
 			}
 
 			String[] vdiSet = vdi.split(",");
@@ -75,6 +75,9 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
 		}catch(Exception e1){
 			logger.warn("failed to get disk usage information for" + vmUuid
 					+ ":" + e1.getMessage());
+			
+			//set default values to dataMap
+			dataMap.put(DISK_AVG_USAGE, 0.0);
 			return dataMap;
 		}
 

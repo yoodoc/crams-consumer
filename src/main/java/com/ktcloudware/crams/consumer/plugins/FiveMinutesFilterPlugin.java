@@ -25,7 +25,7 @@ public class FiveMinutesFilterPlugin implements CramsConsumerPlugin {
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
 		if(dataMap == null || dataMap.isEmpty()){
 			return dataMap;
 		}
@@ -37,7 +37,7 @@ public class FiveMinutesFilterPlugin implements CramsConsumerPlugin {
 				return dataMap;
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			throw new CramsPluginException(e.getMessage(), e);
 		}
 		return null;
 	}
