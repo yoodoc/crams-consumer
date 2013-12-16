@@ -17,16 +17,27 @@ public class VifAvgPlugin implements CramsConsumerPlugin {
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
-		Map<String, Object> resultMap = KafkaConsumerPluginUtil
-				.addAverageValue("vif_[0-9]+_rx", VIF_RX_AVG, dataMap);
-		if(resultMap == null){
-			logger.warn("can't get average vif values from data=" + dataMap);
-			return dataMap;
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
+		if(dataMap == null || dataMap.isEmpty()) {
+			throw new CramsPluginException("null dataMap");
 		}
-		resultMap = KafkaConsumerPluginUtil.addAverageValue("vif_[0-9]+_tx",
-				VIF_TX_AVG, resultMap);
-		return resultMap;
+		
+		try {
+			dataMap = KafkaConsumerPluginUtil
+					.addAverageValue("vif_[0-9]+_rx", VIF_RX_AVG, dataMap);
+		} catch (CramsPluginException e) {
+			dataMap = putZeorResult(VIF_RX_AVG, dataMap);
+			logger.warn("failed to get average for" + VIF_RX_AVG, e);
+		}
+		
+		try {
+			dataMap = KafkaConsumerPluginUtil.addAverageValue("vif_[0-9]+_tx",
+					VIF_TX_AVG, dataMap);
+		} catch (CramsPluginException e) {
+			dataMap = putZeorResult(VIF_TX_AVG, dataMap);
+			logger.warn("failed to get average for" + VIF_TX_AVG, e);
+		}
+		return dataMap;
 	}
 
 	@Override
@@ -45,5 +56,10 @@ public class VifAvgPlugin implements CramsConsumerPlugin {
 	public boolean needProperties(){
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	public Map<String,Object> putZeorResult(String key, Map<String, Object> dataMap) {
+		dataMap.put(key, (long) 0.0);
+		return dataMap;
 	}
 }

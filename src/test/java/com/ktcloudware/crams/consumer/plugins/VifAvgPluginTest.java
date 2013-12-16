@@ -16,10 +16,35 @@ public class VifAvgPluginTest {
 		Map<String, Object> testData = FileUtil
 				.readJsonToMap("singleRrdData1.json");
 		VifAvgPlugin plugin = new VifAvgPlugin();
-		Map<String, Object> resultMessage = plugin.excute(testData, null);
+		Map<String, Object> resultMessage = null;
+		try {
+			resultMessage = plugin.excute(testData, null);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		System.out.println(resultMessage);
 		assertEquals(203703075L, resultMessage.get("vif_tx_avg"));
 		assertEquals(465025100L, resultMessage.get("vif_rx_avg"));
 	}
 
+	@Test
+	public void testMissingTargetValue() {
+		Map<String, Object> testData = FileUtil
+				.readJsonToMap("singleRrdData1.json");
+		testData.remove("vif_0_rx");
+		VifAvgPlugin plugin = new VifAvgPlugin();
+		Map<String, Object> resultMessage = null;
+		try {
+			resultMessage = plugin.excute(testData, null);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
+		System.out.println(resultMessage);
+		assertEquals(203703075L, resultMessage.get("vif_tx_avg"));
+		assertEquals(0L, resultMessage.get("vif_rx_avg"));
+	}
 }

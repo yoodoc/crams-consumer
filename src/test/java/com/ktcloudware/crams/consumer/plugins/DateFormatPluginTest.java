@@ -4,10 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Test;
-
-import scala.testing.SUnit.AssertFailed;
 
 import com.ktcloudware.crams.consumer.plugins.DateFormatPlugin;
 

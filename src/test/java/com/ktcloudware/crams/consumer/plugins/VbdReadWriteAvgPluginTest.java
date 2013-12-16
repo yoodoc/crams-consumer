@@ -9,14 +9,21 @@ import org.junit.Test;
 import com.ktcloudware.crams.consumer.plugins.VbdReadWriteAvgPlugin;
 import com.ktcloudware.crams.consumer.util.FileUtil;
 
-public class VbdAvgPluginTest {
+public class VbdReadWriteAvgPluginTest {
 
 	@Test
 	public void test() {
 		Map<String, Object> testData = FileUtil
 				.readJsonToMap("singleRrdData1.json");
 		VbdReadWriteAvgPlugin plugin = new VbdReadWriteAvgPlugin();
-		Map<String, Object> resultMessage = plugin.excute(testData, null);
+		Map<String, Object> resultMessage = null;
+		try {
+			resultMessage = plugin.excute(testData, null);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		System.out.println(resultMessage);
 		assertEquals(879123556L, resultMessage.get("vbd_write_avg"));
 	}
@@ -26,9 +33,16 @@ public class VbdAvgPluginTest {
 		Map<String, Object> testData = FileUtil
 				.readJsonToMap("singleRrdData2.json");
 		VbdReadWriteAvgPlugin plugin = new VbdReadWriteAvgPlugin();
-		Map<String, Object> resultMessage = plugin.excute(testData, null);
+		Map<String, Object> resultMessage = null;
+		try {
+			resultMessage = plugin.excute(testData, null);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		System.out.println(resultMessage);
-		assertEquals(0, resultMessage.get("vbd_read_avg"));
+		assertEquals(0L, resultMessage.get("vbd_read_avg"));
 	}
 
 }

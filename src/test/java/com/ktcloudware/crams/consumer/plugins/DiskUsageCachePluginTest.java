@@ -14,7 +14,7 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
 public class DiskUsageCachePluginTest {
 	// @Ignore
 	@Test
-	public void test() throws Exception {
+	public void testRedisCache() throws Exception {
 		RedisClient redis = new RedisClient("localhost");
 		DiskUsageCachePlugin plugin = new DiskUsageCachePlugin();
 		plugin.setProperties("localhost,600");

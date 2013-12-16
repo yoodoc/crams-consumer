@@ -19,16 +19,30 @@ public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
 	}
 
 	@Override
-	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
-		dataMap = replaceName.excute(dataMap, dataTag);
-		Map<String, Object> resultMap = KafkaConsumerPluginUtil.addAverageValue("vbd_[a-z]+_read",
-				VBD_READ_AVG, (KafkaConsumerPluginUtil.addAverageValue(
-						"vbd_[a-z]+_write", VBD_WRITE_AVG, dataMap)));
-		if(resultMap == null){
-			logger.warn("can't get average vbd r/w values from data=" + dataMap);
-			return dataMap;
+	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag) throws CramsPluginException{
+		if (dataMap == null || dataMap.isEmpty()) {
+			throw new CramsPluginException("null input dataMap");
 		}
-		return resultMap;
+		
+		dataMap = replaceName.excute(dataMap, dataTag);
+		
+		try {
+			dataMap = KafkaConsumerPluginUtil.addAverageValue("vbd_[a-z]+_read", VBD_READ_AVG, dataMap);
+		} catch (CramsPluginException e) {
+			logger.warn("can't get average vbd read values from data=" + dataMap);
+			putZeroFloatResult(VBD_READ_AVG, dataMap);	
+		}
+		
+		System.out.println("!!!!");
+		
+		try {
+			logger.warn("can't get average vbd write values from data=" + dataMap);
+			dataMap = KafkaConsumerPluginUtil.addAverageValue("vbd_[a-z]+_write", VBD_WRITE_AVG, dataMap);
+		} catch (CramsPluginException e) {
+			putZeroFloatResult(VBD_WRITE_AVG, dataMap);
+		}
+	
+		return dataMap;
 	}
 
 	@Override
@@ -47,5 +61,10 @@ public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
 	public boolean needProperties(){
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	public Map<String,Object> putZeroFloatResult(String key, Map<String, Object> dataMap) {
+		dataMap.put(key, (float) 0.0);
+		return dataMap;
 	}
 }

@@ -17,8 +17,14 @@ public class KafkaConsumerPluginUtilTest {
 		message.put("cpu1", new Double(100));
 		message.put("cpu2", new Float(50));
 
-		KafkaConsumerPluginUtil
-				.addAverageValue("cpu[0-9]+", "cpu_avg", message);
+		try {
+			KafkaConsumerPluginUtil
+					.addAverageValue("cpu[0-9]+", "cpu_avg", message);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		assertEquals((float) 75.0, message.get("cpu_avg"));
 	}
 
@@ -28,8 +34,14 @@ public class KafkaConsumerPluginUtilTest {
 		message.put("vbd_hda_write", 100);
 		message.put("vbd_hdb_write", 50);
 
-		message = KafkaConsumerPluginUtil.addAverageValue("vbd_hd[a-z]_write",
-				"vbd_write_avg", message);
+		try {
+			message = KafkaConsumerPluginUtil.addAverageValue("vbd_hd[a-z]_write",
+					"vbd_write_avg", message);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		assertEquals(75L, message.get("vbd_write_avg"));
 	}
 }

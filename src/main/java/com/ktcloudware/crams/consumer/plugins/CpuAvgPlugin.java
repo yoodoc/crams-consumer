@@ -13,7 +13,12 @@ public class CpuAvgPlugin implements CramsConsumerPlugin{
 	@Override
 	public Map<String, Object> excute(Map<String, Object> dataMap, String dataTag){
 		// TODO Auto-generated method stub
-		return KafkaConsumerPluginUtil.addAverageValue("cpu[0-9]+", CPU_AVG, dataMap);
+		try {
+			dataMap = KafkaConsumerPluginUtil.addAverageValue("cpu[0-9]+", CPU_AVG, dataMap);
+		} catch (CramsPluginException e) {
+			dataMap = putZeroFloatResult(dataMap);
+		}
+		return dataMap;
 	}
 
 	@Override
@@ -31,5 +36,10 @@ public class CpuAvgPlugin implements CramsConsumerPlugin{
 	public String getProperties(){
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public Map<String,Object> putZeroFloatResult(Map<String, Object> dataMap) {
+		dataMap.put(CPU_AVG, (float) 0.0);
+		return dataMap;
 	}
 }

@@ -4,41 +4,87 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.plugins.AppendDiskUsagePlugin;
-import com.ktcloudware.crams.consumer.plugins.DiskUsageCachePlugin;
 import com.ktcloudware.crams.consumer.util.FileUtil;
 
 public class AppendDiskUsagePluginTest {
-	// @Ignore
 	@Test
-	public void testDiskAvgUsagePlugin() {
-		DiskUsageCachePlugin cachePlugin = new DiskUsageCachePlugin();
-		cachePlugin.setProperties("localhost,60");
-		AppendDiskUsagePlugin avgUsagePlugin = new AppendDiskUsagePlugin();
-		avgUsagePlugin.setProperties("localhost");
-
-		// Map diskData = JsonFileToMap.read("singleDiskData.json");
-		// Map cacheItemKey = cachePlugin.excute(diskData);
-		Map<String, Object> diskData = FileUtil.readJsonToMap("diskData1.json");
-		diskData.put("vm_uuid", "unittest_uuid");
+	public void testAppendDiskUsagePlugin() {
+		//create AppendDiskUsagePlugin for unittest
+		AppendDiskUsagePlugin diskUsagePlugin = new AppendDiskUsagePlugin() {
+			void initCacheClient(String cacheAddress){
+				this.cacheClient = new MockCacheClient(cacheAddress) {
+					@Override
+					public String get(String key) throws Exception {
+						if (key.equalsIgnoreCase("unittest_name")) {
+							return "device_a,1000,500";
+						}
+						
+						if (key.equalsIgnoreCase("unittest_uuid")) {
+							return "unittest_name";
+						}
+						return null;
+					}
+				};
+			}
+		};
+		diskUsagePlugin.setProperties("localhost");
+		
 		Map<String, Object> rrdData = FileUtil
 				.readJsonToMap("singleRrdData1.json");
 		rrdData.put("vm_uuid", "unittest_uuid");
+	
 		try {
-			cachePlugin.excute(diskData, null);
+			rrdData = diskUsagePlugin.excute(rrdData, null);
 		} catch (CramsPluginException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail();
 		}
-		rrdData = avgUsagePlugin.excute(rrdData, null);
 
 		System.out.println(rrdData);
-		assertEquals((float) 0.109375, rrdData.get("vbd_usage"));
-		assertEquals(2147483648L, rrdData.get("vbd_a_size"));
-		// cacheClient.delete(cacheItemKey);
+		assertEquals((float) 0.5, rrdData.get("vbd_usage"));
+		assertEquals(1000L, rrdData.get("vbd_a_size"));
+	}
+	
+	@Test
+	public void testCanNotFindVMInfoFromCache() {
+		//create AppendDiskUsagePlugin for unittest
+		AppendDiskUsagePlugin diskUsagePlugin = new AppendDiskUsagePlugin() {
+			void initCacheClient(String cacheAddress){
+				this.cacheClient = new MockCacheClient(cacheAddress) {
+					@Override
+					public String get(String key) throws Exception {
+						if (key.equalsIgnoreCase("unittest_name")) {
+							return "device_a,1000,500";
+						}
+						
+						if (key.equalsIgnoreCase("unittest_uuid")) {
+							return "unittest_name";
+						}
+						return null;
+					}
+				};
+			}
+		};
+		diskUsagePlugin.setProperties("localhost");
+		
+		Map<String, Object> rrdData = FileUtil
+				.readJsonToMap("singleRrdData1.json");
+		rrdData.put("vm_uuid", "");
+	
+		try {
+			rrdData = diskUsagePlugin.excute(rrdData, null);
+		} catch (CramsPluginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
+
+		System.out.println(rrdData);
+		assertEquals((float) 0.0, rrdData.get("vbd_usage"));
+		assertEquals(0L, rrdData.get("vbd_a_size"));
 	}
 }
