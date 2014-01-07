@@ -28,337 +28,344 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
+import com.ktcloudware.crams.consumer.CramsException;
+
 public class ESBulkIndexer {
-	private Client client = null;
-	private BulkRequestBuilder bulkRequestBuilder;
-	private long lastSendTime;
-	private String typeInIndex;
-	private String indexSettings;
-	private String indexMappings;
-	private String routingKeyName;
-	private List<String> indexListToCheckExistance = null;
+    private Client client = null;
+    private BulkRequestBuilder bulkRequestBuilder;
+    private long lastSendTime;
+    private String typeInIndex;
+    private String indexSettings;
+    private String indexMappings;
+    private String routingKeyName;
+    private List<String> indexListToCheckExistance = null;
 
-	private Logger logger = LogManager.getLogger("ESCLIENT");
-	private String clusterName;
-	private List<InetSocketTransportAddress> esAddressList;
+    private Logger logger = LogManager.getLogger("ESCLIENT");
+    private String clusterName;
+    private List<InetSocketTransportAddress> esAddressList;
 
-	/**
-	 * 
-	 * @param esAddressList
-	 * @param clusterName
-	 * @param type
-	 * @param routingKeyName
-	 * @param indexSettings
-	 * @param indexMappings
-	 */
-	public ESBulkIndexer(List<InetSocketTransportAddress> esAddressList,
-			String clusterName, String type, String routingKeyName,
-			String indexSettings, String indexMappings){
-		logger = LogManager.getLogger("ESCLIENT");
+    /**
+     * 
+     * @param esAddressList
+     * @param clusterName
+     * @param type
+     * @param routingKeyName
+     * @param indexSettings
+     * @param indexMappings
+     * @throws CramsException 
+     */
+    public ESBulkIndexer(List<InetSocketTransportAddress> esAddressList,
+            String clusterName, String type, String routingKeyName,
+            String indexSettings, String indexMappings) throws CramsException {
+        logger = LogManager.getLogger("ESCLIENT");
 
-		this.routingKeyName = routingKeyName;
-		this.typeInIndex = type;
-		this.indexSettings = indexSettings;
-		this.indexMappings = indexMappings;
-		this.clusterName = clusterName;
-		this.esAddressList = esAddressList;
-		lastSendTime = System.currentTimeMillis();
-		initESClient();
-	
-	}
+        this.routingKeyName = routingKeyName;
+        this.typeInIndex = type;
+        this.indexSettings = indexSettings;
+        this.indexMappings = indexMappings;
+        this.clusterName = clusterName;
+        this.esAddressList = esAddressList;
+        lastSendTime = System.currentTimeMillis();
+        initESClient();
 
-	public void initESClient(){
-		Settings settings = ImmutableSettings.settingsBuilder()
-				.put("cluster.name", clusterName).build();
-		TransportClient transportClient = new TransportClient(settings);
-		for(InetSocketTransportAddress address : esAddressList){
-			// FIXME 일부 es master 접속 불가시에 가용한 es master에만 접속하도록 하는 부분이며, 수정이
-			// 필요하다.
-			System.out.println("!!!!! init es");
+    }
 
-			try{
-				this.client = transportClient.addTransportAddress(address);
-			}catch(Exception e){
-				logger.error("ES connection error. failed to connect to "
-						+ address.toString());
-				e.printStackTrace();
-				System.out.println("!!!!!!!!!! init es");
+    public void initESClient() throws CramsException{
+        Settings settings = ImmutableSettings.settingsBuilder()
+                .put("cluster.name", clusterName).build();
+        TransportClient transportClient = null;
+        try {
+            transportClient = new TransportClient(settings);
+        } catch (Exception e) {
+            throw new CramsException("failed to create ES TransportClient instance", e);
+        }
+        for (InetSocketTransportAddress address : esAddressList) {
+            // FIXME 일부 es master 접속 불가시에 가용한 es master에만 접속하도록 하는 부분이며, 수정이
+            // 필요하다.
+            System.out.println("!!!!! init es" + address.toString());
 
-			}
-		}
+            try {
+                transportClient.addTransportAddress(address);
+            } catch (Exception e) {
+                logger.error("ES connection error. failed to connect to "
+                        + address.toString(), e);
+            }
+        }
+        this.client = transportClient;
 
-		this.indexListToCheckExistance = new ArrayList<String>();
-		this.bulkRequestBuilder = client.prepareBulk();
-	}
+        this.indexListToCheckExistance = new ArrayList<String>();
+        this.bulkRequestBuilder = client.prepareBulk();
+    }
 
-	/**
-	 * 
-	 * @param index
-	 * @param data
-	 */
-	public boolean addRequestData(String index, Map<String, Object> data,
-			String dataTag){
-		appendBulkRequestBuilder(index, typeInIndex, data, dataTag);
-		return true;
-	}
+    /**
+     * 
+     * @param index
+     * @param data
+     */
+    public boolean addRequestData(String index, Map<String, Object> data,
+            String dataTag) {
+        appendBulkRequestBuilder(index, typeInIndex, data, dataTag);
+        return true;
+    }
 
-	/**
-	 * append data of BulkRequestBuilder
-	 * 
-	 * @param index
-	 * @param typeName
-	 * @param data
-	 */
-	private void appendBulkRequestBuilder(String index, String typeName,
-			Map<String, Object> data, String dataTag){
-		// create new index if does not exist.
-		try{
-			boolean result = createIndexAndMappingsIfNeeded(index,
-					indexSettings, indexMappings);
-			if(result == true){
-				logger.info("create new index=" + index + " with mapping="
-						+ indexMappings + ", dataTag=" + dataTag);
-			}
-		}catch(Exception e1){
-			logger.error(e1.getMessage());
-			e1.printStackTrace();
-			return;
-		}
+    /**
+     * append data of BulkRequestBuilder
+     * 
+     * @param index
+     * @param typeName
+     * @param data
+     */
+    private void appendBulkRequestBuilder(String index, String typeName,
+            Map<String, Object> data, String dataTag) {
+        // create new index if does not exist.
+        try {
+            boolean result = createIndexAndMappingsIfNeeded(index,
+                    indexSettings, indexMappings);
+            if (result == true) {
+                logger.info("create new index=" + index + " with mapping="
+                        + indexMappings + ", dataTag=" + dataTag);
+            }
+        } catch (Exception e1) {
+            logger.error("failed to create index ES request, " + index + ", "
+                    + e1.getMessage(), e1);
+            return;
+        }
 
-		// set routing key for single index request, then add it to
-		// bulkRequestBuilder
-		IndexRequestBuilder source = null;
-		try{
-			Object routingKey = data.get(routingKeyName);
-			if(routingKey == null){
-				logger.warn("can't find routing key");
-				return;
-			} else if(routingKey instanceof String){
-				routingKey = (String) data.get(routingKeyName);
-			} else {
-				routingKey = String.valueOf(data.get(routingKeyName));
-			}
+        // set routing key for single index request, then add it to
+        // bulkRequestBuilder
+        IndexRequestBuilder source = null;
+        try {
+            Object routingKey = data.get(routingKeyName);
+            if (routingKey == null) {
+                logger.warn("can't find routing key");
+                return;
+            } else if (routingKey instanceof String) {
+                routingKey = (String) data.get(routingKeyName);
+            } else {
+                routingKey = String.valueOf(data.get(routingKeyName));
+            }
 
-			if(routingKey != null && !((String) routingKey).isEmpty()){
-				source = client.prepareIndex(index, typeName).setSource(data)
-						.setRouting((String) routingKey);
-				this.bulkRequestBuilder.add(source);
-			} else {
-				// routingKey에 해당하는 필드가 json 메시지에 포함되지 않는 경우에 해당 메시지는 전달되지 않는다.
-				logger.warn("Missing field to generate routing key. data:"
-						+ data);
-			}
-		}catch(Exception e){
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-	}
+            if (routingKey != null && !((String) routingKey).isEmpty()) {
+                source = client.prepareIndex(index, typeName).setSource(data)
+                        .setRouting((String) routingKey);
+                this.bulkRequestBuilder.add(source);
+            } else {
+                // routingKey에 해당하는 필드가 json 메시지에 포함되지 않는 경우에 해당 메시지는 전달되지 않는다.
+                logger.warn("Missing field to generate routing key. data:"
+                        + data);
+            }
+        } catch (Exception e) {
+            logger.error("failed to append ES request, " + e.getMessage(), e);
+        }
+    }
 
-	/**
-	 * send request using current bulkRequestbuilder, that has multiple index
-	 * data
-	 * 
-	 * @return num of sended data
-	 */
-	public int sendBulkRequest(){
-		// send bulk request using bulkRequestBulker
-		int sizeOfBulkRequest = this.bulkRequestBuilder.numberOfActions();
-		try{
-			BulkResponse bulkResponse = this.bulkRequestBuilder.execute()
-					.actionGet();
-			if(bulkResponse.hasFailures()){
-				throw new Exception("bulk insert fail: "
-						+ bulkResponse.buildFailureMessage() + ", "
-						+ bulkResponse.getItems());
-			} else {
-				logger.info("ES_RESULT: send " + sizeOfBulkRequest
-						+ "data, it took " + bulkResponse.getTookInMillis()
-						+ "msec");
-			}
-		}catch(Exception e){
-			logger.error(e.getMessage());
-			e.printStackTrace();
+    /**
+     * send request using current bulkRequestbuilder, that has multiple index
+     * data
+     * 
+     * @return num of sended data
+     * @throws CramsException 
+     */
+    public int sendBulkRequest() throws CramsException {
+        // send bulk request using bulkRequestBulker
+        int sizeOfBulkRequest = this.bulkRequestBuilder.numberOfActions();
+        try {
+            BulkResponse bulkResponse = this.bulkRequestBuilder.execute()
+                    .actionGet();
+            if (bulkResponse.hasFailures()) {
+                throw new Exception("bulk insert fail: "
+                        + bulkResponse.buildFailureMessage() + ", "
+                        + bulkResponse.getItems());
+            } else {
+                logger.info("ES_RESULT: send " + sizeOfBulkRequest
+                        + "data, it took " + bulkResponse.getTookInMillis()
+                        + "msec");
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            //re-init client
+            client.close();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e1) {
+                logger.error("sleep interrupted", e1);
+            }
+            initESClient();
+            this.bulkRequestBuilder = client.prepareBulk();
+            return 0;
+        }
 
-			client.close();
-			try{
-				Thread.sleep(1000);
-			}catch(InterruptedException e1){
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			initESClient();
-			this.bulkRequestBuilder = client.prepareBulk();
-			return 0;
-		}
+        // update last bulk request time
+        lastSendTime = System.currentTimeMillis();
 
-		// update last bulk request time
-		lastSendTime = System.currentTimeMillis();
+        // flush bulk requests list
+        // TODO bulkRequestBuilder를 새로 생성할 필요가 있을까? 확인이 필요하다.
+        this.bulkRequestBuilder = client.prepareBulk();
 
-		// flush bulk requests list
-		// TODO bulkRequestBuilder를 새로 생성할 필요가 있을까? 확인이 필요하다.
-		this.bulkRequestBuilder = client.prepareBulk();
+        return sizeOfBulkRequest;
+    }
 
-		return sizeOfBulkRequest;
-	}
+    /**
+     * create index, index setting & mapping info, if needed
+     * 
+     * @param index
+     * @param settings
+     * @param mappings
+     * @return
+     */
+    private boolean createIndexAndMappingsIfNeeded(String index,
+            String settings, String mappings) {
+        if (indexListToCheckExistance.contains(index)) {
+            return false;
+        }
+        boolean indexResult = false;
+        try {
+            indexResult = createIndexIfNeeded(index, settings);
+        } catch (Exception e) {
+            logger.error("index creation failed", e);
+        }
 
-	/**
-	 * create index, index setting & mapping info, if needed
-	 * 
-	 * @param index
-	 * @param settings
-	 * @param mappings
-	 * @return
-	 * @throws Exception
-	 */
-	private boolean createIndexAndMappingsIfNeeded(String index,
-			String settings, String mappings) throws Exception {
-		if(indexListToCheckExistance.contains(index)){
-			return false;
-		}
-		boolean indexResult = false;
-		try{
-			indexResult = createIndexIfNeeded(index, settings);
-		}catch(Exception e){
-			logger.error("index creation failed");
-		}
+        if (indexResult == false) {
+            logger.error("index creation failed");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                logger.error("sleep interrupted", e);
+            }
+        }
 
-		if(indexResult == false){
-			logger.error("index creation failed");
-			Thread.sleep(5000);
-		}
+        try {
+            PushMappingIfNeeded(index, mappings);
+        } catch (Exception e) {
+            logger.error("index creation failed", e);
+        }
 
-		try{
-			PushMappingIfNeeded(index, mappings);
-		}catch(Exception e){
-			logger.error("index creation failed");
-		}
+        indexListToCheckExistance.add(index);
+        return true;
+    }
 
-		indexListToCheckExistance.add(index);
-		return true;
-	}
+    /**
+     * first, check index existance. if needed it create index & set index info
+     * 
+     * @param index
+     * @param settings
+     * @return
+     */
+    public boolean createIndexIfNeeded(String index, String settings) {
+        boolean isExist = false;
+        try {
+            isExist = doesIndexExist(client, index);
+        } catch (Exception e) {
+            logger.error("failed to check index existance", e);
+            return false;
+        }
+        if (!isExist) {
+            CreateIndexRequestBuilder cirb = client.admin().indices()
+                    .prepareCreate(index);
+            String source = settings;
+            cirb.setSettings(source);
+            CreateIndexResponse createIndexResponse = cirb.execute()
+                    .actionGet();
+            if (!createIndexResponse.isAcknowledged()) {
+                logger.error("ES_REQUEST_RESULT: create index failed. index name="
+                        + index);
+            } else {
+                logger.trace("ES_REQUEST_RESULT: success to create index. name="
+                        + index);
+                return true;
+            }
+        }
+        return false;
+    }
 
-	/**
-	 * first, check index existance. if needed it create index & set index info
-	 * 
-	 * @param index
-	 * @param settings
-	 * @return
-	 */
-	public boolean createIndexIfNeeded(String index, String settings){
-		try{
-			if(!doesIndexExist(client, index)){
-				CreateIndexRequestBuilder cirb = client.admin().indices()
-						.prepareCreate(index);
-				String source = settings;
-				cirb.setSettings(source);
-				CreateIndexResponse createIndexResponse = cirb.execute()
-						.actionGet();
-				if(!createIndexResponse.isAcknowledged()){
-					throw new Exception(
-							"ES_REQUEST_RESULT: create index failed. index name="
-									+ index);
-				}
-				logger.trace("ES_REQUEST_RESULT: success to create index. name="
-						+ index);
-				return true;
-			}
-		}catch(Exception e){
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-		return false;
-	}
+    /**
+     * delete index
+     * 
+     * @param indexName
+     * @param type
+     */
+    public void deleteIndex(String indexName, String type) {
+        try {
+            DeleteIndexResponse deleteResponse = client.admin().indices()
+                    .delete(new DeleteIndexRequest(indexName)).get();
+            if (!deleteResponse.isAcknowledged())
+                throw new Exception("Could not create index [" + indexName
+                        + "].");
+        } catch (Exception e) {
+            logger.error(
+                    "failed to delete index, " + indexName + ", "
+                            + e.getMessage(), e);
+        }
+    }
 
-	/**
-	 * delete index
-	 * 
-	 * @param indexName
-	 * @param type
-	 */
-	public void deleteIndex(String indexName, String type){
-		try{
-			DeleteIndexResponse deleteResponse = client.admin().indices()
-					.delete(new DeleteIndexRequest(indexName)).get();
-			if(!deleteResponse.isAcknowledged())
-				throw new Exception("Could not create index [" + indexName
-						+ "].");
-		}catch(Exception e){
-			logger.error(e.getMessage());
-			e.printStackTrace();
-		}
-	}
+    public static boolean doesIndexExist(Client client, String index) {
+        return client.admin().indices().prepareExists(index).execute()
+                .actionGet().isExists();
+    }
 
-	public static boolean doesIndexExist(Client client, String index)
-			throws Exception {
+    public void shutdown() throws CramsException {
+        sendBulkRequest();
+        bulkRequestBuilder = null;
+        client.close();
+        client = null;
+    }
 
-		return client.admin().indices().prepareExists(index).execute()
-				.actionGet().isExists();
-	}
+    public Client getClient() {
+        return client;
+    }
 
-	public void shutdown(){
-		sendBulkRequest();
-		bulkRequestBuilder = null;
-		client.close();
-		client = null;
-	}
+    public int getSizeOfBulkRequest() {
+        return this.bulkRequestBuilder.numberOfActions();
+    }
 
-	public Client getClient(){
-		return client;
-	}
+    public long getLastSendTime() {
+        return this.lastSendTime;
+    }
 
-	public int getSizeOfBulkRequest(){
-		return this.bulkRequestBuilder.numberOfActions();
-	}
+    public Map<String, Object> getMapping(String index, String type) {
+        try {
+            ClusterState clusterState = client.admin().cluster().prepareState()
+                    .setFilterIndices(index).execute().actionGet().getState();
+            IndexMetaData indexMetadata = clusterState.getMetaData().index(
+                    index);
 
-	public long getLastSendTime(){
-		return this.lastSendTime;
-	}
+            MappingMetaData mappingMeatadata = indexMetadata
+                    .mapping(typeInIndex);
+            if (null == mappingMeatadata) {
+                return null;
+            }
+            return mappingMeatadata.getSourceAsMap();
+        } catch (Exception e) {
+            logger.error("GET Mapping failed " + e.getMessage(), e);
+        }
+        return null;
+    }
 
-	public Map<String, Object> getMapping(String index, String type){
-		try{
-			ClusterState clusterState = client.admin().cluster().prepareState()
-					.setFilterIndices(index).execute().actionGet().getState();
-			IndexMetaData indexMetadata = clusterState.getMetaData().index(
-					index);
+    public boolean PushMappingIfNeeded(String index, String mappings) {
+        try {
+            if (null != getMapping(index, typeInIndex)) {
+                return false;
+            }
 
-			MappingMetaData mappingMeatadata = indexMetadata
-					.mapping(typeInIndex);
-			if(null == mappingMeatadata){
-				return null;
-			}
-			return mappingMeatadata.getSourceAsMap();
-		}catch(Exception e){
-			logger.error("GET Mapping failed " + e.getMessage(), e);
-			e.printStackTrace();
-		}
-		return null;
-	}
+            PutMappingRequestBuilder pmrb = client.admin().indices()
+                    .preparePutMapping(index).setType(typeInIndex);
+            pmrb.setSource(mappings);
 
-	public boolean PushMappingIfNeeded(String index, String mappings){
-		try{
-			if(null != getMapping(index, typeInIndex)){
-				return false;
-			}
+            // Create mapping for type
+            PutMappingResponse response = pmrb.execute().actionGet();
+            if (!response.isAcknowledged()) {
+                logger.error("Could not define mapping for type [" + index
+                        + "]/[" + typeInIndex + "].");
+            } else {
+                logger.info("ES_REQUEST_RESULT: push " + index + " mapping :"
+                        + mappings);
+            }
+            return true;
 
-			PutMappingRequestBuilder pmrb = client.admin().indices()
-					.preparePutMapping(index).setType(typeInIndex);
-			pmrb.setSource(mappings);
+        } catch (Exception e) {
+            logger.error("push mapping failed", e);
+        }
+        return false;
 
-			// Create mapping for type
-			PutMappingResponse response = pmrb.execute().actionGet();
-			if(!response.isAcknowledged()){
-				logger.error("Could not define mapping for type [" + index
-						+ "]/[" + typeInIndex + "].");
-			} else {
-				logger.info("ES_REQUEST_RESULT: push " + index + " mapping :"
-						+ mappings);
-			}
-			return true;
-
-		}catch(Exception e){
-			logger.error("push mapping failed", e);
-		}
-		return false;
-
-	}
+    }
 }

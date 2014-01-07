@@ -13,354 +13,348 @@ import org.apache.log4j.Logger;
 import com.ktcloudware.crams.consumer.CramsException;
 import com.ktcloudware.crams.consumer.clients.HttpClient;
 import com.ktcloudware.crams.consumer.clients.UcloudDBSelector;
-import com.ktcloudware.crams.consumer.dataType.UcloudWatchDemension;
-import com.ktcloudware.crams.consumer.dataType.UcloudWatchMetricData;
+import com.ktcloudware.crams.consumer.datatype.UcloudWatchDemension;
+import com.ktcloudware.crams.consumer.datatype.UcloudWatchMetricData;
 
 public class UcloudWatchPlugin implements CramsConsumerPlugin {
-	private static final Object VM_TYPE = "vm_type";
-	private static final Object VM_UUID = "vm_uuid";
-	private static final Object VM_NAME = "vm_name";
-	private static final int MAX_RETRY = 5;
+    private static final Object VM_TYPE = "vm_type";
+    private static final Object VM_UUID = "vm_uuid";
+    private static final Object VM_NAME = "vm_name";
+    private static final int MAX_RETRY = 5;
 
-	private Logger logger;
-	private List<CramsConsumerPlugin> plugins;
-	private UcloudDBSelector db;
-	private Map<String, String> vmNameMap;
-	private boolean readyDbConnection = false;
-	private String baseUrl = "http://localhost:8080/watch?command=putMetricData";
+    private Logger logger;
+    private List<CramsConsumerPlugin> plugins;
+    private UcloudDBSelector db;
+    private Map<String, String> vmNameMap;
+    private boolean readyDbConnection = false;
+    private String baseUrl = "http://localhost:8080/watch?command=putMetricData";
 
-	public UcloudWatchPlugin() {
-		logger = LogManager.getLogger("PLUGINS");
-		vmNameMap = new HashMap<String, String>();
+    public UcloudWatchPlugin() {
+        logger = LogManager.getLogger("PLUGINS");
+        vmNameMap = new HashMap<String, String>();
 
-		// set required plugins
-		setRequiredPlugins();
+        // set required plugins
+        setRequiredPlugins();
 
-		// init ucloud info storage connector
-		// db = new UcloudDBSelector();
+     }
 
-	}
+    @Override
+    public void setProperties(String dbSelectorType)
+            throws CramsPluginException {
+        if (dbSelectorType == null || dbSelectorType.isEmpty()) {
+            throw new CramsPluginException("UcloudWatchPlugin wrong property");
+        }
+        try {
+            if (dbSelectorType.equalsIgnoreCase("UNITTEST")) {
+                db = new MockDBSelectorForUcloudWatchPlugin("");
+                readyDbConnection = true;
+            } else {
+                db = new UcloudDBSelector(dbSelectorType);
+                readyDbConnection = true;
+            }
+        } catch (CramsException e) {
+            throw new CramsPluginException("UcloudWatchPlugin wrong property",
+                    e);
+        }
 
-	@Override
-	public void setProperties(String dbSelectorType)
-			throws CramsPluginException {
-		if (dbSelectorType == null || dbSelectorType.isEmpty()) {
-			throw new CramsPluginException("UcloudWatchPlugin wrong property");
-		}
-		try {
-			if (dbSelectorType.equalsIgnoreCase("UNITTEST")) {
-				db = new MockDBSelectorForUcloudWatchPlugin("");
-				readyDbConnection = true;
-			} else {
-				db = new UcloudDBSelector(dbSelectorType);
-				readyDbConnection = true;
-			}
-		} catch (CramsException e) {
-			throw new CramsPluginException("UcloudWatchPlugin wrong property", e);
-		}
+    }
 
-	}
+    private void setRequiredPlugins() {
+        plugins = new ArrayList<CramsConsumerPlugin>();
+        DateFormatPlugin plugin = new DateFormatPlugin();
+        plugin.setProperties("datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS");
+        plugins.add(plugin);
+        plugins.add(new ReplaceVmAccountNamePlugin());
+        plugins.add(new ReplaceDiskFieldNamePlugin());
+        plugins.add(new CpuAvgPlugin());
+        plugins.add(new VbdReadWriteAvgPlugin());
+        plugins.add(new VifAvgPlugin());
+    }
 
-	private void setRequiredPlugins() {
-		plugins = new ArrayList<CramsConsumerPlugin>();
-		DateFormatPlugin plugin = new DateFormatPlugin();
-		plugin.setProperties("datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS");
-		plugins.add(plugin);
-		plugins.add(new ReplaceVmAccountNamePlugin());
-		plugins.add(new ReplaceDiskFieldNamePlugin());
-		plugins.add(new CpuAvgPlugin());
-		plugins.add(new VbdReadWriteAvgPlugin());
-		plugins.add(new VifAvgPlugin());
-	}
+    @Override
+    public String getProperties() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public String getProperties() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Map<String, Object> excute(Map<String, Object> rrdMap, String dataTag)
+            throws CramsPluginException {
+        if (!readyDbConnection) {
+            throw new CramsPluginException("plugin not initialized.");
+        }
 
-	@Override
-	public Map<String, Object> excute(Map<String, Object> rrdMap, String dataTag)
-			throws CramsPluginException {
-		if (readyDbConnection == false) {
-			throw new CramsPluginException("plugin not initialized.");
-		}
+        // make avg data from vm rrd
+        for (CramsConsumerPlugin plugin : plugins) {
+            try {
+                rrdMap = plugin.excute(rrdMap, dataTag);
+                if (rrdMap == null) {
+                    throw new CramsPluginException("null plugin result");
+                }
+            } catch (Exception e) {
+                logger.error(plugin.getClass().getName() + " plugin error at "
+                        + dataTag + "," + rrdMap, e);
+                throw new CramsPluginException(plugin.getClass().getName()
+                        + " plugin error at " + dataTag + "," + rrdMap, e);
+            }
+        }
 
-		// make avg data from vm rrd
-		for (CramsConsumerPlugin plugin : plugins) {
-			try {
-				rrdMap = plugin.excute(rrdMap, dataTag);
-				if (rrdMap == null) {
-					throw new CramsPluginException("null plugin result");
-				}
-			} catch (Exception e) {
-				logger.error(plugin.getClass().getName() + " plugin error at "
-						+ dataTag + "," + rrdMap, e);
-				throw new CramsPluginException(plugin.getClass().getName()
-						+ " plugin error at " + dataTag + "," + rrdMap, e);
-			}
-		}
+        // create metric data from dataMap
+        List<UcloudWatchMetricData> ucloudWatchMetricData = null;
 
-		// create metric data from dataMap
-		List<UcloudWatchMetricData> ucloudWatchMetricData = null;
+        // parse namespace
+        String namespace = "ucloud/server";
+        namespace = getNamespace(rrdMap);
 
-		// parse namespace
-		String namespace = "ucloud/server";
-		namespace = getNamespace(rrdMap);
+        // parse ownerField
+        String owner = getOwnerField(rrdMap);
+        if (owner == null) {
+            return null;
+        }
+        
+        // parse demension list
+        // TODO get vm name from vm_uuid than make demension value
+        List<UcloudWatchDemension> demensionList = new ArrayList<UcloudWatchDemension>();
+        try {
+            demensionList = getDemesions(rrdMap);
+        } catch (Exception e) {
+            logger.error("failed to create demension field,", e);
+            throw new CramsPluginException("failed to create demension field,",
+                    e);
+        }
 
-		// parse ownerField
-		String owner = getOwnerField(rrdMap);
-		if (owner == null)
-			return null;
+        if (demensionList == null || demensionList.isEmpty()) {
+            return null;
+        }
 
-		// parse demension list
-		// TODO get vm name from vm_uuid than make demension value
-		List<UcloudWatchDemension> demensionList = new ArrayList<UcloudWatchDemension>();
-		try {
-			demensionList = getDemesions(db, rrdMap);
-		} catch (Exception e) {
-			logger.error("failed to create demension field,", e);
-			throw new CramsPluginException("failed to create demension field,",
-					e);
-		}
+        // create metric data
+        try {
+            ucloudWatchMetricData = createMetricDataList(demensionList, rrdMap);
+        } catch (Exception e) {
+            logger.error("failed to parsing rrd data,", e);
+            throw new CramsPluginException("failed to parsing rrd data,", e);
+        }
 
-		if (demensionList == null || demensionList.size() == 0) {
-			return null;
-		}
+        if (ucloudWatchMetricData == null || ucloudWatchMetricData.isEmpty()) {
+            return null;
+        }
 
-		// create metric data
-		try {
-			ucloudWatchMetricData = createMetricDataList(this, namespace,
-					demensionList, rrdMap);
-		} catch (Exception e) {
-			logger.error("failed to parsing rrd data,", e);
-			throw new CramsPluginException("failed to parsing rrd data,", e);
-		}
+        // send metric data
+        String ucloudWatchRequestParmaeter = createPutMatricRequest(namespace,
+                owner, ucloudWatchMetricData);
 
-		if (ucloudWatchMetricData == null || ucloudWatchMetricData.size() == 0) {
-			return null;
-		}
+        for (int i = 0; i < MAX_RETRY; i++) {
+            String response = send(ucloudWatchRequestParmaeter);
+            if (response == null) {
+                logger.error(ucloudWatchRequestParmaeter
+                        + ": failed to send watch request at " + dataTag
+                        + ", data map :" + rrdMap);
+            } else {
+                logger.trace("send ucloud watch request : "
+                        + ucloudWatchRequestParmaeter + ", response : "
+                        + response);
+                break;
+            }
+        }
+        return null;
+    }
 
-		// send metric data
-		String ucloudWatchRequestParmaeter = createPutMatricRequest(namespace,
-				owner, ucloudWatchMetricData);
+    private String send(String ucloudWatchRequestParmaeter) {
+        return HttpClient.sendRequest(ucloudWatchRequestParmaeter);
+    }
 
-		for (int i = 0; i < MAX_RETRY; i++) {
-			String response = send(ucloudWatchRequestParmaeter);
-			if (response == null) {
-				logger.error(ucloudWatchRequestParmaeter
-						+ ": failed to send watch request at " + dataTag
-						+ ", data map :" + rrdMap);
-			} else {
-				logger.trace("send ucloud watch request : "
-						+ ucloudWatchRequestParmaeter + ", response : "
-						+ response);
-				break;
-			}
-		}
-		return null;
-	}
+    private String createPutMatricRequest(String namespace, String owner,
+            List<UcloudWatchMetricData> ucloudWatchMetricData) throws CramsPluginException {
+        String requestParameter = null;
+        try {
+            requestParameter = baseUrl + "&namespace="
+                    + getUrlEncodedValue(namespace) + "&owner="
+                    + getUrlEncodedValue(owner) + "&requesttype=vmagent";
+        } catch (UnsupportedEncodingException e) {
+            throw new CramsPluginException("failed to create encoded request", e);
+        }
 
-	private String send(String ucloudWatchRequestParmaeter) {
-		return HttpClient.sendRequest(ucloudWatchRequestParmaeter);
-	}
+        for (int i = 0; i < ucloudWatchMetricData.size(); i++) {
+            String metricParameter = null;
+            try {
+                metricParameter = ucloudWatchMetricData.get(i)
+                        .getRequestParameter(
+                                "metricData.member." + String.valueOf(i + 1) + ".");
+            } catch (Exception e) {
+                throw new CramsPluginException("failed to create putMatricRequest", e);
+            }
+            requestParameter = requestParameter + metricParameter;
+        }
+        return requestParameter;
+    }
 
-	private String createPutMatricRequest(String namespace, String owner,
-			List<UcloudWatchMetricData> ucloudWatchMetricData) {
-		String requestParameter = baseUrl + "&namespace="
-				+ getUrlEncodedValue(namespace) + "&owner="
-				+ getUrlEncodedValue(owner) + "&requesttype=vmagent";
+    private List<UcloudWatchDemension> getDemesions(Map<String, Object> rrdMap) throws CramsPluginException {
+        List<UcloudWatchDemension> demensions = new ArrayList<UcloudWatchDemension>();
 
-		for (int i = 0; i < ucloudWatchMetricData.size(); i++) {
-			String metricParameter = ucloudWatchMetricData.get(i)
-					.getRequestParameter(
-							"metricData.member." + String.valueOf(i + 1) + ".");
-			requestParameter = requestParameter + metricParameter;
-		}
-		return requestParameter;
-	}
+        String vmName = getUcloudVmName(rrdMap);
+        if (vmName == null || vmName.isEmpty()) {
+            return demensions;
+        }
 
-	private List<UcloudWatchDemension> getDemesions(UcloudDBSelector db,
-			Map<String, Object> rrdMap) throws CramsPluginException {
-		List<UcloudWatchDemension> demensions = new ArrayList<UcloudWatchDemension>();
+        if (vmName.startsWith("uas-")) {
+            String[] nameSeries = vmName.split("-");
+            String autoscalingGroupName = nameSeries[1];
+            demensions.add(new UcloudWatchDemension("AutoScalingGroupName",
+                    autoscalingGroupName));
 
-		String vmName = getUcloudVmName(rrdMap);
-		if (vmName == null || vmName.isEmpty()) {
-			return null;
-		}
+        }
+        demensions.add(new UcloudWatchDemension("name", vmName));
 
-		if (vmName.startsWith("uas-")) {
-			String[] nameSeries = vmName.split("-");
-			String autoscalingGroupName = nameSeries[1];
-			demensions.add(new UcloudWatchDemension("AutoScalingGroupName",
-					autoscalingGroupName));
+        return demensions;
+    }
 
-		}
-		demensions.add(new UcloudWatchDemension("name", vmName));
+    private String getUcloudVmName(Map<String, Object> rrdMap)
+            throws CramsPluginException {
+        String vmType = (String) rrdMap.get(VM_TYPE);
+        if ("DomainRouter".equalsIgnoreCase(vmType)) {
+            return (String) rrdMap.get(VM_NAME);
+        }
 
-		return demensions;
-	}
+        String vmUuid = (String) rrdMap.get(VM_UUID);
+        if (vmUuid == null || vmUuid.isEmpty()) {
+            throw new CramsPluginException("null vmUuid," + rrdMap);
+        }
 
-	private String getUcloudVmName(Map<String, Object> rrdMap)
-			throws CramsPluginException {
-		String vmType = (String) rrdMap.get(VM_TYPE);
-		if (vmType != null && vmType.equalsIgnoreCase("DomainRouter")) {
-			return (String) rrdMap.get(VM_NAME);
-		}
+        String vmName = vmNameMap.get(vmUuid);
+        if (vmName == null || vmName.isEmpty()) {
+            vmName = db.getVmNameByVmId(vmUuid);
+            if (vmName == null || vmName.isEmpty()) {
+                throw new CramsPluginException("can't find null vmUuid,"
+                        + rrdMap);
+            }
+            vmNameMap.put(vmUuid, vmName);
+        }
 
-		String vmUuid = (String) rrdMap.get(VM_UUID);
-		if (vmUuid == null || vmUuid.isEmpty()) {
-			throw new CramsPluginException("null vmUuid," + rrdMap);
-		}
+        return vmName;
+    }
 
-		String vmName = vmNameMap.get(vmUuid);
-		if (vmName == null || vmName.isEmpty()) {
-			vmName = db.getVmNameByVmId(vmUuid);
-			if (vmName == null || vmName.isEmpty()) {
-				throw new CramsPluginException("can't find null vmUuid,"
-						+ rrdMap);
-			}
-			vmNameMap.put(vmUuid, vmName);
-		}
+    private String getOwnerField(Map<String, Object> rrdMap) {
+        try {
+            return (String) rrdMap.get("vm_account_name");
+        } catch (Exception e) {
+            logger.error("failed to parse vm_account_name, " + rrdMap, e);
+        }
+        return null;
+    }
 
-		return vmName;
-	}
+    private String getNamespace(Map<String, Object> dataMap) {
+        try {
+            String displayName = (String) dataMap.get("vm_display_name");
+            String vmType = (String) dataMap.get(VM_TYPE);
+            if ("rdbaas-instance".equalsIgnoreCase(displayName) || "rdbaas_instance".equalsIgnoreCase(displayName)) {
+                return "ucloud/db";
+            } else if ("DomainRouter".equalsIgnoreCase(vmType)) {
+                return "ucloud/vr";
+            }
 
-	private String getOwnerField(Map<String, Object> rrdMap) {
-		try {
-			return (String) rrdMap.get("vm_account_name");
-		} catch (Exception e) {
-			logger.error("failed to parse vm_account_name, " + rrdMap, e);
-		}
-		return null;
-	}
+        } catch (Exception e) {
+            logger.error("failed to parse vm_display_name, "
+                    + dataMap.toString(), e);
+        }
+        return "ucloud/server";
+    }
 
-	private String getNamespace(Map<String, Object> dataMap) {
-		try {
-			String displayName = (String) dataMap.get("vm_display_name");
-			String vmType = (String) dataMap.get(VM_TYPE);
-			if (displayName != null
-					&& (displayName.equalsIgnoreCase("rdbaas-instance") || displayName
-							.equalsIgnoreCase("rdbaas_instance"))) {
-				return "ucloud/db";
-			} else if (vmType != null
-					&& vmType.equalsIgnoreCase("DomainRouter")) {
-				return "ucloud/vr";
-			}
+    @Override
+    public boolean needProperties() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-		} catch (Exception e) {
-			logger.error("failed to parse vm_display_name, "
-					+ dataMap.toString());
-		}
-		return "ucloud/server";
-	}
+    private String getUrlEncodedValue(String value) throws UnsupportedEncodingException {
+        return URLEncoder.encode(value, "UTF-8");
+    }
 
-	@Override
-	public boolean needProperties() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    private List<UcloudWatchMetricData> createMetricDataList(List<UcloudWatchDemension> demensionList, Map<String, Object> rrdMap) {
+        // init data type
+        List<UcloudWatchMetricData> metricData = new ArrayList<UcloudWatchMetricData>();
 
-	private String getUrlEncodedValue(String value) {
-		String encodedValue = "";
-		try {
-			encodedValue = URLEncoder.encode(value, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return encodedValue;
-	}
+        // get metric data
+        String timestamp = (String) rrdMap.get("datetime");
+        String cpuUtilizationValue = String.valueOf(rrdMap
+                .get(CpuAvgPlugin.CPU_AVG));
+        String memomyTargetValue = String.valueOf(rrdMap.get("memory_target"));
+        String memoryInternalFreeValue = String.valueOf(rrdMap
+                .get("memory_internal_free"));
+        String vbdReadAvgValue = String.valueOf(rrdMap
+                .get(VbdReadWriteAvgPlugin.VBD_READ_AVG));
+        String vbdWriteAvgValue = String.valueOf(rrdMap
+                .get(VbdReadWriteAvgPlugin.VBD_WRITE_AVG));
+        String vifRxAvgValue = String.valueOf(rrdMap
+                .get(VifAvgPlugin.VIF_RX_AVG));
+        String vifTxAvgValue = String.valueOf(rrdMap
+                .get(VifAvgPlugin.VIF_TX_AVG));
+        if (timestamp == null || timestamp.isEmpty()
+                || "null".equalsIgnoreCase(cpuUtilizationValue)
+                || "null".equalsIgnoreCase(memomyTargetValue)
+                || "null".equalsIgnoreCase(memoryInternalFreeValue)
+                || "null".equalsIgnoreCase(vbdReadAvgValue)
+                || "null".equalsIgnoreCase(vbdWriteAvgValue)
+                || "null".equalsIgnoreCase(vifRxAvgValue)
+                || "null".equalsIgnoreCase(vifTxAvgValue)) {
+            return null;
+        }
 
-	private List<UcloudWatchMetricData> createMetricDataList(
-			UcloudWatchPlugin ucloudWatchMetricData, String namespace,
-			List<UcloudWatchDemension> demensionList, Map<String, Object> rrdMap)
-			throws Exception {
-		// init data type
-		List<UcloudWatchMetricData> metricData = new ArrayList<UcloudWatchMetricData>();
+        UcloudWatchMetricData cpuUtilization = new UcloudWatchMetricData();
+        cpuUtilization.metricName = "CPUUtillization";
+        cpuUtilization.unit = "Percent";
+        cpuUtilization.value = cpuUtilizationValue;
+        cpuUtilization.timestamp = timestamp;
+        cpuUtilization.demension.addAll(demensionList);
+        metricData.add(cpuUtilization);
 
-		// get metric data
-		String timestamp = (String) rrdMap.get("datetime");
-		String cpuUtilizationValue = String.valueOf(rrdMap
-				.get(CpuAvgPlugin.CPU_AVG));
-		String memomyTargetValue = String.valueOf(rrdMap.get("memory_target"));
-		String memoryInternalFreeValue = String.valueOf(rrdMap
-				.get("memory_internal_free"));
-		String vbdReadAvgValue = String.valueOf(rrdMap
-				.get(VbdReadWriteAvgPlugin.VBD_READ_AVG));
-		String vbdWriteAvgValue = String.valueOf(rrdMap
-				.get(VbdReadWriteAvgPlugin.VBD_WRITE_AVG));
-		String vifRxAvgValue = String.valueOf(rrdMap
-				.get(VifAvgPlugin.VIF_RX_AVG));
-		String vifTxAvgValue = String.valueOf(rrdMap
-				.get(VifAvgPlugin.VIF_TX_AVG));
-		if (timestamp == null || timestamp.isEmpty()
-				|| cpuUtilizationValue.equalsIgnoreCase("null")
-				|| memomyTargetValue.equalsIgnoreCase("null")
-				|| memoryInternalFreeValue.equalsIgnoreCase("null")
-				|| vbdReadAvgValue.equalsIgnoreCase("null")
-				|| vbdWriteAvgValue.equalsIgnoreCase("null")
-				|| vifRxAvgValue.equalsIgnoreCase("null")
-				|| vifTxAvgValue.equalsIgnoreCase("null")) {
-			throw new Exception("null value");
-		}
+        UcloudWatchMetricData memoryTarget = new UcloudWatchMetricData();
+        memoryTarget.metricName = "MemoryTarget";
+        memoryTarget.unit = "Bytes";
+        memoryTarget.value = memomyTargetValue;
+        memoryTarget.timestamp = timestamp;
+        memoryTarget.demension.addAll(demensionList);
+        metricData.add(memoryTarget);
 
-		UcloudWatchMetricData cpuUtilization = new UcloudWatchMetricData();
-		cpuUtilization.metricName = "CPUUtillization";
-		cpuUtilization.unit = "Percent";
-		cpuUtilization.value = cpuUtilizationValue;
-		cpuUtilization.timestamp = timestamp;
-		cpuUtilization.demension.addAll(demensionList);
-		metricData.add(cpuUtilization);
+        UcloudWatchMetricData memoryInternalFree = new UcloudWatchMetricData();
+        memoryInternalFree.metricName = "MemoryInternalFree";
+        memoryInternalFree.unit = "Bytes";
+        memoryInternalFree.value = memoryInternalFreeValue;
+        memoryInternalFree.timestamp = timestamp;
+        memoryInternalFree.demension.addAll(demensionList);
+        metricData.add(memoryInternalFree);
 
-		UcloudWatchMetricData memoryTarget = new UcloudWatchMetricData();
-		memoryTarget.metricName = "MemoryTarget";
-		memoryTarget.unit = "Bytes";
-		memoryTarget.value = memomyTargetValue;
-		memoryTarget.timestamp = timestamp;
-		memoryTarget.demension.addAll(demensionList);
-		metricData.add(memoryTarget);
+        UcloudWatchMetricData vbdReadAvg = new UcloudWatchMetricData();
+        vbdReadAvg.metricName = "DiskReadBytes";
+        vbdReadAvg.unit = "Bytes";
+        vbdReadAvg.value = vbdReadAvgValue;
+        vbdReadAvg.timestamp = timestamp;
+        vbdReadAvg.demension.addAll(demensionList);
+        metricData.add(vbdReadAvg);
 
-		UcloudWatchMetricData memoryInternalFree = new UcloudWatchMetricData();
-		memoryInternalFree.metricName = "MemoryInternalFree";
-		memoryInternalFree.unit = "Bytes";
-		memoryInternalFree.value = memoryInternalFreeValue;
-		memoryInternalFree.timestamp = timestamp;
-		memoryInternalFree.demension.addAll(demensionList);
-		metricData.add(memoryInternalFree);
+        UcloudWatchMetricData vbdWriteAvg = new UcloudWatchMetricData();
+        vbdWriteAvg.metricName = "DiskWriteBytes";
+        vbdWriteAvg.unit = "Bytes";
+        vbdWriteAvg.value = vbdWriteAvgValue;
+        vbdWriteAvg.timestamp = timestamp;
+        vbdWriteAvg.demension.addAll(demensionList);
+        metricData.add(vbdWriteAvg);
 
-		UcloudWatchMetricData vbdReadAvg = new UcloudWatchMetricData();
-		vbdReadAvg.metricName = "DiskReadBytes";
-		vbdReadAvg.unit = "Bytes";
-		vbdReadAvg.value = vbdReadAvgValue;
-		vbdReadAvg.timestamp = timestamp;
-		vbdReadAvg.demension.addAll(demensionList);
-		metricData.add(vbdReadAvg);
+        UcloudWatchMetricData vifRxAvg = new UcloudWatchMetricData();
+        vifRxAvg.metricName = "NetworkIn";
+        vifRxAvg.unit = "Bytes";
+        vifRxAvg.value = vifRxAvgValue;
+        vifRxAvg.timestamp = timestamp;
+        vifRxAvg.demension.addAll(demensionList);
+        metricData.add(vifRxAvg);
 
-		UcloudWatchMetricData vbdWriteAvg = new UcloudWatchMetricData();
-		vbdWriteAvg.metricName = "DiskWriteBytes";
-		vbdWriteAvg.unit = "Bytes";
-		vbdWriteAvg.value = vbdWriteAvgValue;
-		vbdWriteAvg.timestamp = timestamp;
-		vbdWriteAvg.demension.addAll(demensionList);
-		metricData.add(vbdWriteAvg);
+        UcloudWatchMetricData vifTxAvg = new UcloudWatchMetricData();
+        vifTxAvg.metricName = "NetworkOut";
+        vifTxAvg.unit = "Bytes";
+        vifTxAvg.value = vifTxAvgValue;
+        vifTxAvg.timestamp = timestamp;
+        vifTxAvg.demension.addAll(demensionList);
+        metricData.add(vifTxAvg);
 
-		UcloudWatchMetricData vifRxAvg = new UcloudWatchMetricData();
-		vifRxAvg.metricName = "NetworkIn";
-		vifRxAvg.unit = "Bytes";
-		vifRxAvg.value = vifRxAvgValue;
-		vifRxAvg.timestamp = timestamp;
-		vifRxAvg.demension.addAll(demensionList);
-		metricData.add(vifRxAvg);
-
-		UcloudWatchMetricData vifTxAvg = new UcloudWatchMetricData();
-		vifTxAvg.metricName = "NetworkOut";
-		vifTxAvg.unit = "Bytes";
-		vifTxAvg.value = vifTxAvgValue;
-		vifTxAvg.timestamp = timestamp;
-		vifTxAvg.demension.addAll(demensionList);
-		metricData.add(vifTxAvg);
-
-		return metricData;
-	}
+        return metricData;
+    }
 }

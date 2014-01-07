@@ -14,8 +14,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import scala.testing.SUnit.AssertFailed;
+
+import com.ktcloudware.crams.consumer.CramsException;
 import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
-import com.ktcloudware.crams.consumer.dataType.ESConfig;
+import com.ktcloudware.crams.consumer.datatype.ESConfig;
 import com.ktcloudware.crams.consumer.util.FileUtil;
 
 /**
@@ -26,85 +29,106 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
  */
 public class ESBulkIndexerIntergratedTest {
 
-	private ESConfig esConfig;
+    private ESConfig esConfig;
 
-	@Before
-	public void setup() {
-		ESConfig esConfig = new ESConfig();
-		try {
-			esConfig.setESAddress("14.63.226.175:9300");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		esConfig.clusterName = "cdp_dev_qa";
-		esConfig.type = "vm";
-		this.esConfig = esConfig;
-	}
+    @Before
+    public void setup() {
+        ESConfig esConfig = new ESConfig();
+        try {
+            esConfig.setESAddress("14.63.226.175:9300");
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        esConfig.clusterName = "cdp_dev_qa";
+        esConfig.type = "vm";
+        this.esConfig = esConfig;
+    }
 
-	@Ignore
-	@Test
-	public void testIndexingWithRoutingKey() {
-		esConfig.routingKey = "owner";
-		esConfig.indexKey = "datetime";
-		esConfig.settings = FileUtil.readJsonToString("indexSettings.json");
-		esConfig.mappings = FileUtil.readJsonToString("mappingInfo.json");
-		assertEquals(true, esConfig.validateConfigVals());
-		String owner = "yoodoc";
+  //  @Ignore
+    @Test
+    public void testIndexingWithRoutingKey() {
+        esConfig.routingKey = "owner";
+        esConfig.indexKey = "datetime";
+        try {
+            esConfig.indexSettingsFileName = "indexSettings.json";
+            esConfig.mappingInfoFileName = "mappingInfo.json";
+            esConfig.settings = FileUtil.readJsonToString(esConfig.indexSettingsFileName);
+            esConfig.mappings = FileUtil.readJsonToString(esConfig.mappingInfoFileName);
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+            fail();
+        }
+        try {
+          assertEquals(true, esConfig.validateConfigVals());
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+            fail();
+        }
+        String owner = "yoodoc";
 
-		// create ESBulkIndexer instance
-		ESBulkIndexer esBulkIndexer = new ESBulkIndexer(esConfig.esAddressList,
-				esConfig.clusterName, esConfig.type, esConfig.routingKey,
-				esConfig.settings, esConfig.mappings);
-		String index = null;
-		try {
-			// create index & mapping info, then indexing
-			Map<String, Object> rrdJson = FileUtil
-					.readJsonToMap("singleRrdData1.json");
+        // create ESBulkIndexer instance
 
-			// set new test owner
-			rrdJson.remove("owner");
-			rrdJson.put("owner", owner);
+        ESBulkIndexer esBulkIndexer = null;
+        try {
+            esBulkIndexer = new ESBulkIndexer(esConfig.esAddressList,
+                    esConfig.clusterName, esConfig.type, esConfig.routingKey,
+                    esConfig.settings, esConfig.mappings);
+        } catch (CramsException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        String index = null;
+        try {
+            // create index & mapping info, then indexing
+            Map<String, Object> rrdJson = FileUtil
+                    .readJsonToMap("singleRrdData1.json");
 
-			// index = parseIndexField(rrdJson);
-			index = "yoodoctest";
-			esBulkIndexer.addRequestData(index, rrdJson, "testdata");
-			esBulkIndexer.sendBulkRequest();
+            // set new test owner
+            rrdJson.remove("owner");
+            rrdJson.put("owner", owner);
 
-			Thread.sleep(1000);
+            // index = parseIndexField(rrdJson);
+            index = "yoodoctest";
+            esBulkIndexer.addRequestData(index, rrdJson, "testdata");
+            esBulkIndexer.sendBulkRequest();
 
-			// varify indexing data
-			assertTrue(isSameShard(esBulkIndexer.getClient(), index,
-					esConfig.type, owner));
-			Thread.sleep(1000);
+            Thread.sleep(1000);
 
-			// delete index
-			esBulkIndexer.deleteIndex(index, esConfig.type);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+            // varify indexing data
+            assertTrue(isSameShard(esBulkIndexer.getClient(), index,
+                    esConfig.type, owner));
+            Thread.sleep(1000);
 
-	private boolean isSameShard(Client client, String index, String type,
-			String owner) {
-		SearchResponse response = client.prepareSearch(index).setTypes(type)
-				.setQuery(QueryBuilders.termQuery("owner", owner))
-				.setExplain(true).execute().actionGet();
-		// System.out.println("!!" + response.toString());
-		Pattern shardPattern = Pattern
-				.compile("\"_shard\"[\\s]*:[\\s]*([0-9]+),");
-		Matcher matcher = shardPattern.matcher(response.toString());
-		String lastGroup = null;
-		while (matcher.find()) {
-			String group = matcher.group(1);
-			System.out.println("\"shard\" : " + group);
-			if (lastGroup == null) {
-				lastGroup = group;
-			} else if (!group.equals(lastGroup)) {
-				return false;
-			}
-		}
-		return true;
-	}
+            // delete index
+            esBulkIndexer.deleteIndex(index, esConfig.type);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private boolean isSameShard(Client client, String index, String type,
+            String owner) {
+        SearchResponse response = client.prepareSearch(index).setTypes(type)
+                .setQuery(QueryBuilders.termQuery("owner", owner))
+                .setExplain(true).execute().actionGet();
+        // System.out.println("!!" + response.toString());
+        Pattern shardPattern = Pattern
+                .compile("\"_shard\"[\\s]*:[\\s]*([0-9]+),");
+        Matcher matcher = shardPattern.matcher(response.toString());
+        String lastGroup = null;
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            System.out.println("\"shard\" : " + group);
+            if (lastGroup == null) {
+                lastGroup = group;
+            } else if (!group.equals(lastGroup)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
