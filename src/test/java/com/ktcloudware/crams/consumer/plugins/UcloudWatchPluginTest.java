@@ -32,7 +32,7 @@ public class UcloudWatchPluginTest {
         long starttime = System.currentTimeMillis();
 
         // make default input data
-        int testDataSize = 1;
+        int testDataSize = 10000;
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
         for (int i = 0; i < testDataSize; i++) {
             Map<String, Object> data = new HashMap<String, Object>();

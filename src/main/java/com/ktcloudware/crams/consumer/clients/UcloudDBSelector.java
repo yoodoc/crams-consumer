@@ -33,12 +33,17 @@ public class UcloudDBSelector {
         initPool();
     }
 
+    /**
+     * supported dbTargetType: STAGING, PRODUCT 
+     * @param dbTarget
+     * @throws CramsException
+     */
     public UcloudDBSelector(String dbTarget) throws CramsException {
         if (dbTarget == null || dbTarget.isEmpty()) {
             throw new CramsException("not supported database");
         } else if (dbTarget.equalsIgnoreCase(STAGING)) {
             this.driver = "com.mysql.jdbc.Driver";
-            this.url = "jdbc:mysql://172.27.115.91:13306/KTCP_EPC_DB_NEW";
+            this.url = "jdbc:mysql://172.27.115.91:3306/KTCP_EPC_DB_NEW";
             this.user = "cdp";
             this.pass = "cdpadmin";
             this.connectionManager = new ConnectionManager();

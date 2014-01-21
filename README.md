@@ -1,6 +1,26 @@
 crams indexer
 =============
 
+wiki
+--------
+http://wiki.ktcloudware.com/display/CDP/WATCH+Agent
+
+source hierarchy
+--------
+- conf/
+설정 파일
+- bin/
+바이너리 실행 스크립트
+- src/
+java 소스 및 라이브러리
+- README.txt
+- pom.xml
+maven 설정 파일
+- assembly.xml
+바이너리 압축 설정 파일
+- install.sh
+바이너리 압축 파일을 생성하기 위한 실행 스크립트
+
 packaging 
 --------
 kafka consumer java client 라이브러리를 local maven 저장소에 등록한 후, 프로젝트를빌드한다.
@@ -20,7 +40,7 @@ install
 
 configurations
 -------------
-config/* contains configuration files.  
+conf/* contains configuration files.  
   - kafkaConsumer.properties contains kafka client configuration  
   - esIndexer.properties contains es client configuration  
   - cramsConsumerPlugins.properties contains plugin setting for specific kafka topic  

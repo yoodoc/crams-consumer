@@ -2,21 +2,10 @@ package com.ktcloudware.crams.consumer.plugins;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.apache.commons.cli.ParseException;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.ktcloudware.crams.consumer.CramsException;
-import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
-import com.ktcloudware.crams.consumer.datatype.ESConfig;
-import com.ktcloudware.crams.consumer.util.FileUtil;
 
 public class ESIndexingPluginTest {
 

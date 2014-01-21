@@ -8,7 +8,7 @@ public interface CramsConsumerPlugin {
      * kafkaConsumerPlugin implements
      * 
      * @param pluginProperties
-     * @throws CramsPluginException
+      * @throws CramsPluginException 
      */
     public void setProperties(String pluginProperties)
             throws CramsPluginException;

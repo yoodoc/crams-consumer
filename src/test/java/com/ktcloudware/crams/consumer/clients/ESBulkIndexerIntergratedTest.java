@@ -2,7 +2,6 @@ package com.ktcloudware.crams.consumer.clients;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,13 +9,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.cli.ParseException;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import scala.testing.SUnit.AssertFailed;
 
 import com.ktcloudware.crams.consumer.CramsException;
 import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;

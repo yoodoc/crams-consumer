@@ -2,14 +2,10 @@ package com.ktcloudware.crams.consumer;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
-
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.datatype.ESConfig;
 import com.ktcloudware.crams.consumer.datatype.KafkaConfig;
-import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
 import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
 public class OptionParserTest {

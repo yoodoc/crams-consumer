@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 
 import kafka.consumer.KafkaStream;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.clients.KafkaConsumerGroup;

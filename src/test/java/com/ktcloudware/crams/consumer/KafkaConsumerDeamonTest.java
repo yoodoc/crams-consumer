@@ -2,20 +2,12 @@ package com.ktcloudware.crams.consumer;
 
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.daemon.DaemonContext;
-import org.apache.commons.daemon.DaemonInitException;
-import org.apache.log4j.LogManager;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.MainDaemon;
-import com.ktcloudware.crams.consumer.datatype.KafkaConfig;
-import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
 public class KafkaConsumerDeamonTest {
     MainDaemon deamon;

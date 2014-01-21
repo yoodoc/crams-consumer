@@ -29,7 +29,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.ktcloudware.crams.consumer.CramsException;
-import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
 
 public class ESBulkIndexer {
     private Client client = null;

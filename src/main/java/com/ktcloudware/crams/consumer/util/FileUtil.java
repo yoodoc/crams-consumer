@@ -12,8 +12,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.ktcloudware.crams.consumer.CramsException;
 
 public class FileUtil {
-    private static final String CONFIG_PATH = "/config/";
-  
     private FileUtil() {
         
     }
