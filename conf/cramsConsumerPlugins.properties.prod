@@ -1,5 +1,5 @@
-# <topic name>=plugin,plugin,....						
-# prefixed path = com.ktcloudware.crams.consumer.plugins.
+# <topic name>=plugin,plugin,....		
+# prefixed path = com.ktcloudware.crams.consumer.plugins. 
 
 vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
 disk_usage=DateFormatPlugin,DiskUsageESIndexingPlugin
@@ -12,8 +12,10 @@ DiskUsageCachePlugin=localhost,3000
 # <redis server address>
 AppendDiskUsagePlugin=localhost
 
+
 # <date fieldName>,<input format>,<output format>
 DateFormatPlugin=datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ssZZ
+
 
 # <date fieldName>
 FiveMinutesFilterPlugin=datetime,3
