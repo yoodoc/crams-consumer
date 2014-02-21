@@ -214,4 +214,19 @@ public class UcloudWatchPluginTest {
             }
         }
     }
+    
+    @Test
+    public void testRdbaasInstanceData() {
+    
+    }
+    
+    @Test
+    public void testVrData() {
+    
+    }
+    
+    @Test
+    public void testAutoscalingInstanceData() {
+        
+    }
 }

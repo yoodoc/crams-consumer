@@ -1,0 +1,16 @@
+# kafka consumer group name
+groupId=crams_indexer_ver6_0
+
+# zookeeper for kafka broker & kafka consumer, allow comma separated <ip:port> values
+#zookeeper=172.27.24.142:2181,172.27.60.204:2181,172.27.196.159:2181
+zookeeper=localhost:2181
+#zookeeper=14.63.226.175:2184
+
+# kafka topic name to consume, allow comma separated topic names
+#topic=vm_perf_rrd,disk_usage
+topic=yoodoc
+
+# offset policy for new topic 
+#resetOffset=smallest
+resetOffset=largest
+

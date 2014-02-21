@@ -24,7 +24,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
     private static final String UCLOUD_SERVER_NAMESPACE = "ucloud/server";
     private static final String UCLOUD_RDBAAS_NAMESPACE = "ucloud/db";
     private static final String UCLOUD_VR_NAMESPACE = "ucloud/vr";
-    
+
     private String properties;
     private Logger logger;
     private List<CramsConsumerPlugin> plugins;
@@ -33,25 +33,28 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
     private boolean readyDbConnection = false;
     private String uwatchBaseUrl = "http://localhost:8080/watch";
     private String uwatchPutMetricCmdParam = "?command=putMetricData";
+
     public UcloudWatchPlugin() {
         logger = LogManager.getLogger("PLUGINS");
         vmNameMap = new HashMap<String, String>();
-     }
-    
+    }
+
     /**
-     * set DB type & ucloud watch base url. 
-     * DB type can be STAGING, PRODUCT or UNITTEST 
-     * @throws CramsInitiationException 
+     * set DB type & ucloud watch base url. DB type can be STAGING, PRODUCT or
+     * UNITTEST
+     * 
+     * @throws CramsInitiationException
      */
     @Override
-    public void setProperties(String properties)
-   throws CramsPluginException {
+    public void setProperties(String properties) throws CramsPluginException {
         this.properties = properties;
         String[] propertiesArray = properties.split(",");
         if (properties == null || propertiesArray.length <= 0) {
-            throw new CramsPluginException("property is required for UcloudWatchPlugin, it can be " + "<DB type>,<DB url>");
+            throw new CramsPluginException(
+                    "property is required for UcloudWatchPlugin, it can be "
+                            + "<DB type>,<DB url>");
         }
-       
+
         String dbSelectorType = propertiesArray[0];
         try {
             if ("UNITTEST".equalsIgnoreCase(dbSelectorType)) {
@@ -67,16 +70,16 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
         }
 
         if (propertiesArray.length == 2) {
-            this.uwatchBaseUrl = propertiesArray[1]; 
+            this.uwatchBaseUrl = propertiesArray[1];
         }
-        
+
         // set required plugins
         setRequiredPlugins();
     }
 
     private void setBaseUrl(String string) {
         // TODO Auto-generated method stub
-        
+
     }
 
     private void setRequiredPlugins() {
@@ -93,12 +96,12 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 
     @Override
     public String getProperties() {
-         return this.properties;
+        return this.properties;
     }
 
     /**
-     * create ucloud watch metric data from xenRrd & ucloud portal db info
-     * and send putmetric http request to ucloud watch server
+     * create ucloud watch metric data from xenRrd & ucloud portal db info and
+     * send putmetric http request to ucloud watch server
      */
     @Override
     public Map<String, Object> excute(Map<String, Object> xenRrd, String dataTag)
@@ -109,7 +112,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 
         // make avg data from vm rrd
         xenRrd = excuteCramsPlugins(xenRrd, dataTag);
-      
+
         // parse namespace
         String namespace = null;
         namespace = createUWatchNamespace(xenRrd);
@@ -119,22 +122,23 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
         if (owner == null) {
             return null;
         }
-        
-        // parse demension list 
-        List<UcloudWatchDemension> demensionList = parseUWatchDemensionList(namespace, xenRrd);
+
+        // parse demension list
+        List<UcloudWatchDemension> demensionList = parseUWatchDemensionList(
+                namespace, xenRrd);
         if (demensionList == null || demensionList.isEmpty()) {
             return null;
         }
-    
-       
+
         // create metric data
         String ucloudWatchRequestParmaeter = createPutMatricRequest(namespace,
                 owner, demensionList, xenRrd);
-        if(ucloudWatchRequestParmaeter == null || ucloudWatchRequestParmaeter.isEmpty()) {
+        if (ucloudWatchRequestParmaeter == null
+                || ucloudWatchRequestParmaeter.isEmpty()) {
             logger.error("noting to send, original data:" + xenRrd);
             return null;
         }
-        //send metric data
+        // send metric data
         for (int i = 0; i < MAX_RETRY; i++) {
             String response = send(ucloudWatchRequestParmaeter);
             if (response == null) {
@@ -156,39 +160,44 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
     }
 
     /**
-     * create UcloudWatchDemension list, that has demension name & demension value
+     * create UcloudWatchDemension list, that has demension name & demension
+     * value
      * 
-     * rdbaas_instance use vm_uuid as "name" demension value,
-     * vr use xen vm_name as "name" demension value
+     * rdbaas_instance use vm_uuid as "name" demension value, vr use xen vm_name
+     * as "name" demension value
+     * 
      * @param namespace
      * @param xenRrd
-     * @return List<UcloudWatchDemension> that contains UWatch Demension name, UWatch Demension value pair 
+     * @return List<UcloudWatchDemension> that contains UWatch Demension name,
+     *         UWatch Demension value pair
      * @throws CramsPluginException
      */
-    private List<UcloudWatchDemension> parseUWatchDemensionList(String namespace, Map<String, Object> xenRrd) throws CramsPluginException {
+    private List<UcloudWatchDemension> parseUWatchDemensionList(
+            String namespace, Map<String, Object> xenRrd)
+            throws CramsPluginException {
         List<UcloudWatchDemension> demensionList = new ArrayList<UcloudWatchDemension>();
         try {
-            //create "name" demension value
+            // create "name" demension value
             String vmName = null;
             if (UCLOUD_SERVER_NAMESPACE.equalsIgnoreCase(namespace)) {
-                vmName = getUcloudVmName(xenRrd);
+                vmName = getUcloudVmName(namespace, xenRrd);
             } else if (UCLOUD_RDBAAS_NAMESPACE.equalsIgnoreCase(namespace)) {
-               vmName = (String) xenRrd.get("vm_uuid");
+                vmName = (String) xenRrd.get("vm_uuid");
             } else if (UCLOUD_VR_NAMESPACE.equalsIgnoreCase(namespace)) {
                 vmName = (String) xenRrd.get("vm_name");
             }
-            
+
             if (vmName == null || vmName.isEmpty()) {
                 return demensionList;
             }
             demensionList.add(new UcloudWatchDemension("name", vmName));
-            
-            //create "AutoScalingGroupName" demension value
+
+            // create "AutoScalingGroupName" demension value
             if (vmName.startsWith("uas-")) {
                 String[] nameSeries = vmName.split("-");
                 String autoscalingGroupName = nameSeries[1];
-                demensionList.add(new UcloudWatchDemension("AutoScalingGroupName",
-                        autoscalingGroupName));
+                demensionList.add(new UcloudWatchDemension(
+                        "AutoScalingGroupName", autoscalingGroupName));
             }
         } catch (Exception e) {
             logger.error("failed to create demension field,", e);
@@ -196,11 +205,11 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
                     e);
         }
         return demensionList;
-        
+
     }
-    
-    
-    private Map<String, Object> excuteCramsPlugins(Map<String, Object> xenRrd, String dataTag) throws CramsPluginException {
+
+    private Map<String, Object> excuteCramsPlugins(Map<String, Object> xenRrd,
+            String dataTag) throws CramsPluginException {
         for (CramsConsumerPlugin plugin : plugins) {
             try {
                 xenRrd = plugin.excute(xenRrd, dataTag);
@@ -215,12 +224,13 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
             }
         }
 
-       return xenRrd;
+        return xenRrd;
     }
-    
+
     /**
-     * create http request to put ucloud watch metric
-     * it contains metric data for single xen rrd data 
+     * create http request to put ucloud watch metric it contains metric data
+     * for single xen rrd data
+     * 
      * @param namespace
      * @param owner
      * @param demensionList
@@ -229,28 +239,32 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
      * @throws CramsPluginException
      */
     private String createPutMatricRequest(String namespace, String owner,
-            List<UcloudWatchDemension> demensionList, Map<String, Object> xenRrd) throws CramsPluginException {
+            List<UcloudWatchDemension> demensionList, Map<String, Object> xenRrd)
+            throws CramsPluginException {
         // create metric data
         List<UcloudWatchMetricData> ucloudWatchMetricData = null;
         try {
-            ucloudWatchMetricData  = createUWatchMetricData(demensionList, xenRrd);
+            ucloudWatchMetricData = createUWatchMetricData(demensionList,
+                    xenRrd);
         } catch (Exception e) {
             logger.error("failed to parsing rrd data,", e);
             throw new CramsPluginException("failed to parsing rrd data,", e);
         }
 
         if (ucloudWatchMetricData == null || ucloudWatchMetricData.isEmpty()) {
-            throw new CramsPluginException("failed to parsing matric data," + xenRrd);
+            throw new CramsPluginException("failed to parsing matric data,"
+                    + xenRrd);
         }
 
         // create metric data with url query format
         String requestParameter = null;
         try {
-            requestParameter = uwatchBaseUrl + uwatchPutMetricCmdParam + "&namespace="
-                    + getUrlEncodedValue(namespace) + "&owner="
+            requestParameter = uwatchBaseUrl + uwatchPutMetricCmdParam
+                    + "&namespace=" + getUrlEncodedValue(namespace) + "&owner="
                     + getUrlEncodedValue(owner) + "&requesttype=vmagent";
         } catch (UnsupportedEncodingException e) {
-            throw new CramsPluginException("failed to create encoded request", e);
+            throw new CramsPluginException("failed to create encoded request",
+                    e);
         }
 
         for (int i = 0; i < ucloudWatchMetricData.size(); i++) {
@@ -258,9 +272,11 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
             try {
                 metricParameter = ucloudWatchMetricData.get(i)
                         .getRequestParameter(
-                                "metricData.member." + String.valueOf(i + 1) + ".");
+                                "metricData.member." + String.valueOf(i + 1)
+                                        + ".");
             } catch (Exception e) {
-                throw new CramsPluginException("failed to create putMatricRequest", e);
+                throw new CramsPluginException(
+                        "failed to create putMatricRequest", e);
             }
             requestParameter = requestParameter + metricParameter;
         }
@@ -268,29 +284,34 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
     }
 
     /**
-     * get vm name in ucloud portal(db) for normal vm that exclude vr, rdbaas_instance
+     * get vm name in ucloud portal(db) for normal vm that exclude vr,
+     * rdbaas_instance
+     * 
      * @param xenRrd
      * @return
      * @throws CramsPluginException
      */
-    private String getUcloudVmName(Map<String, Object> xenRrd)
+    private String getUcloudVmName(String namespace, Map<String, Object> xenRrd)
             throws CramsPluginException {
-        String vmType = (String) xenRrd.get(VM_TYPE);
-        if ("DomainRouter".equalsIgnoreCase(vmType)) {
-            return (String) xenRrd.get(VM_NAME);
-        }
-
         String vmUuid = (String) xenRrd.get(VM_UUID);
         if (vmUuid == null) {
             throw new CramsPluginException("null vmUuid," + xenRrd);
+        }
+
+        // return vm_name as ucloud demension name for vr
+        // return uuid as ucloud dememnsion name for rdbaas
+        if (UCLOUD_VR_NAMESPACE.equals(namespace)) {
+            return (String) xenRrd.get(VM_NAME);
+        } else if (UCLOUD_RDBAAS_NAMESPACE.equals(namespace)) {
+            return vmUuid;
         }
 
         String vmName = vmNameMap.get(vmUuid);
         if (vmName == null) {
             vmName = db.getVmNameByVmId(vmUuid);
             if (vmName == null) {
-                throw new CramsPluginException("can't find null vmUuid,"
-                        + xenRrd);
+                throw new CramsPluginException("can't find vmName for vmUuid="
+                        + vmUuid + "," + xenRrd);
             }
             vmNameMap.put(vmUuid, vmName);
         }
@@ -308,8 +329,8 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
     }
 
     /**
-     * get Namespace for ucloud watch metric data
-     * if depends on vm_display_namm & vmType fields in xenRrd 
+     * get Namespace for ucloud watch metric data if depends on vm_display_namm
+     * & vmType fields in xenRrd
      * 
      * @param dataMap
      * @return ucloud/server, ucloud/db or ucloud/vr
@@ -318,14 +339,15 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
         try {
             String displayName = (String) dataMap.get("vm_display_name");
             String vmType = (String) dataMap.get(VM_TYPE);
-            if ("rdbaas-instance".equalsIgnoreCase(displayName) || "rdbaas_instance".equalsIgnoreCase(displayName)) {
+            if ("rdbaas-instance".equalsIgnoreCase(displayName)
+                    || "rdbaas_instance".equalsIgnoreCase(displayName)) {
                 return UCLOUD_RDBAAS_NAMESPACE;
             } else if ("DomainRouter".equalsIgnoreCase(vmType)) {
                 return UCLOUD_VR_NAMESPACE;
             }
         } catch (Exception e) {
-            logger.error("failed to parse vm_display_name, "
-                    + dataMap.toString(), e);
+            logger.error(
+                    "failed to parse vm_display_name, " + dataMap.toString(), e);
         }
         return UCLOUD_SERVER_NAMESPACE;
     }
@@ -336,11 +358,13 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
         return false;
     }
 
-    private String getUrlEncodedValue(String value) throws UnsupportedEncodingException {
+    private String getUrlEncodedValue(String value)
+            throws UnsupportedEncodingException {
         return URLEncoder.encode(value, "UTF-8");
     }
 
-    private List<UcloudWatchMetricData> createUWatchMetricData(List<UcloudWatchDemension> demensionList, Map<String, Object> xenRrd) {
+    private List<UcloudWatchMetricData> createUWatchMetricData(
+            List<UcloudWatchDemension> demensionList, Map<String, Object> xenRrd) {
         // init data type
         List<UcloudWatchMetricData> metricData = new ArrayList<UcloudWatchMetricData>();
 
@@ -359,15 +383,14 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
                 .get(VifAvgPlugin.VIF_RX_AVG));
         String vifTxAvgValue = String.valueOf(xenRrd
                 .get(VifAvgPlugin.VIF_TX_AVG));
-        if (timestamp == null 
-                || "null".equalsIgnoreCase(cpuUtilizationValue)
+        if (timestamp == null || "null".equalsIgnoreCase(cpuUtilizationValue)
                 || "null".equalsIgnoreCase(memomyTargetValue)
                 || "null".equalsIgnoreCase(memoryInternalFreeValue)
                 || "null".equalsIgnoreCase(vbdReadAvgValue)
                 || "null".equalsIgnoreCase(vbdWriteAvgValue)
                 || "null".equalsIgnoreCase(vifRxAvgValue)
                 || "null".equalsIgnoreCase(vifTxAvgValue)) {
-           return metricData;
+            return metricData;
         }
 
         UcloudWatchMetricData cpuUtilization = new UcloudWatchMetricData();
