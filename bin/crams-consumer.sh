@@ -1,6 +1,6 @@
 #!/bin/sh
 #set environment
-JAVA_HOME=$JAVA_HOME/bin
+JAVA_HOME=$JAVA_HOME
 JSVC=jsvc
 DAEMON_USER=$(whoami)
 #DAEMON_HOME=$(dirname $0)/..
@@ -30,7 +30,7 @@ case "$1" in
         # Start Daemon
         #
 
-        exec $PROJECT_DIR/$JSVC \
+        exec $JSVC \
         -user $DAEMON_USER \
         -debug \
         -home $JAVA_HOME \
@@ -44,7 +44,7 @@ case "$1" in
         ;;
 
     stop)
-        exec $PROJECT_DIR/$JSVC \
+        exec $JSVC \
         -stop \
         -pidfile $PROJECT_DIR/jsvc.pid \
         com.ktcloudware.crams.consumer.MainDaemon

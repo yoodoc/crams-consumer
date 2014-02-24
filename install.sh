@@ -23,7 +23,7 @@ case "$1" in
         done
         for i in `ls $PROJECT_DIR/bin|grep dev`
         do
-            name=$(echo $i|sed 's/sh.dev/properties/')
+            name=$(echo $i|sed 's/sh.dev/sh/')
             cp $PROJECT_DIR/bin/$i $PROJECT_DIR/bin/$name
         done
         1;;
