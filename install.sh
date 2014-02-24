@@ -25,13 +25,13 @@ case "$1" in
             name=$(echo $i|sed 's/sh.dev/sh/')
             cp $PROJECT_DIR/bin/$i $PROJECT_DIR/bin/$name
         done
-        1;;
+        ;;
     staging)
-        1;;
+        ;;
     product)
-        1;;
+        ;;
     *)
-        1;;
+        ;;
 esac
 
 cd $PROJECT_DIR
