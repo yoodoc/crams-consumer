@@ -9,7 +9,7 @@ ORIGIN_DIR=$(pwd)
 uname=$(uname -a|grep -i 'ubuntu')
 if [ "$uname" ];
 then
-    PROJECT_DIR=$(readlink -f $0|xargs dirname)/..
+    $PROJECT_DIR=$(readlink -f $0|xargs dirname)/..
 else
     echo this scipt need ubuntu environment
     exit
