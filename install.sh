@@ -14,7 +14,6 @@ fi
 case "$1" in
     develop)
         #set configuration for develop environment
-        cp $PROJECT_DIR/conf/*.properites.dev $PROJECT_DIR/conf/*.properties
         for i in `ls $PROJECT_DIR/conf|grep dev`
         do
             #name=$(echo $i|awk -F . '/.dev/{print $1"."$2}')
