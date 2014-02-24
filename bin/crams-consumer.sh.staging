@@ -1,17 +1,29 @@
 #!/bin/sh
-JAVA_HOME=$JAVA_HOME/bin
+#set environment
+JAVA_HOME=$JAVA_HOME
 JSVC=jsvc
 DAEMON_USER=$(whoami)
-DAEMON_HOME=$(dirname $0)/..
-PID_FILE=$DAEMON_HOME/crams-consumer.pid
+#DAEMON_HOME=$(dirname $0)/..
+ORIGIN_DIR=$(pwd)
 
+uname=$(uname -a|grep -i 'ubuntu')
+if [ "$uname" ];
+then
+    PROJECT_DIR=$(readlink -f $0|xargs dirname)/..
+else
+    echo this scipt need ubuntu environment
+    exit
+fi
+
+PID_FILE=$PROJECT_DIR/crams-consumer.pid
 CLASSPATH=\
 $JAVA_HOME:\
-$DAEMON_HOME:\
-$DAEMON_HOME/lib:\
-$DAEMON_HOME/lib/*:\
-$DAEMON_HOME/conf
+$PROJECT_DIR:\
+$PROJECT_DIR/lib:\
+$PROJECT_DIR/lib/*:\
+$PROJECT_DIR/conf
 
+#run daemon 
 case "$1" in
     start)
         #
@@ -22,19 +34,19 @@ case "$1" in
         -user $DAEMON_USER \
         -debug \
         -home $JAVA_HOME \
-        -outfile $DAEMON_HOME/error-jsvc.log \
-        -pidfile $DAEMON_HOME/jsvc.pid \
-        -errfile $DAEMON_HOME/error-jsvc.log \
+        -outfile $PROJECT_DIR/error-jsvc.log \
+        -pidfile $PROJECT_DIR/jsvc.pid \
+        -errfile $PROJECT_DIR/error-jsvc.log \
         -cp $CLASSPATH \
-        -Ddaemon.home=$DAEMON_HOME \
+        -Ddaemon.home=$PROJECT_DIR \
         com.ktcloudware.crams.consumer.MainDaemon
         exit $?
         ;;
 
     stop)
-        $JSVC \
+        exec $JSVC \
         -stop \
-        -pidfile $DAEMON_HOME/jsvc.pid \
+        -pidfile $PROJECT_DIR/jsvc.pid \
         com.ktcloudware.crams.consumer.MainDaemon
         exit $?
         ;;
