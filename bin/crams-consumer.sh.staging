@@ -22,10 +22,14 @@ $PROJECT_DIR:\
 $PROJECT_DIR/lib:\
 $PROJECT_DIR/lib/*:\
 $PROJECT_DIR/conf
+LOG4J_CONF=$PROJECT_DIR/conf/log4j.properties
 
 #run daemon 
 case "$1" in
     start)
+        #set logging path
+        sed -i s/PROJECT_PATH/$PROJECT_DIR/g $LOG4J_CONF
+
         #
         # Start Daemon
         #
@@ -38,6 +42,7 @@ case "$1" in
         -pidfile $PROJECT_DIR/jsvc.pid \
         -errfile $PROJECT_DIR/error-jsvc.log \
         -cp $CLASSPATH \
+        -Dlog4j.configuration=$LOG4J_CONF \
         -Ddaemon.home=$PROJECT_DIR \
         com.ktcloudware.crams.consumer.MainDaemon
         exit $?
