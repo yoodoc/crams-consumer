@@ -1,20 +1,20 @@
-# conf for dev kafkabroker
-# <topic name>=plugin,plugin,....						    #	
-# prefixed path = com.ktcloudware.crams.consumer.plugins.   #
+# <topic name>=plugin,plugin,...				   
+# prefixed path = com.ktcloudware.crams.consumer.plugins.   
 
 vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
 #yoodoc=UcloudWatchPlugin
-#disk_usage=DiskUsageCachePlugin
-disk_usage=DateFormatPlugin,DiskUsageESIndexingPlugin
+disk_usage=DiskUsageCachePlugin
 
 # set comma seperated properties for specific plugins  
 
 # <redis server address>
-DiskUsageCachePlugin=172.27.24.142,3000
+DiskUsageCachePlugin=localhost,3000
+#DiskUsageCachePlugin=172.27.24.142,3000
 
 
 # <redis server address>
-AppendDiskUsagePlugin=172.27.24.142
+AppendDiskUsagePlugin=localhost,3000
+#AppendDiskUsagePlugin=172.27.24.142
 
 
 # <date fieldName>,<input format>,<output format>

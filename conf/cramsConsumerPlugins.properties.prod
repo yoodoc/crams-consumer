@@ -1,16 +1,20 @@
-# <topic name>=plugin,plugin,....		
-# prefixed path = com.ktcloudware.crams.consumer.plugins. 
+# <topic name>=plugin,plugin,...				   
+# prefixed path = com.ktcloudware.crams.consumer.plugins.   
 
 vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
-disk_usage=DateFormatPlugin,DiskUsageESIndexingPlugin
+#yoodoc=UcloudWatchPlugin
+disk_usage=DiskUsageCachePlugin
 
 # set comma seperated properties for specific plugins  
 
 # <redis server address>
 DiskUsageCachePlugin=localhost,3000
+#DiskUsageCachePlugin=172.27.24.142,3000
+
 
 # <redis server address>
-AppendDiskUsagePlugin=localhost
+AppendDiskUsagePlugin=localhost,3000
+#AppendDiskUsagePlugin=172.27.24.142
 
 
 # <date fieldName>,<input format>,<output format>
@@ -26,4 +30,4 @@ LoggingNullDataPlugin=vm_uuid
 # <DB type>,<ucloud watch url>
 # DB type: unittest, staging or product
 #UcloudWatchPlugin=unittest,localhost:8080/watch
-#UcloudWatchPlugin=staging,http://172.27.205.175:8080/watch
+UcloudWatchPlugin=staging,http://172.27.205.175:8080/watch
