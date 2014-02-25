@@ -200,5 +200,20 @@
 			<artifactId>zookeeper</artifactId>
 			<version>3.3.4</version>
 		</dependency>
-	</dependencies>
+            </dependencies>
+            <distributionManagement>
+                <repository>
+                    <id>ktcloudware_release</id>
+                    <url>http://172.27.242.227/nexus/content/repositories/releases</url>
+                </repository>
+                <snapshotRepository>
+                    <id>ktcloudware_snapshot</id>
+                    <url>http://172.27.242.227/nexus/content/repositories/snapshots</url>
+               </snapshotRepository>
+            </distributionManagement>
+           <organization>
+            <name>KT Innotz</name>
+            <url>http://ktinnotz.com/</url>
+            </organization>
+           <description>Banach Deployment Management System</description>
 </project>
