@@ -52,7 +52,8 @@
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
-					<finalName>crams-consumer-${project.version}</finalName>
+                                    <!--	<finalName>crams-consumer-${project.version}</finalName>-->
+                                    <finalName>crams-consumer</finalName>
 					<descriptors>
 						<descriptor>${basedir}/assembly.xml</descriptor>
 					</descriptors>

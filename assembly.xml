@@ -6,7 +6,7 @@
 
 	<formats>
 		<format>tar.gz</format>
-	</formats>
+            </formats>
 	<includeBaseDirectory>true</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
