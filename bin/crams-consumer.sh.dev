@@ -1,6 +1,7 @@
 #!/bin/sh
 #set environment
-JAVA_HOME=$JAVA_HOME
+#JAVA_HOME=$JAVA_HOME
+JAVA_HOME=/usr/lib/jvm/jdk1.7.0_51/
 JSVC=jsvc
 DAEMON_USER=$(whoami)
 #DAEMON_HOME=$(dirname $0)/..
