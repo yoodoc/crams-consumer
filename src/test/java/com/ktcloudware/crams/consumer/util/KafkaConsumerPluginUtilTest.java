@@ -1,14 +1,10 @@
 package com.ktcloudware.crams.consumer.util;
 
 import static org.junit.Assert.*;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Test;
-
 import com.ktcloudware.crams.consumer.CramsException;
-import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
 
 public class KafkaConsumerPluginUtilTest {
 

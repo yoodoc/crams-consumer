@@ -6,7 +6,7 @@
 
 	<formats>
 		<format>tar.gz</format>
-            </formats>
+	</formats>
 	<includeBaseDirectory>true</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
@@ -39,7 +39,9 @@
 			<outputDirectory>lib</outputDirectory>
 			<useStrictFiltering>true</useStrictFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
-			<excludes><exclude>com.ktcloudware:crams-consumer</exclude></excludes>
+			<excludes>
+				<exclude>com.ktcloudware:crams-consumer</exclude>
+			</excludes>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
 		</dependencySet>
@@ -47,7 +49,9 @@
 			<outputDirectory>/</outputDirectory>
 			<useStrictFiltering>true</useStrictFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
-			<includes><include>com.ktcloudware:crams-consumer</include></includes>
+			<includes>
+				<include>com.ktcloudware:crams-consumer</include>
+			</includes>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
 		</dependencySet>

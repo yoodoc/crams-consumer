@@ -1,9 +1,9 @@
-package com.ktcloudware.crams.consumer;
+package com.ktcloudware.crams.consumer.util;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VMPerfData {
+public class VMPerfDataUtil {
     int count = 0;
     Map<String, Object> avgDataMap = null;
 
@@ -53,7 +53,7 @@ public class VMPerfData {
     Float cpu14 = null;
     Float cpu15 = null;
     
-    void addPerfData(Map<String, Object> dataMap){
+    public void addPerfData(Map<String, Object> dataMap){
         if (dataMap == null || dataMap.isEmpty()) {
             return;
         }
@@ -143,7 +143,7 @@ public class VMPerfData {
         cpu15 =+ (Float)dataMap.get("cpu15");*/
     }
     
-    Map<String, Object> getAvgValuesData(){
+    public Map<String, Object> getAvgValuesData(){
         
         if (avgDataMap == null || avgDataMap.isEmpty()) {
             return null;

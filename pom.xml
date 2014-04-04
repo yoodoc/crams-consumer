@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ktcloudware</groupId>
 	<artifactId>crams-consumer</artifactId>
-	<version>0.6.0-SNAPSHOT</version>
+	<version>0.7.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>crams-consumer</name>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -27,8 +27,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.5.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<encoding>utf-8</encoding>
 				</configuration>
 			</plugin>
@@ -97,13 +97,8 @@
 			<artifactId>kafka_2.10</artifactId>
 			<version>0.8.0</version>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>com.ktcloudware.kafka</groupId>
-			<artifactId>kafka_2.8.0</artifactId>
-			<version>0.8.0</version>
-		</dependency>
-		-->
+		<!-- <dependency> <groupId>com.ktcloudware.kafka</groupId> <artifactId>kafka_2.8.0</artifactId> 
+			<version>0.8.0</version> </dependency> -->
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
@@ -151,79 +146,34 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.27</version>
 		</dependency>
-	<dependency>
-		<groupId>com.google.guava</groupId>
-		<artifactId>guava</artifactId>
-		<version>16.0.1</version>
-	</dependency>
-	
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>16.0.1</version>
+		</dependency>
+
 
 		<!-- dependencies for kafka library -->
-		<!-- 
-		<dependency>
-			<groupId>net.sf.jopt-simple</groupId>
-			<artifactId>jopt-simple</artifactId>
-			<version>3.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.yammer.metrics</groupId>
-			<artifactId>metrics-annotation</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.yammer.metrics</groupId>
-			<artifactId>metrics-core</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-compiler</artifactId>
-			<version>2.8.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>2.8.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.6.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xerial.snappy</groupId>
-			<artifactId>snappy-java</artifactId>
-			<version>1.0.4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.101tec</groupId>
-			<artifactId>zkclient</artifactId>
-			<version>0.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.zookeeper</groupId>
-			<artifactId>zookeeper</artifactId>
-			<version>3.3.4</version>
-		</dependency>
-		-->
+		<!-- <dependency> <groupId>net.sf.jopt-simple</groupId> <artifactId>jopt-simple</artifactId> 
+			<version>3.2</version> </dependency> <dependency> <groupId>com.yammer.metrics</groupId> 
+			<artifactId>metrics-annotation</artifactId> <version>2.2.0</version> </dependency> 
+			<dependency> <groupId>com.yammer.metrics</groupId> <artifactId>metrics-core</artifactId> 
+			<version>2.2.0</version> </dependency> <dependency> <groupId>org.scala-lang</groupId> 
+			<artifactId>scala-compiler</artifactId> <version>2.8.0</version> </dependency> 
+			<dependency> <groupId>org.scala-lang</groupId> <artifactId>scala-library</artifactId> 
+			<version>2.8.0</version> </dependency> <dependency> <groupId>org.slf4j</groupId> 
+			<artifactId>slf4j-api</artifactId> <version>1.7.2</version> </dependency> 
+			<dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-simple</artifactId> 
+			<version>1.6.4</version> </dependency> <dependency> <groupId>org.xerial.snappy</groupId> 
+			<artifactId>snappy-java</artifactId> <version>1.0.4.1</version> </dependency> 
+			<dependency> <groupId>com.101tec</groupId> <artifactId>zkclient</artifactId> 
+			<version>0.3</version> </dependency> <dependency> <groupId>org.apache.zookeeper</groupId> 
+			<artifactId>zookeeper</artifactId> <version>3.3.4</version> </dependency> -->
 	</dependencies>
-	<!-- 
-	<distributionManagement>
-		<repository>
-			<id>ktcloudware_release</id>
-			<url>http://172.27.242.227/nexus/content/repositories/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>ktcloudware_snapshot</id>
-			<url>http://172.27.242.227/nexus/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
--->
+	<!-- <distributionManagement> <repository> <id>ktcloudware_release</id> 
+		<url>http://172.27.242.227/nexus/content/repositories/releases</url> </repository> 
+		<snapshotRepository> <id>ktcloudware_snapshot</id> <url>http://172.27.242.227/nexus/content/repositories/snapshots</url> 
+		</snapshotRepository> </distributionManagement> -->
 	<organization>
 		<name>KT cloudware</name>
 		<url>http://www.ktcloudware.com/</url>

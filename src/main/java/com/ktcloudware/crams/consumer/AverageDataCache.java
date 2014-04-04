@@ -15,8 +15,9 @@ import org.apache.log4j.Logger;
 
 import com.google.common.cache.*;
 import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
+import com.ktcloudware.crams.consumer.util.VMPerfDataUtil;
 
-public class DataAggregator {
+public class AverageDataCache {
     public static final String CPU_AVG = "cpu_avg";
     private Logger logger;
     private Map<String, Map<String, Object>> vmPerfMap = new ConcurrentHashMap<String, Map<String, Object>>();
@@ -26,12 +27,12 @@ public class DataAggregator {
     private SimpleDateFormat originDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
     private static final String KEY_DELETEMETER = "::Delimeter::";
-    public static final String DATE_TIME_KEY = "date_time";
+    public static final String DATE_TIME_KEY = "datetime";
     public static final String VM_KEY = "vm_uuid";
     private long lastUpdateTime;
     private int processedData = 0;
 
-    public DataAggregator() {
+    public AverageDataCache() {
         logger = LogManager.getLogger("PLUGINS");
         cache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
                 .maximumSize(10000).expireAfterWrite(30, TimeUnit.MINUTES)
@@ -45,11 +46,11 @@ public class DataAggregator {
         Map<String, Object> avgDataMap = new HashMap<String, Object>();
         String vmId = (String) dataMap.get(VM_KEY);
         if (vmId == null || vmId.isEmpty()) {
-            return null;
+        	throw new CramsPluginException("failed to parse vm_uuid, " + dataMap.toString());
         }
         String timestamp = (String) dataMap.get(DATE_TIME_KEY);
         if (timestamp == null) {
-            return null;
+        	throw new CramsPluginException("failed to parse " + DATE_TIME_KEY + ", " + dataMap.toString());
         }
         try {
             Date date = originDateFormat.parse(timestamp);
@@ -57,7 +58,7 @@ public class DataAggregator {
                     dataMap);
             avgDataMap = getFiveMinuteAvgData(vmId, false);
         } catch (ParseException e) {
-            logger.warn("failed to parse date_time" + dataMap, e);
+            logger.warn("failed to parse datetime, " + dataMap, e);
             throw new CramsPluginException(e);
         }
 
@@ -67,6 +68,7 @@ public class DataAggregator {
 
     private void addData(String vmId, long timestampInMinutes,
             Map<String, Object> dataMap) {
+    	System.out.println("!!new data added " + dataMap.toString());
         // store new dataMap
         if (null == dataMap || dataMap.isEmpty()) {
             return;
@@ -141,7 +143,7 @@ public class DataAggregator {
         }
         
         // calculate avg values
-        VMPerfData perfData = new VMPerfData();
+        VMPerfDataUtil perfData = new VMPerfDataUtil();
         for (int i = 0; i < 5; i++) {
             String key = vmId + KEY_DELETEMETER + (firstMinutes + i);
             Map<String, Object> dataMap = vmPerfMap.remove(key);
@@ -151,9 +153,15 @@ public class DataAggregator {
         return perfData.getAvgValuesData();
     }
 
+    /**
+     * clean cache and return averages for all vm
+     * @param avgs
+     * @return
+     */
     public List<Map<String, Object>> clean(List<Map<String, Object>> avgs) {
      /*   List<Map<String, Object>> avgNew = new ArrayList<Map<String,Object>>();
         avgNew.addAll(avgs);*/
+    	System.out.println("!!clean ");
         for (String vm : vmTimestampsInMinutes.keySet()) {
             Map<String, Object> avgData = getFiveMinuteAvgData(vm, true);
             avgs.add(avgData);
@@ -164,9 +172,15 @@ public class DataAggregator {
         return avgs;
     }
 
-    public List<Map<String, Object>> cleanIfIdle(long l) {
+    /**
+     * if datacache is idle for timeDuration, clean cache and return averages for all vm
+     * @param timeDuration
+     * @return
+     */
+    public List<Map<String, Object>> cleanIfIdle(long timeDuration) {
+    	System.out.println("!!cleanIfIdle " + lastUpdateTime + "," + timeDuration + "," + System.currentTimeMillis());
         List<Map<String, Object>> avgs = new ArrayList<Map<String, Object>>();
-        if ((lastUpdateTime + l) < System.currentTimeMillis()) {
+        if ((lastUpdateTime + timeDuration) < System.currentTimeMillis()) {
             avgs = clean(avgs);
         }
         return avgs;

@@ -1,29 +1,19 @@
 package com.ktcloudware.crams.consumer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import kafka.consumer.KafkaStream;
 
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import kafka.consumer.KafkaStream;
 import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
 import com.ktcloudware.crams.consumer.clients.KafkaConsumerGroup;
 import com.ktcloudware.crams.consumer.datatype.KafkaConfig;
@@ -36,7 +26,7 @@ public class MainDaemon implements Daemon {
     private ESBulkIndexer esBulkIndexer;
     protected Map<String, ExecutorService> executorMap;
 
-    Logger logger = LogManager.getLogger("MAIN");
+    private Logger logger = LogManager.getLogger("MAIN");
     private Timer flushingTaskScheduler;
 
     @Override
@@ -69,8 +59,11 @@ public class MainDaemon implements Daemon {
             executorMap.get(topic).shutdownNow();
         }
 
-        flushingTaskScheduler.cancel();
-        flushingTaskScheduler.purge();
+        if (flushingTaskScheduler != null) {
+        	flushingTaskScheduler.cancel();
+        	flushingTaskScheduler.purge();
+        	flushingTaskScheduler = null;
+        }
         
         logger.info("daemon shutdown");
     }
@@ -95,10 +88,10 @@ public class MainDaemon implements Daemon {
             CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
 
             //create dataAggregator & flushing task for over stacked data
-            DataAggregator dataAggregator = new DataAggregator();
-            DataAggregatorFlushTimerTask flushTimerTask = new DataAggregatorFlushTimerTask();
-            flushTimerTask.addDataAggregator(dataAggregator);
-            flushTimerTask.addPluginExcutor(pluginExcutor);
+            AverageDataCache dataAggregator = new AverageDataCache();
+            AverageDataCacheFlushTimerTask flushTimerTask = new AverageDataCacheFlushTimerTask();
+            flushTimerTask.addAverageDataCache(dataAggregator);
+            flushTimerTask.addCramsPluginExcutor(pluginExcutor);
            
             try {
                 for (int i = 0; i < streams.size(); i++) {
@@ -116,7 +109,9 @@ public class MainDaemon implements Daemon {
             }
             
             //run flushing task 
+            
             flushingTaskScheduler.scheduleAtFixedRate(flushTimerTask, 10000, 10000);
+            logger.info("run data aggregator");
         }
 
         logger.info("start all service threads");

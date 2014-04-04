@@ -1,17 +1,22 @@
 package com.ktcloudware.crams.consumer;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
-public class DataAggregatorFlushTimerTask extends TimerTask {
-    private List<DataAggregator> dataAggList = null;
-    private CramsPluginExcutor pluginExcutor;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-    public DataAggregatorFlushTimerTask(DataAggregator dataAggregator,
+public class AverageDataCacheFlushTimerTask extends TimerTask {
+    private List<AverageDataCache> dataAggList = null;
+    private CramsPluginExcutor pluginExcutor;
+	private Logger logger;
+
+    public AverageDataCacheFlushTimerTask(AverageDataCache dataAggregator,
             CramsPluginExcutor pluginExcutor) {
-        dataAggList = new ArrayList<DataAggregator>();
+        dataAggList = new ArrayList<AverageDataCache>();
         if (dataAggregator != null) {
             dataAggList.add(dataAggregator);
         }
@@ -20,28 +25,31 @@ public class DataAggregatorFlushTimerTask extends TimerTask {
         }
     }
 
-    public DataAggregatorFlushTimerTask() {
-        // TODO Auto-generated constructor stub
+    public AverageDataCacheFlushTimerTask() {
+    	logger = LogManager.getLogger("MAIN");
     }
 
     @Override
     public void run() {
-        for (DataAggregator dataAggregator : dataAggList) {
+    	logger.debug("run flush task at " + (new Date()).toString());
+        for (AverageDataCache dataAggregator : dataAggList) {
             if (pluginExcutor == null) {
                 return;
             }
+            System.out.println("!!DataAggregatorFlushTimerTask cache stats " + dataAggregator.getStats());
             List<Map<String, Object>> dataList = dataAggregator
                     .cleanIfIdle(1000L);
             System.out.println("!!DataAggregatorFlushTimerTask result data " + dataList.toString());
+            System.out.println("!!DataAggregatorFlushTimerTask cache stats " + dataAggregator.getStats());
             for (Map<String, Object> dataMap : dataList) {
                 pluginExcutor.excute(dataMap, "aggregatedData");
             }
         }
     }
 
-    public void addDataAggregator(DataAggregator dataAggregator) {
+    public void addAverageDataCache(AverageDataCache dataAggregator) {
         if (dataAggList == null) {
-            dataAggList = new ArrayList<DataAggregator>();
+            dataAggList = new ArrayList<AverageDataCache>();
         }
         if (dataAggregator != null) {
             dataAggList.add(dataAggregator);
@@ -49,7 +57,7 @@ public class DataAggregatorFlushTimerTask extends TimerTask {
 
     }
 
-    public void addPluginExcutor(CramsPluginExcutor pluginExcutor) {
+    public void addCramsPluginExcutor(CramsPluginExcutor pluginExcutor) {
         if (pluginExcutor != null) {
             this.pluginExcutor = pluginExcutor;
         }

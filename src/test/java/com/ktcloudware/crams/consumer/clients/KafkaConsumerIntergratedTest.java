@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import kafka.consumer.KafkaStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.clients.KafkaConsumerGroup;
@@ -18,7 +19,7 @@ public class KafkaConsumerIntergratedTest {
     private ExecutorService executor;
     private KafkaConsumerGroup consumerGroup;
 
-//    @Ignore
+    @Ignore
     @Test
     public void test() {
         try {
@@ -28,19 +29,19 @@ public class KafkaConsumerIntergratedTest {
         Thread.sleep(10 * 1000);
         stop();
         } catch (Exception e) {
+        	e.printStackTrace();
             fail();
         }
        }
 
     public void init() throws Exception {
         kafkaConfig = new KafkaConfig();
-        kafkaConfig.zookeeper = "14.63.226.175:2184";
+        kafkaConfig.zookeeper = "14.63.213.13:2181";
         kafkaConfig.groupId = "ydTest";
-        String topics = "yd1031";
+        String topics = "test";
         kafkaConfig.topics.add(topics);
         kafkaConfig.numOfThread = 1;
         kafkaConfig.resetPolicy = "smallest";
-
     }
 
     public void start() throws Exception {

@@ -2,9 +2,9 @@ package com.ktcloudware.crams.consumer;
 
 import static org.junit.Assert.*;
 
-
 import org.apache.commons.daemon.DaemonContext;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.MainDaemon;
@@ -18,7 +18,7 @@ public class KafkaConsumerDeamonTest {
         deamon.destroy();
     }
 
-   // @Ignore
+    @Ignore
     @Test
     public void test() {
        try {

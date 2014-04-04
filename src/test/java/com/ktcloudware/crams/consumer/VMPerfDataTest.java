@@ -7,13 +7,13 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.ktcloudware.crams.consumer.VMPerfData;
+import com.ktcloudware.crams.consumer.util.VMPerfDataUtil;
 
 public class VMPerfDataTest {
 
     @Test
     public void test() {
-        VMPerfData perfData = new VMPerfData();
+        VMPerfDataUtil perfData = new VMPerfDataUtil();
         Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put("cpu0", 1.0);
         perfData.addPerfData(dataMap);

@@ -77,12 +77,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
         setRequiredPlugins();
     }
 
-    private void setBaseUrl(String string) {
-        // TODO Auto-generated method stub
-
-    }
-
-    private void setRequiredPlugins() {
+     private void setRequiredPlugins() {
         plugins = new ArrayList<CramsConsumerPlugin>();
         DateFormatPlugin plugin = new DateFormatPlugin();
         plugin.setProperties("datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS");

@@ -6,21 +6,17 @@
 
 package com.ktcloudware.crams.consumer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import scala.Array;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.message.MessageAndMetadata;
 
-import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
 
 /**
  * date format is hardcoded
@@ -36,7 +32,7 @@ public class KafkaConsumerService implements Runnable {
     private Logger logger;
     private Logger logger2;
     private CramsPluginExcutor runner;
-    private DataAggregator dataStorage;
+    private AverageDataCache dataStorage;
 
     /**
      * 
@@ -46,7 +42,7 @@ public class KafkaConsumerService implements Runnable {
      * @param dataStorage
      */
     public KafkaConsumerService(KafkaStream<byte[], byte[]> kafkaStream,
-             String topicName, CramsPluginExcutor runner, DataAggregator dataStorage) {
+             String topicName, CramsPluginExcutor runner, AverageDataCache dataStorage) {
         this.topicName = topicName;
         logger = LogManager.getLogger("CONSUMER.MAIN");
         logger2 = LogManager.getLogger("CONSUMER.KAFKADATA");
@@ -88,8 +84,9 @@ public class KafkaConsumerService implements Runnable {
                 }
 
                 //make average 
+                System.out.println("!!Insert data to cache,  " + userData.toString());
                 userData = dataStorage.getAverage(userData);
-                
+                System.out.println("!!Insert data to cache,  " + dataStorage.getStats());
                 runner.excute(userData,dataTag);
                 
                 logger.trace("total processing data : " + kafkaCount);

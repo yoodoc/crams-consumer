@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.CramsException;
@@ -24,6 +25,8 @@ import com.ktcloudware.crams.consumer.util.FileUtil;
  * @author yoodoc
  * 
  */
+
+@Ignore
 public class ESBulkIndexerIntergratedTest {
 
     private ESConfig esConfig;
@@ -32,7 +35,7 @@ public class ESBulkIndexerIntergratedTest {
     public void setup() {
         ESConfig esConfig = new ESConfig();
         try {
-            esConfig.setESAddress("14.63.226.175:9300");
+            esConfig.setESAddress("14.63.213.13:9300");
         } catch (ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -111,7 +114,7 @@ public class ESBulkIndexerIntergratedTest {
             fail();
         }
     }
-  //  @Ignore
+
     
     
     @Test
