@@ -12,6 +12,10 @@ import com.ktcloudware.crams.consumer.CramsException;
 import com.ktcloudware.crams.consumer.datatype.ESConfig;
 import com.ktcloudware.crams.consumer.datatype.KafkaConfig;
 import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
+<<<<<<< HEAD
+=======
+import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
 public class IndexerOptionParser {
     private static final String OPTION_ZOOKEEPER = "zookeeper";
@@ -28,6 +32,7 @@ public class IndexerOptionParser {
     private static final String OPTION_INDEX_SETTING_FILE = "indexSettingJsonFile";
     private static final String OPTION_MAPPING_INFO_FILE = "mappingInfoJsonFile";
     private static final String OPTION_RESET_OFFSET = "resetOffset";
+<<<<<<< HEAD
 
     private static final String ES_PROPERTIES_FILE = "esIndexer.properties";
     private static final String KAFKA_PROPERTIES_FILE = "kafkaConsumer.properties";
@@ -38,13 +43,30 @@ public class IndexerOptionParser {
 
     }
 
+=======
+ 
+    private static final String ES_PROPERTIES_FILE = "esIndexer.properties";
+    private static final String KAFKA_PROPERTIES_FILE = "kafkaConsumer.properties";
+    
+    static Logger logger = LogManager.getLogger("MAIN");
+
+    private IndexerOptionParser() {
+        
+    }
+    
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     /**
      * esIndexer.properties 파일을 ESConfig.class 로 parsing 한다.
      * 
      * @return
      * @throws CramsException
      */
+<<<<<<< HEAD
     public static ESConfig parseESProperties() throws CramsException {
+=======
+    public static ESConfig parseESProperties()
+            throws CramsException {
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         Properties properties = null;
         try {
             properties = FileUtil.getProperties(ES_PROPERTIES_FILE);
@@ -162,6 +184,7 @@ public class IndexerOptionParser {
                         + pluginName, e);
             }
 
+<<<<<<< HEAD
             CramsConsumerPlugin plugin;
             try {
                 plugin = (CramsConsumerPlugin) pluginClass.newInstance();
@@ -184,6 +207,30 @@ public class IndexerOptionParser {
             }
             plugins.add(plugin);
             logger.info("load pluging : " + pluginClass.getName());
+=======
+            try {
+                CramsConsumerPlugin plugin;
+                try {
+                    plugin = (CramsConsumerPlugin) pluginClass.newInstance();
+                } catch (IllegalAccessException e1) {
+                    logger.error(e1.getMessage(), e1);
+                    throw new CramsException(e1.getMessage(), e1);
+                }
+                String pluginProperties = properties.getProperty(pluginName);
+                if (pluginProperties != null) {
+                    try {
+                        plugin.setProperties(pluginProperties);
+                    } catch (CramsPluginException e) {
+                        logger.error("failed to set property", e);
+                        throw new CramsException(e.getMessage(), e);
+                    }
+                }
+                plugins.add(plugin);
+                logger.info("load pluging : " + pluginClass.getName());
+            } catch (InstantiationException e) {
+                throw new CramsException("instantiation failed", e);
+            }
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
         return plugins;
 

@@ -68,7 +68,11 @@ public class MemoryUsagePlugin implements CramsConsumerPlugin {
                 throw new CramsPluginException(
                         "negative value for memory usage");
             }
+<<<<<<< HEAD
             dataMap.put(memoryUsageName, usedMemory / totalMem);
+=======
+            dataMap.put(memoryUsageName, (usedMemory / totalMem));
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             return dataMap;
         } catch (Exception e) {
             throw new CramsPluginException(e.getMessage(), e);

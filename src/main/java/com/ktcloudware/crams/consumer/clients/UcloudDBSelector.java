@@ -33,17 +33,24 @@ public class UcloudDBSelector {
         initPool();
     }
 
+<<<<<<< HEAD
     /**
      * supported dbTargetType: STAGING, PRODUCT 
      * @param dbTarget
      * @throws CramsException
      */
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     public UcloudDBSelector(String dbTarget) throws CramsException {
         if (dbTarget == null || dbTarget.isEmpty()) {
             throw new CramsException("not supported database");
         } else if (dbTarget.equalsIgnoreCase(STAGING)) {
             this.driver = "com.mysql.jdbc.Driver";
+<<<<<<< HEAD
             this.url = "jdbc:mysql://172.27.115.91:3306/KTCP_EPC_DB_NEW";
+=======
+            this.url = "jdbc:mysql://172.27.115.91:13306/KTCP_EPC_DB_NEW";
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             this.user = "cdp";
             this.pass = "cdpadmin";
             this.connectionManager = new ConnectionManager();
@@ -68,20 +75,34 @@ public class UcloudDBSelector {
 
     public String getVmNameByVmId(String vmUuid) {
         if (null == vmUuid) {
+<<<<<<< HEAD
             throw new CramsRuntimeException("vmUuid should not be null");
         }
 
+=======
+            throw new NullPointerException("vmUuid should not be null");
+        }
+        
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         Connection conn = this.connectionManager.getConnection();
 
         try {
             PreparedStatement stmt = conn.prepareStatement(getVmNameQuery);
             stmt.setString(1, vmUuid);
             ResultSet rs = stmt.executeQuery();
+<<<<<<< HEAD
             String vmName = null;
             while (rs.next()) {
                 vmName = rs.getString(1);
             }
             return vmName;
+=======
+            String secretKey = null;
+            while (rs.next()) {
+                secretKey = rs.getString(1);
+            }
+            return secretKey;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         } catch (SQLException se) {
             // TODO make error log
             logger.error(se.getMessage(), se);
@@ -122,7 +143,12 @@ public class UcloudDBSelector {
         }
 
         public Connection getConnection() {
+<<<<<<< HEAD
             return generateConnection();
+=======
+            Connection conn = generateConnection();
+            return conn;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
 
         public void releaseConnection(Connection conn) {

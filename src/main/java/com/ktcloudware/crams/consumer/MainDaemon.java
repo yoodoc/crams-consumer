@@ -11,6 +11,10 @@ import kafka.consumer.KafkaStream;
 
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
+<<<<<<< HEAD
+=======
+import org.apache.commons.daemon.DaemonInitException;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -21,14 +25,23 @@ import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
 public class MainDaemon implements Daemon {
 
+<<<<<<< HEAD
     protected KafkaConfig kafkaConfig = null;
     private List<KafkaConsumerGroup> consumerGroupList;
     private ESBulkIndexer esBulkIndexer;
     protected Map<String, ExecutorService> executorMap;
+=======
+    private KafkaConfig kafkaConfig = null;
+    private List<KafkaConsumerGroup> consumerGroupList;
+    private ESBulkIndexer esBulkIndexer;
+    // private CacheClient cacheClient;
+    private Map<String, ExecutorService> executorMap;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
     Logger logger = LogManager.getLogger("MAIN");
 
     @Override
+<<<<<<< HEAD
     public void init(DaemonContext arg0) throws CramsException {
         logger = LogManager.getLogger("MAIN");
 
@@ -39,6 +52,13 @@ public class MainDaemon implements Daemon {
             logger.error("daemon initiation error", e);
             throw new CramsException("daemon initiation error", e);
         }
+=======
+    public void init(DaemonContext arg0) throws DaemonInitException, Exception {
+        logger = LogManager.getLogger("MAIN");
+
+        // read kafka client configuration
+        kafkaConfig = IndexerOptionParser.parseKafkaConsumerProperties();
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
         // create empty thread pool for each kafka topic
         executorMap = new HashMap<String, ExecutorService>();
@@ -59,7 +79,11 @@ public class MainDaemon implements Daemon {
     }
 
     @Override
+<<<<<<< HEAD
     public void start() throws CramsException {
+=======
+    public void start() throws Exception {
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         // create kafka consumer group & make consumer stream
         consumerGroupList = new ArrayList<KafkaConsumerGroup>();
         KafkaConsumerGroup consumerGroup = new KafkaConsumerGroup(
@@ -79,6 +103,11 @@ public class MainDaemon implements Daemon {
                 for (int i = 0; i < streams.size(); i++) {
                     logger.info("start thread=" + i + " for topic=" + topic
                             + " " + streams.size());
+<<<<<<< HEAD
+=======
+                    System.out.println("start thread=" + i + " for topic="
+                            + topic + " " + streams.size());
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
                     Runnable worker = new KafkaConsumerService(streams.get(i),
                             IndexerOptionParser.loadKafkaPlugins(topic), topic);
                     executor.execute(worker);
@@ -95,7 +124,11 @@ public class MainDaemon implements Daemon {
     }
 
     @Override
+<<<<<<< HEAD
     public void stop() throws CramsException {
+=======
+    public void stop() throws Exception {
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         for (KafkaConsumerGroup consumerGroup : consumerGroupList) {
             consumerGroup.shutdown();
         }

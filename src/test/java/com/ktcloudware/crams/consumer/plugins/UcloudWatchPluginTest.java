@@ -32,7 +32,11 @@ public class UcloudWatchPluginTest {
         long starttime = System.currentTimeMillis();
 
         // make default input data
+<<<<<<< HEAD
         int testDataSize = 10000;
+=======
+        int testDataSize = 1;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
         for (int i = 0; i < testDataSize; i++) {
             Map<String, Object> data = new HashMap<String, Object>();
@@ -115,6 +119,10 @@ public class UcloudWatchPluginTest {
             try {
                 uwp.excute(data, "unittest");
                 Assert.fail("expect exception");
+<<<<<<< HEAD
+=======
+                ;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -159,7 +167,10 @@ public class UcloudWatchPluginTest {
         for (Map<String, Object> data : dataList) {
             try {
                 uwp.excute(data, "unittest");
+<<<<<<< HEAD
                 System.out.println("!! hi");
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
                 Assert.fail("expect exception");
                 ;
             } catch (Exception e) {
@@ -214,6 +225,7 @@ public class UcloudWatchPluginTest {
             }
         }
     }
+<<<<<<< HEAD
     
     @Test
     public void testRdbaasInstanceData() {
@@ -229,4 +241,6 @@ public class UcloudWatchPluginTest {
     public void testAutoscalingInstanceData() {
         
     }
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 }

@@ -21,7 +21,11 @@ public class FiveMinutesFilterPlugin implements CramsConsumerPlugin {
     public void setProperties(String properties) {
         String[] propertiesArray = properties.split(",");
         this.dateFieldName = propertiesArray[0];
+<<<<<<< HEAD
         this.baseMinute = Integer.valueOf((String) propertiesArray[1]);
+=======
+        this.baseMinute = new Integer((String) propertiesArray[1]);
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     }
 
     @Override

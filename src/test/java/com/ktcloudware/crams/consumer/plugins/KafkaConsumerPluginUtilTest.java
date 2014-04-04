@@ -7,7 +7,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
+<<<<<<< HEAD
 import com.ktcloudware.crams.consumer.CramsException;
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import com.ktcloudware.crams.consumer.util.KafkaConsumerPluginUtil;
 
 public class KafkaConsumerPluginUtilTest {
@@ -21,7 +24,11 @@ public class KafkaConsumerPluginUtilTest {
         try {
             KafkaConsumerPluginUtil.addAverageValue("cpu[0-9]+", "cpu_avg",
                     message);
+<<<<<<< HEAD
         } catch (CramsException e) {
+=======
+        } catch (CramsPluginException e) {
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             // TODO Auto-generated catch block
             e.printStackTrace();
             fail();
@@ -38,7 +45,11 @@ public class KafkaConsumerPluginUtilTest {
         try {
             message = KafkaConsumerPluginUtil.addAverageValue(
                     "vbd_hd[a-z]_write", "vbd_write_avg", message);
+<<<<<<< HEAD
         } catch (CramsException e) {
+=======
+        } catch (CramsPluginException e) {
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             // TODO Auto-generated catch block
             e.printStackTrace();
             fail();

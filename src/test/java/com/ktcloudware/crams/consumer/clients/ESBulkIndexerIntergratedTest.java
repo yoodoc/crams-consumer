@@ -11,8 +11,16 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Before;
+<<<<<<< HEAD
 import org.junit.Test;
 
+=======
+import org.junit.Ignore;
+import org.junit.Test;
+
+import scala.testing.SUnit.AssertFailed;
+
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import com.ktcloudware.crams.consumer.CramsException;
 import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
 import com.ktcloudware.crams.consumer.datatype.ESConfig;
@@ -39,6 +47,15 @@ public class ESBulkIndexerIntergratedTest {
         }
         esConfig.clusterName = "cdp_dev_qa";
         esConfig.type = "vm";
+<<<<<<< HEAD
+=======
+        this.esConfig = esConfig;
+    }
+
+  //  @Ignore
+    @Test
+    public void testIndexingWithRoutingKey() {
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         esConfig.routingKey = "owner";
         esConfig.indexKey = "datetime";
         try {
@@ -51,6 +68,7 @@ public class ESBulkIndexerIntergratedTest {
             e1.printStackTrace();
             fail();
         }
+<<<<<<< HEAD
         this.esConfig = esConfig;
     }
 
@@ -58,16 +76,23 @@ public class ESBulkIndexerIntergratedTest {
     public void testEsConfigValidator() {
         try {
             assertEquals(true, esConfig.validateConfigVals());
+=======
+        try {
+          assertEquals(true, esConfig.validateConfigVals());
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
             fail();
         }
+<<<<<<< HEAD
         
     }
     
     @Test
     public void nullRoutingKey(){
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         String owner = "yoodoc";
 
         // create ESBulkIndexer instance
@@ -80,6 +105,7 @@ public class ESBulkIndexerIntergratedTest {
         } catch (CramsException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+<<<<<<< HEAD
             fail();
         }
         String index = null;
@@ -129,6 +155,8 @@ public class ESBulkIndexerIntergratedTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
             fail();
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
         String index = null;
         try {
@@ -157,7 +185,10 @@ public class ESBulkIndexerIntergratedTest {
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+<<<<<<< HEAD
             fail();
+=======
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
     }
 

@@ -1,10 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+<<<<<<< HEAD
 	<groupId>com.ktcloudware</groupId>
 	<artifactId>crams-consumer</artifactId>
 	<version>0.6.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
+=======
+
+	<groupId>com.ktcloudware</groupId>
+	<artifactId>crams-consumer</artifactId>
+	<version>0.6.0</version>
+	<packaging>jar</packaging>
+
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 	<name>crams-consumer</name>
 	<url>http://maven.apache.org</url>
 

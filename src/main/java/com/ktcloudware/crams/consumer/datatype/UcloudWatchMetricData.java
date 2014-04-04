@@ -3,7 +3,13 @@ package com.ktcloudware.crams.consumer.datatype;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+<<<<<<< HEAD
 import java.util.List;
+=======
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
 import com.ktcloudware.crams.consumer.CramsException;
 
@@ -19,6 +25,19 @@ public class UcloudWatchMetricData {
         demension = new ArrayList<UcloudWatchDemension>();
     }
 
+<<<<<<< HEAD
+=======
+    public String getMetricData() {
+        return null;
+    }
+
+    public Map<String, String> getMetricDataMap() {
+        Map<String, String> metricData = new HashMap<String, String>();
+
+        return metricData;
+    }
+
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     public String getRequestParameter(String prefix) throws CramsException {
         String requestParameter = null;
         String metricName = null;
@@ -60,6 +79,11 @@ public class UcloudWatchMetricData {
     }
 
     private String getUrlEncodedValue(String value) throws UnsupportedEncodingException {
+<<<<<<< HEAD
         return URLEncoder.encode(value, "UTF-8");
+=======
+        String encodedValue = URLEncoder.encode(value, "UTF-8");
+        return encodedValue;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     }
 }

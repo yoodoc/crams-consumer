@@ -4,6 +4,10 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 
+<<<<<<< HEAD
+=======
+import org.junit.Ignore;
+>>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.clients.RedisClient;
