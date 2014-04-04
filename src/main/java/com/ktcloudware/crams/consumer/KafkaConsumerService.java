@@ -44,8 +44,8 @@ public class KafkaConsumerService implements Runnable {
     public KafkaConsumerService(KafkaStream<byte[], byte[]> kafkaStream,
              String topicName, CramsPluginExcutor runner, AverageDataCache dataStorage) {
         this.topicName = topicName;
-        logger = LogManager.getLogger("CONSUMER.MAIN");
-        logger2 = LogManager.getLogger("CONSUMER.KAFKADATA");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
+        logger2 = LogManager.getLogger("KAFKADATA");
         stream = kafkaStream;
         mapper = new ObjectMapper();
         this.runner = runner;

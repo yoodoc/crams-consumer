@@ -13,7 +13,7 @@ public class CramsPluginExcutor {
     private Logger logger;
     
     public CramsPluginExcutor(List<CramsConsumerPlugin> plugins) {
-        logger = LogManager.getLogger("MAIN");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
         this.plugins = plugins;
         for (CramsConsumerPlugin plugin : plugins) {
             logger.info("load plugin" + plugin.getClass().getName());
@@ -23,7 +23,7 @@ public class CramsPluginExcutor {
     }
     
     public void excute(Map<String, Object> dataMap, String dataTag) {
- // kafka message processing
+    // kafka message processing
     try {
         for (CramsConsumerPlugin plugin : plugins) {
             if (dataMap == null) {
@@ -36,7 +36,7 @@ public class CramsPluginExcutor {
         }
     } catch (Exception e) {
         logger.error(e.getMessage(), e);
-        // TODO 데몬 동작을 종료해야하는 에러에 대한 처리가 필요하다.
+        //TODO 데몬 동작 종료시 발생하는 에러에 대한 처리가 필요하다.
     }
     }
 }

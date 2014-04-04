@@ -1,33 +1,33 @@
 # <topic name>=plugin,plugin,...				   
 # prefixed path = com.ktcloudware.crams.consumer.plugins.   
 
-vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
+vm_perf_rrd=LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,ESIndexingPlugin
+#vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
 #yoodoc=UcloudWatchPlugin
-disk_usage=DiskUsageCachePlugin
+#disk_usage=DiskUsageCachePlugin
 
 # set comma seperated properties for specific plugins  
 
+#deprecated
 # <redis server address>
-DiskUsageCachePlugin=localhost,3000
+#DiskUsageCachePlugin=localhost,3000
 #DiskUsageCachePlugin=172.27.24.142,3000
 
-
+#deprecated
 # <redis server address>
-AppendDiskUsagePlugin=localhost,3000
+#AppendDiskUsagePlugin=localhost,3000
 #AppendDiskUsagePlugin=172.27.24.142
-
 
 # <date fieldName>,<input format>,<output format>
 DateFormatPlugin=datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ssZZ
 
-
+#deprecated
 # <date fieldName>
-FiveMinutesFilterPlugin=datetime,3
+#FiveMinutesFilterPlugin=datetime,3
 
 # key name to check null
 LoggingNullDataPlugin=vm_uuid
 
-# <DB type>,<ucloud watch url>
-# DB type: unittest, staging or product
-#UcloudWatchPlugin=unittest,localhost:8080/watch
+# <ucloud watch url>
+#UcloudWatchPlugin=localhost:8080/watch
 UcloudWatchPlugin=staging,http://172.27.205.175:8080/watch

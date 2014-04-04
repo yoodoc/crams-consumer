@@ -39,12 +39,12 @@ public class UcloudWatchMetricData {
              throw new CramsException("failed to create request parameter, unsupportedEncodeing:", e);
         }
 
-        requestParameter = metricName + unit + dimension + value + timestamp;
+        requestParameter = dimension + metricName + unit + value + timestamp;
         return requestParameter;
     }
 
     private String getDemesionParameter(String prefix) throws UnsupportedEncodingException {
-        String demensionParameter = "";
+    	String demensionParameter = "";
         for (int i = 0; i < this.demension.size(); i++) {
             String demensionNameParameter = "&" + prefix + "Dimensions.member."
                         + String.valueOf(i + 1) + ".Name="

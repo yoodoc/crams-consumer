@@ -11,11 +11,12 @@ import org.apache.log4j.Logger;
 
 import com.ktcloudware.crams.consumer.CramsException;
 
+@Deprecated
 public class UcloudDBSelector {
     private static final String STAGING = "staging";
     private static final String PRODUCT = "product";
 
-    private static Logger logger = LogManager.getLogger("DATABASE");
+    private static Logger logger = LogManager.getLogger("CRAMS_CONSUMER");
 
     private String driver;
     private String url;

@@ -33,7 +33,7 @@ public class AverageDataCache {
     private int processedData = 0;
 
     public AverageDataCache() {
-        logger = LogManager.getLogger("PLUGINS");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
         cache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
                 .maximumSize(10000).expireAfterWrite(30, TimeUnit.MINUTES)
                 .build();
@@ -68,14 +68,12 @@ public class AverageDataCache {
 
     private void addData(String vmId, long timestampInMinutes,
             Map<String, Object> dataMap) {
-    	System.out.println("!!new data added " + dataMap.toString());
-        // store new dataMap
+       // store new dataMap
         if (null == dataMap || dataMap.isEmpty()) {
             return;
         }
         Map<String, Object> receivedData = new HashMap<String, Object>(dataMap);
-        vmPerfMap
-                .put(vmId + KEY_DELETEMETER + timestampInMinutes, receivedData);
+        vmPerfMap.put(vmId + KEY_DELETEMETER + timestampInMinutes, receivedData);
         List<Long> timestamps = vmTimestampsInMinutes.get(vmId);
         if (timestamps == null) {
             timestamps = new ArrayList<Long>();
@@ -134,8 +132,6 @@ public class AverageDataCache {
         }
         timestamps = timestamps.subList(dataSizeInSingleFiveMinutes,
                 dataSizeInSingleFiveMinutes);
-        System.out.println("!!size " + dataSizeInSingleFiveMinutes);
-        System.out.println("!!!DataAggregator!!updated vmtimestamp " + timestamps.toString());
         if (timestamps.isEmpty()) {
            vmTimestampsInMinutes.remove(vmId); 
         } else {
@@ -159,9 +155,6 @@ public class AverageDataCache {
      * @return
      */
     public List<Map<String, Object>> clean(List<Map<String, Object>> avgs) {
-     /*   List<Map<String, Object>> avgNew = new ArrayList<Map<String,Object>>();
-        avgNew.addAll(avgs);*/
-    	System.out.println("!!clean ");
         for (String vm : vmTimestampsInMinutes.keySet()) {
             Map<String, Object> avgData = getFiveMinuteAvgData(vm, true);
             avgs.add(avgData);

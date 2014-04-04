@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
+//@Ignore
 public class UcloudWatchPluginTest {
 
     UcloudWatchPlugin uwp;
@@ -21,8 +21,7 @@ public class UcloudWatchPluginTest {
 
         uwp = new UcloudWatchPlugin();
         try {
-
-            uwp.setProperties("unittest");
+            uwp.setProperties("http://14.63.214.195:9010/watch");
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -34,10 +33,11 @@ public class UcloudWatchPluginTest {
         long starttime = System.currentTimeMillis();
 
         // make default input data
-        int testDataSize = 10000;
+        int testDataSize = 1;
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
         for (int i = 0; i < testDataSize; i++) {
             Map<String, Object> data = new HashMap<String, Object>();
+            data.put("memory_target", 100000000000L);
             data.put("memory_target", 100000000000L);
             data.put("memory_internal_free", 100000000);
             data.put("cpu0", 0.38738647169767515);
@@ -45,8 +45,12 @@ public class UcloudWatchPluginTest {
             data.put("cpu2", 0.9888381871688897);
             data.put("cpu3", 0.08545827027426656);
             data.put("cpu4", 0.7659032390437487);
-            data.put("vm_uuid", "unit_test");
+            data.put("vm_uuid", "uu_id");
+            data.put("vm_name", "test_vm");
             data.put("vm_account_name", "EPC_M1111112_S1111");
+            data.put("vm_template_name", "template");
+            data.put("vm_service_offering_name", "serviceoffering");
+            
             Calendar calendar = Calendar.getInstance();
             int day = calendar.get(Calendar.DAY_OF_MONTH);
             int month = calendar.get(Calendar.MONTH);
@@ -69,8 +73,8 @@ public class UcloudWatchPluginTest {
             try {
                 uwp.excute(data, "unittest");
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
+                Assert.fail();
             }
         }
 
@@ -87,6 +91,7 @@ public class UcloudWatchPluginTest {
         for (int i = 0; i < testDataSize; i++) {
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("memory_target", 100000000000L);
+            data.put("memory_target", 100000000000L);
             data.put("memory_internal_free", 100000000);
             data.put("cpu0", 0.38738647169767515);
             data.put("cpu1", 0.635808734557892);
@@ -94,7 +99,10 @@ public class UcloudWatchPluginTest {
             data.put("cpu3", 0.08545827027426656);
             data.put("cpu4", 0.7659032390437487);
             data.put("vm_uuid", null);
+            data.put("vm_name", "test_vm");
             data.put("vm_account_name", "EPC_M1111112_S1111");
+            data.put("vm_template_name", "template");
+            data.put("vm_service_offering_name", "serviceoffering");
             Calendar calendar = Calendar.getInstance();
             int day = calendar.get(Calendar.DAY_OF_MONTH);
             int month = calendar.get(Calendar.MONTH);
@@ -118,7 +126,6 @@ public class UcloudWatchPluginTest {
                 uwp.excute(data, "unittest");
                 Assert.fail("expect exception");
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -165,7 +172,6 @@ public class UcloudWatchPluginTest {
                 Assert.fail("expect exception");
                 ;
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

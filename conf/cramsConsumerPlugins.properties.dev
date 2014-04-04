@@ -27,7 +27,6 @@ FiveMinutesFilterPlugin=datetime,3
 # key name to check null
 LoggingNullDataPlugin=vm_uuid
 
-# <DB type>,<ucloud watch url>
-# DB type: unittest, staging or product
-#UcloudWatchPlugin=unittest,localhost:8080/watch
-UcloudWatchPlugin=staging,http://172.27.205.175:8080/watch
+# <ucloud watch url>
+#UcloudWatchPlugin=localhost:8080/watch
+UcloudWatchPlugin=http://172.27.205.175:8080/watch

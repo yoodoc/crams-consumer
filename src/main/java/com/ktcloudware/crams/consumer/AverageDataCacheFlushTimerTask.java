@@ -26,21 +26,19 @@ public class AverageDataCacheFlushTimerTask extends TimerTask {
     }
 
     public AverageDataCacheFlushTimerTask() {
-    	logger = LogManager.getLogger("MAIN");
+    	logger = LogManager.getLogger("CRAMS_CONSUMER");
     }
 
     @Override
     public void run() {
-    	logger.debug("run flush task at " + (new Date()).toString());
         for (AverageDataCache dataAggregator : dataAggList) {
+        	logger.debug("run flush task at " + (new Date()).toString() + "," + dataAggregator.getStats() );
             if (pluginExcutor == null) {
                 return;
             }
-            System.out.println("!!DataAggregatorFlushTimerTask cache stats " + dataAggregator.getStats());
             List<Map<String, Object>> dataList = dataAggregator
                     .cleanIfIdle(1000L);
-            System.out.println("!!DataAggregatorFlushTimerTask result data " + dataList.toString());
-            System.out.println("!!DataAggregatorFlushTimerTask cache stats " + dataAggregator.getStats());
+            logger.debug("flushed data: " + dataList.toString());
             for (Map<String, Object> dataMap : dataList) {
                 pluginExcutor.excute(dataMap, "aggregatedData");
             }

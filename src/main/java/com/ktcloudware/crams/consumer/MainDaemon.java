@@ -26,12 +26,12 @@ public class MainDaemon implements Daemon {
     private ESBulkIndexer esBulkIndexer;
     protected Map<String, ExecutorService> executorMap;
 
-    private Logger logger = LogManager.getLogger("MAIN");
+    private Logger logger = LogManager.getLogger("CRAMS_CONSUMER");
     private Timer flushingTaskScheduler;
 
     @Override
     public void init(DaemonContext arg0) throws CramsException {
-        logger = LogManager.getLogger("MAIN");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
 
         // read kafka client configuration
         try {

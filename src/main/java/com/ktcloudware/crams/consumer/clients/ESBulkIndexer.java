@@ -40,7 +40,7 @@ public class ESBulkIndexer {
     private String routingKeyName;
     private List<String> indexListToCheckExistance = null;
 
-    private Logger logger = LogManager.getLogger("ESCLIENT");
+    private Logger logger = LogManager.getLogger("ES_CLIENT");
     private String clusterName;
     private List<InetSocketTransportAddress> esAddressList;
 
@@ -57,7 +57,7 @@ public class ESBulkIndexer {
     public ESBulkIndexer(List<InetSocketTransportAddress> esAddressList,
             String clusterName, String type, String routingKeyName,
             String indexSettings, String indexMappings) throws CramsException {
-        logger = LogManager.getLogger("ESCLIENT");
+        logger = LogManager.getLogger("ES_CLIENT");
 
         this.routingKeyName = routingKeyName;
         this.typeInIndex = type;

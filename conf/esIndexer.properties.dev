@@ -6,7 +6,8 @@ requestIntervalMaxSec=60
 #clusterName=cdp_dev_qa
 clusterName=crams
 
-esAddress=14.63.213.13:9300
+#esAddress=14.63.213.13:9300
+esAddress=localhost:9300
 #esAddress=10.220.163.145:9300,10.220.163.146:9300,10.220.163.168:9300
 
 type=vm
