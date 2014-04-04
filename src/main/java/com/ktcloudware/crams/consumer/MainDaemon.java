@@ -1,11 +1,21 @@
 package com.ktcloudware.crams.consumer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import kafka.consumer.KafkaStream;
 
@@ -27,6 +37,7 @@ public class MainDaemon implements Daemon {
     protected Map<String, ExecutorService> executorMap;
 
     Logger logger = LogManager.getLogger("MAIN");
+    private Timer flushingTaskScheduler;
 
     @Override
     public void init(DaemonContext arg0) throws CramsException {
@@ -43,10 +54,13 @@ public class MainDaemon implements Daemon {
         // create empty thread pool for each kafka topic
         executorMap = new HashMap<String, ExecutorService>();
         for (String topic : kafkaConfig.topics) {
-            ExecutorService executor = Executors
-                    .newFixedThreadPool(kafkaConfig.numOfThread);
+            ExecutorService executor = Executors.newFixedThreadPool(kafkaConfig.numOfThread);
+                     
             executorMap.put(topic, executor);
         }
+        
+        //create scheduler for dataAggregator flushing task 
+        flushingTaskScheduler = new Timer();
     }
 
     @Override
@@ -55,6 +69,9 @@ public class MainDaemon implements Daemon {
             executorMap.get(topic).shutdownNow();
         }
 
+        flushingTaskScheduler.cancel();
+        flushingTaskScheduler.purge();
+        
         logger.info("daemon shutdown");
     }
 
@@ -67,20 +84,28 @@ public class MainDaemon implements Daemon {
                 kafkaConfig.numOfThread, kafkaConfig.topics,
                 kafkaConfig.resetPolicy);
         consumerGroupList.add(consumerGroup);
-
+        
         // get kafka consuming streams for each kafka topic. and assign consumer
         // service thread for them
         for (String topic : kafkaConfig.topics) {
             ExecutorService executor = executorMap.get(topic);
             List<KafkaStream<byte[], byte[]>> streams = consumerGroup
                     .getKafkaStreams(topic);
+            
+            CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
 
+            //create dataAggregator & flushing task for over stacked data
+            DataAggregator dataAggregator = new DataAggregator();
+            DataAggregatorFlushTimerTask flushTimerTask = new DataAggregatorFlushTimerTask();
+            flushTimerTask.addDataAggregator(dataAggregator);
+            flushTimerTask.addPluginExcutor(pluginExcutor);
+           
             try {
                 for (int i = 0; i < streams.size(); i++) {
+                    //create plugin runner
                     logger.info("start thread=" + i + " for topic=" + topic
                             + " " + streams.size());
-                    Runnable worker = new KafkaConsumerService(streams.get(i),
-                            IndexerOptionParser.loadKafkaPlugins(topic), topic);
+                    Runnable worker = new KafkaConsumerService(streams.get(i), topic, pluginExcutor, dataAggregator);
                     executor.execute(worker);
                 }
             } catch (Exception e) {
@@ -89,6 +114,9 @@ public class MainDaemon implements Daemon {
                 stop();
                 return;
             }
+            
+            //run flushing task 
+            flushingTaskScheduler.scheduleAtFixedRate(flushTimerTask, 10000, 10000);
         }
 
         logger.info("start all service threads");

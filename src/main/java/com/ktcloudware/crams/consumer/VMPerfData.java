@@ -1,9 +1,7 @@
-package com.ktcloudware.crams.consumer.plugins;
+package com.ktcloudware.crams.consumer;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ktcloudware.crams.consumer.CramsException;
 
 public class VMPerfData {
     int count = 0;
@@ -56,11 +54,13 @@ public class VMPerfData {
     Float cpu15 = null;
     
     void addPerfData(Map<String, Object> dataMap){
+        if (dataMap == null || dataMap.isEmpty()) {
+            return;
+        }
         System.out.println("!!!add" + dataMap.toString());
         count++;
         if(avgDataMap == null || avgDataMap.isEmpty()) {
             avgDataMap = new HashMap<String, Object>(dataMap);
-            System.out.println("!!!add" + avgDataMap.toString());
             return;
         }
         for (String keyName: dataMap.keySet()) { 
@@ -75,14 +75,15 @@ public class VMPerfData {
                 Float cpuValueTotal =  null;
                 if (avgDataMap.get(keyName) instanceof Double) {
                     cpuValueTotal = ((Double) avgDataMap.get(keyName)).floatValue();
-                    System.out.println(cpuValueTotal);
                 } else {
                     cpuValueTotal = (Float) avgDataMap.get(keyName);                    
                 }
                 if (cpuValueTotal == null) { 
                     continue;
                 }
+                cpuValueTotal = cpuValueTotal * (count-1);
                 cpuValueTotal += cpuValue;
+                System.out.println("!total" + cpuValueTotal);
                this.avgDataMap.put(keyName, new Float(cpuValueTotal/count));
             } else if (keyName.matches("vbd_[a-z]_[read|write]") || keyName.matches("vif_[0-9]_[rx|tx]") || keyName.equals("memory_internal_free")) {
                 Long value = (Long) dataMap.get(keyName);
@@ -90,6 +91,7 @@ public class VMPerfData {
                 if (valueTotal == null) { 
                     continue;
                 }
+                valueTotal = valueTotal * (count-1);
                 valueTotal += value;
                 this.avgDataMap.put(keyName, valueTotal/count);
             }

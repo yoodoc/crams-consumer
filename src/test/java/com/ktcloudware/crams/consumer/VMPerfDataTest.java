@@ -1,4 +1,4 @@
-package com.ktcloudware.crams.consumer.plugins;
+package com.ktcloudware.crams.consumer;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import com.ktcloudware.crams.consumer.VMPerfData;
 
 public class VMPerfDataTest {
 

@@ -25,12 +25,29 @@
 			</includes>
 			<fileMode>755</fileMode>
 		</fileSet>
+		<fileSet>
+			<directory>lib</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>*.jar</include>
+			</includes>
+			<fileMode>755</fileMode>
+		</fileSet>
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
 			<outputDirectory>lib</outputDirectory>
 			<useStrictFiltering>true</useStrictFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
+			<excludes><exclude>com.ktcloudware:crams-consumer</exclude></excludes>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>/</outputDirectory>
+			<useStrictFiltering>true</useStrictFiltering>
+			<useProjectArtifact>true</useProjectArtifact>
+			<includes><include>com.ktcloudware:crams-consumer</include></includes>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
 		</dependencySet>
