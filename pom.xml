@@ -6,8 +6,7 @@
 	<version>0.6.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>crams-consumer</name>
-	<url>http://maven.apache.org</url>
-
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -213,6 +212,7 @@
 		</dependency>
 		-->
 	</dependencies>
+	<!-- 
 	<distributionManagement>
 		<repository>
 			<id>ktcloudware_release</id>
@@ -223,9 +223,9 @@
 			<url>http://172.27.242.227/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+-->
 	<organization>
-		<name>KT Innotz</name>
-		<url>http://ktinnotz.com/</url>
+		<name>KT cloudware</name>
+		<url>http://www.ktcloudware.com/</url>
 	</organization>
-	<description>Banach Deployment Management System</description>
 </project>
