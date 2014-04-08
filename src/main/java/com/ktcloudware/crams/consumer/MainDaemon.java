@@ -29,6 +29,7 @@ public class MainDaemon implements Daemon {
     private Logger logger = LogManager.getLogger("CRAMS_CONSUMER");
     private Timer flushingTaskScheduler;
     private DataAggregatorFlushTask flushTimerTask;
+    private boolean disableAggregation = false;
 
     @Override
     public void init(DaemonContext arg0) throws CramsException {
@@ -42,6 +43,11 @@ public class MainDaemon implements Daemon {
             throw new CramsException("daemon initiation error", e);
         }
 
+        if (null != kafkaConfig.disableAggregation && "true".equalsIgnoreCase(kafkaConfig.disableAggregation)) {
+            disableAggregation = true;
+        }  else {
+            logger.info("disable aggregation false" + disableAggregation);
+        }
         // create empty thread pool for each kafka topic
         executorMap = new HashMap<String, ExecutorService>();
         for (String topic : kafkaConfig.topics) {
@@ -101,7 +107,7 @@ public class MainDaemon implements Daemon {
                     //create plugin runner
                     logger.info("start thread=" + i + " for topic=" + topic
                             + " " + streams.size());
-                    Runnable worker = new KafkaConsumerService(streams.get(i), topic, pluginExcutor, dataCache);
+                    Runnable worker = new KafkaConsumerService(streams.get(i), topic, pluginExcutor, dataCache, disableAggregation);
                     executor.execute(worker);
                 }
             } catch (Exception e) {
@@ -110,10 +116,12 @@ public class MainDaemon implements Daemon {
                 stop();
                 return;
             }
-            
-            //run flushing task 
-            flushingTaskScheduler.scheduleAtFixedRate(flushTimerTask, 10000, 10000);
-            logger.info("run data aggregator");
+         
+            if (disableAggregation == false) {
+                         //run flushing task 
+                flushingTaskScheduler.scheduleAtFixedRate(flushTimerTask, 10000, 10000);
+                logger.info("run data aggregator");
+            }
         }
 
         logger.info("start all service threads");

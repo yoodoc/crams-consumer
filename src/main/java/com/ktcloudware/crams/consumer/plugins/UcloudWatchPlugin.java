@@ -253,10 +253,9 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		for (int i = 0; i < ucloudWatchMetricData.size(); i++) {
 			String metricParameter = null;
 			try {
+			    String prefix = "metricData.member." + String.valueOf(i + 1) + ".";
 				metricParameter = ucloudWatchMetricData.get(i)
-						.getRequestParameter(
-								"metricData.member." + String.valueOf(i + 1)
-										+ ".");
+						.getRequestParameter(prefix);
 			} catch (Exception e) {
 				throw new CramsPluginException(
 						"failed to create putMatricRequest", e);
@@ -367,13 +366,18 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 				|| "null".equalsIgnoreCase(vifTxAvgValue)) {
 			return metricData;
 		}
-
+		Integer sampleCount =(Integer) xenRrd.get("sample_count");
+		if (sampleCount == null ) {
+		    sampleCount = 1;
+		}
+		
 		UcloudWatchMetricData cpuUtilization = new UcloudWatchMetricData();
 		cpuUtilization.metricName = "CPUUtillization";
 		cpuUtilization.unit = "Percent";
 		cpuUtilization.value = cpuUtilizationValue;
 		cpuUtilization.timestamp = timestamp;
 		cpuUtilization.demension.addAll(demensionList);
+		cpuUtilization.sampleCount = String.valueOf(sampleCount);
 		metricData.add(cpuUtilization);
 
 		UcloudWatchMetricData memoryTarget = new UcloudWatchMetricData();
@@ -382,6 +386,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		memoryTarget.value = memomyTargetValue;
 		memoryTarget.timestamp = timestamp;
 		memoryTarget.demension.addAll(demensionList);
+		memoryTarget.sampleCount = String.valueOf(sampleCount);
 		metricData.add(memoryTarget);
 
 		UcloudWatchMetricData memoryInternalFree = new UcloudWatchMetricData();
@@ -390,6 +395,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		memoryInternalFree.value = memoryInternalFreeValue;
 		memoryInternalFree.timestamp = timestamp;
 		memoryInternalFree.demension.addAll(demensionList);
+		memoryInternalFree.sampleCount = String.valueOf(sampleCount);
 		metricData.add(memoryInternalFree);
 
 		UcloudWatchMetricData vbdReadAvg = new UcloudWatchMetricData();
@@ -398,6 +404,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vbdReadAvg.value = vbdReadAvgValue;
 		vbdReadAvg.timestamp = timestamp;
 		vbdReadAvg.demension.addAll(demensionList);
+		vbdReadAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vbdReadAvg);
 
 		UcloudWatchMetricData vbdWriteAvg = new UcloudWatchMetricData();
@@ -406,6 +413,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vbdWriteAvg.value = vbdWriteAvgValue;
 		vbdWriteAvg.timestamp = timestamp;
 		vbdWriteAvg.demension.addAll(demensionList);
+		vbdWriteAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vbdWriteAvg);
 
 		UcloudWatchMetricData vifRxAvg = new UcloudWatchMetricData();
@@ -414,6 +422,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vifRxAvg.value = vifRxAvgValue;
 		vifRxAvg.timestamp = timestamp;
 		vifRxAvg.demension.addAll(demensionList);
+		vifRxAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vifRxAvg);
 
 		UcloudWatchMetricData vifTxAvg = new UcloudWatchMetricData();
@@ -422,6 +431,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vifTxAvg.value = vifTxAvgValue;
 		vifTxAvg.timestamp = timestamp;
 		vifTxAvg.demension.addAll(demensionList);
+		vifTxAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vifTxAvg);
 
 		return metricData;

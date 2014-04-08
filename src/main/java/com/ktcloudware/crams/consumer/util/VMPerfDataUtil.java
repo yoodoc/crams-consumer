@@ -110,7 +110,7 @@ public class VMPerfDataUtil {
                 this.avgDataMap.put(keyName, valueTotal/count);
             }
          }
-        
+        avgDataMap.put("sample_count", count);
        /* vbd_a_read =(Long)dataMap.get("vbd_a_read");
           vbd_b_read =(Long)dataMap.get("vbd_b_read");
           vbd_c_read =(Long)dataMap.get("vbd_c_read");

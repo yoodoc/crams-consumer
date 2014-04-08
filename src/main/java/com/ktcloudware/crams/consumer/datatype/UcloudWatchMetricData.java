@@ -14,11 +14,18 @@ public class UcloudWatchMetricData {
     public String unit;
     public String value;
     public String timestamp;
-
+    public String sampleCount;
+    
     public UcloudWatchMetricData() {
         demension = new ArrayList<UcloudWatchDemension>();
     }
 
+    /**
+     * return &<prefix>key=<prefix>value&<prefix>key2=<prefix>value2... 
+     * @param prefix
+     * @return
+     * @throws CramsException
+     */
     public String getRequestParameter(String prefix) throws CramsException {
         String requestParameter = null;
         String metricName = null;
@@ -26,7 +33,7 @@ public class UcloudWatchMetricData {
         String dimension = null;
         String value = null;
         String timestamp = null;
-
+        String sampleCount = null;
         try {
             metricName = "&" + prefix + "MetricName="
                     + getUrlEncodedValue(this.metricName);
@@ -35,6 +42,7 @@ public class UcloudWatchMetricData {
             value = "&" + prefix + "Value=" + getUrlEncodedValue(this.value);
             timestamp = "&" + prefix + "Timestamp="
                     + getUrlEncodedValue(this.timestamp);
+            sampleCount = "&" + prefix + "SampleCount=" + getUrlEncodedValue(this.sampleCount);
         } catch (UnsupportedEncodingException e) {
              throw new CramsException("failed to create request parameter, unsupportedEncodeing:", e);
         }

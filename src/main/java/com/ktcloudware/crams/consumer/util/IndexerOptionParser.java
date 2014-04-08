@@ -31,6 +31,7 @@ public class IndexerOptionParser {
 
     private static final String ES_PROPERTIES_FILE = "esIndexer.properties";
     private static final String KAFKA_PROPERTIES_FILE = "kafkaConsumer.properties";
+    private static final String DISABLE_AGGREGATION = "disableAggregation";
 
     static Logger logger = LogManager.getLogger("UTIL.OptionParser");
 
@@ -133,7 +134,8 @@ public class IndexerOptionParser {
             kafkaConfig.topics.add(topic);
         }
         kafkaConfig.numOfThread = 1;
-
+        kafkaConfig.disableAggregation = properties
+                .getProperty(IndexerOptionParser.DISABLE_AGGREGATION);
         return kafkaConfig;
 
     }

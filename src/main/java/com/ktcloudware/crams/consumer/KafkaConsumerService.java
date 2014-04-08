@@ -33,6 +33,7 @@ public class KafkaConsumerService implements Runnable {
     private Logger logger2;
     private CramsPluginExcutor runner;
     private DataAggregator dataStorage;
+    private boolean disableAggregation = false;
 
     /**
      * 
@@ -40,9 +41,10 @@ public class KafkaConsumerService implements Runnable {
      * @param topicName
      * @param runner
      * @param dataStorage
+     * @throws CramsException 
      */
     public KafkaConsumerService(KafkaStream<byte[], byte[]> kafkaStream,
-             String topicName, CramsPluginExcutor runner, DataAggregator dataStorage) {
+             String topicName, CramsPluginExcutor runner, DataAggregator dataStorage, boolean disableAggregation) throws CramsException {
         this.topicName = topicName;
         logger = LogManager.getLogger("CRAMS_CONSUMER");
         logger2 = LogManager.getLogger("KAFKADATA");
@@ -50,6 +52,11 @@ public class KafkaConsumerService implements Runnable {
         mapper = new ObjectMapper();
         this.runner = runner;
         this.dataStorage = dataStorage;
+        this.disableAggregation = disableAggregation;
+        
+        if (this.disableAggregation == false && this.dataStorage == null) {
+            throw new CramsException("failed to init");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -84,9 +91,11 @@ public class KafkaConsumerService implements Runnable {
                 }
 
                 //make average 
-                userData = dataStorage.add(userData);
-                if (null != userData) {
-                    logger.trace("produced avg data = " + userData);
+                if (disableAggregation == false) {
+                    userData = dataStorage.add(userData);
+                    if (null != userData) {
+                        logger.trace("produced avg data = " + userData);
+                    }
                 }
                 runner.excute(userData,dataTag);
                 

@@ -44,6 +44,9 @@ public class DataAggregator {
      */
     public synchronized Map<String, Object> add(Map<String, Object> dataMap)
             throws CramsPluginException {
+        if (null == dataMap || dataMap.isEmpty()) {
+            return null;
+        }
         lastUpdateTime = System.currentTimeMillis();
 
         Map<String, Object> avgDataMap = new HashMap<String, Object>();

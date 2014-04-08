@@ -14,3 +14,4 @@ topic=vm_perf_rrd,disk_usage
 #resetOffset=smallest
 resetOffset=largest
 
+disableAggregation=true
