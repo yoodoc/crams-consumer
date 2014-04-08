@@ -3,9 +3,13 @@
 
 test=LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,SimpleLoggingPlugin
 
+#for analysis ES indexer
 #vm_perf_rrd=LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,ESIndexingPlugin
-#yoodoc=UcloudWatchPlugin
 #disk_usage=DiskUsageCachePlugin
+
+#for watch agent 
+#yoodoc=UcloudWatchPlugin
+
 
 # set comma seperated properties for specific plugins  
 

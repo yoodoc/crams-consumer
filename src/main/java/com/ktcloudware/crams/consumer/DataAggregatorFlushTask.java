@@ -1,7 +1,6 @@
 package com.ktcloudware.crams.consumer;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
@@ -33,16 +32,13 @@ public class DataAggregatorFlushTask extends TimerTask {
     @Override
     public void run() {
         for (DataAggregator dataCache : dataCacheList) {
-            if (!dataCache.getStats().contains("remained perfData count=0")) {
-                logger.info("run flush task at " + (new Date()).toString() + "," + dataCache.getStats() );
-            } 
             if (pluginExcutor == null) {
                 return;
             }
             List<Map<String, Object>> dataList = dataCache
                     .cleanIfIdle(1000L);
             if (dataList != null && dataList.size() != 0) {
-                logger.debug("flushed data: " + dataList.toString());
+                logger.info("run flush task," + dataCache.getStats() +", flushed data: " + dataList.toString());
             }
             if (dataList == null || dataList.size() == 0) {
                 pluginExcutor.excute(null, "aggregatedData");

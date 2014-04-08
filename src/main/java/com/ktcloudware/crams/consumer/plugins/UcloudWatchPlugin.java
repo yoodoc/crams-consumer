@@ -58,7 +58,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		DateFormatPlugin plugin = new DateFormatPlugin();
 		plugin.setProperties("datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS");
 		plugins.add(plugin);
-		plugins.add(new ReplaceVmAccountNamePlugin());
+		//plugins.add(new ReplaceVmAccountNamePlugin());
 		plugins.add(new ReplaceDiskFieldNamePlugin());
 		plugins.add(new CpuAvgPlugin());
 		plugins.add(new VbdReadWriteAvgPlugin());

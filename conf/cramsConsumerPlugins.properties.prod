@@ -1,10 +1,14 @@
 # <topic name>=plugin,plugin,...				   
 # prefixed path = com.ktcloudware.crams.consumer.plugins.   
 
+# for ucloud analysis indexer
 vm_perf_rrd=LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ESIndexingPlugin
 #old vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
-#yoodoc=UcloudWatchPlugin
 #disk_usage=DiskUsageCachePlugin
+
+# for ucloud watch agent
+#vm_perf_rrd=UcloudWatchPlugin
+
 
 # set comma seperated properties for specific plugins  
 
