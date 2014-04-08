@@ -125,10 +125,10 @@ public class ESBulkIndexer {
         IndexRequestBuilder source = null;
 
         Object routingKey = data.get(routingKeyName);
-        if (routingKey instanceof String && ((String) routingKey).isEmpty()) {
+        if (routingKey instanceof String && !((String) routingKey).isEmpty()) {
             routingKey = (String) data.get(routingKeyName);
         } else {
-            logger.warn("can't find routing key");
+            logger.warn("can't find routing key," + routingKeyName +", data=" + data.toString());
         }
 
         source = client.prepareIndex(index, typeName).setSource(data)
@@ -238,28 +238,31 @@ public class ESBulkIndexer {
         boolean isExist = false;
         try {
             isExist = doesIndexExist(client, index);
+            if(isExist) {
+                return true;
+            }
         } catch (Exception e) {
             logger.error("failed to check index existance", e);
             return false;
         }
-        if (!isExist) {
-            CreateIndexRequestBuilder cirb = client.admin().indices()
-                    .prepareCreate(index);
-            String source = settings;
-            cirb.setSettings(source);
-            CreateIndexResponse createIndexResponse = cirb.execute()
-                    .actionGet();
-            if (!createIndexResponse.isAcknowledged()) {
-                logger.error("ES_REQUEST_RESULT: create index failed. index name="
-                        + index);
-            } else {
-                logger.trace("ES_REQUEST_RESULT: success to create index. name="
-                        + index);
-                return true;
-            }
+       
+        CreateIndexRequestBuilder cirb = client.admin().indices()
+                .prepareCreate(index);
+        String source = settings;
+        cirb.setSettings(source);
+        CreateIndexResponse createIndexResponse = cirb.execute()
+                .actionGet();
+        if (!createIndexResponse.isAcknowledged()) {
+            logger.error("ES_REQUEST_RESULT: create index failed. index name="
+                    + index);
+        } else {
+            logger.info("ES_REQUEST_RESULT: success to create index. name="
+                    + index);
+            return true;
         }
         return false;
-    }
+    }       
+
 
     /**
      * delete index

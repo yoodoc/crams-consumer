@@ -35,13 +35,17 @@ public class DataAggregatorFlushTask extends TimerTask {
     @Override
     public void run() {
         for (DataAggregator dataCache : dataCacheList) {
-            logger.debug("run flush task at " + (new Date()).toString() + "," + dataCache.getStats() );
+            if (!dataCache.getStats().contains("remained perfData count=0")) {
+                logger.debug("run flush task at " + (new Date()).toString() + "," + dataCache.getStats() );
+            } 
             if (pluginExcutor == null) {
                 return;
             }
             List<Map<String, Object>> dataList = dataCache
                     .cleanIfIdle(1000L);
-            logger.debug("flushed data: " + dataList.toString());
+            if (dataList != null && dataList.size() != 0) {
+                logger.debug("flushed data: " + dataList.toString());
+            }
             if (dataList == null || dataList.size() == 0) {
                 pluginExcutor.excute(null, "aggregatedData");
             }
