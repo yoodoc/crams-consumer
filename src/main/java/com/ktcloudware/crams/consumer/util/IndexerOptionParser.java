@@ -18,7 +18,7 @@ public class IndexerOptionParser {
     private static final String OPTION_GROUP = "groupId";
     private static final String OPTION_ES_ADDRESS = "esAddress";
     private static final String OPTION_ES_CLUSTER_NAME = "clusterName";
-    private static final String OPTION_ES_INDEX_NAME = "indexer";
+    private static final String OPTION_ES_INDEX_NAME = "indexKey";
     private static final String OPTION_ES_BULK_INTERVAL_SEC = "requestIntervalMaxSec";
     private static final String OPTION_ES_BULKSIZE = "bulkRequestSize";
     private static final String OPTION_ES_ROUTINGKEY = "routingKey";

@@ -23,7 +23,7 @@ public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
         if (dataMap == null || dataMap.isEmpty()) {
-            throw new CramsPluginException("null input dataMap");
+            return dataMap;
         }
 
         dataMap = replaceName.excute(dataMap, dataTag);

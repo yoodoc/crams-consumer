@@ -32,7 +32,7 @@ public class KafkaConsumerService implements Runnable {
     private Logger logger;
     private Logger logger2;
     private CramsPluginExcutor runner;
-    private AverageDataCache dataStorage;
+    private DataAggregator dataStorage;
 
     /**
      * 
@@ -42,7 +42,7 @@ public class KafkaConsumerService implements Runnable {
      * @param dataStorage
      */
     public KafkaConsumerService(KafkaStream<byte[], byte[]> kafkaStream,
-             String topicName, CramsPluginExcutor runner, AverageDataCache dataStorage) {
+             String topicName, CramsPluginExcutor runner, DataAggregator dataStorage) {
         this.topicName = topicName;
         logger = LogManager.getLogger("CRAMS_CONSUMER");
         logger2 = LogManager.getLogger("KAFKADATA");
@@ -84,9 +84,10 @@ public class KafkaConsumerService implements Runnable {
                 }
 
                 //make average 
-                System.out.println("!!Insert data to cache,  " + userData.toString());
-                userData = dataStorage.getAverage(userData);
-                System.out.println("!!Insert data to cache,  " + dataStorage.getStats());
+                userData = dataStorage.add(userData);
+                if (null != userData) {
+                    logger.trace("produced avg data = " + userData);
+                }
                 runner.excute(userData,dataTag);
                 
                 logger.trace("total processing data : " + kafkaCount);

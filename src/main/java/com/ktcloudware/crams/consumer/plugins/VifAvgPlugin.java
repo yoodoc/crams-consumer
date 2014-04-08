@@ -21,7 +21,7 @@ public class VifAvgPlugin implements CramsConsumerPlugin {
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
         if (dataMap == null || dataMap.isEmpty()) {
-            throw new CramsPluginException("null dataMap");
+            return dataMap;
         }
 
         try {

@@ -13,33 +13,36 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.google.common.cache.*;
 import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
 import com.ktcloudware.crams.consumer.util.VMPerfDataUtil;
 
-public class AverageDataCache {
-    public static final String CPU_AVG = "cpu_avg";
+public class DataAggregator {
     private Logger logger;
     private Map<String, Map<String, Object>> vmPerfMap = new ConcurrentHashMap<String, Map<String, Object>>();
     private Map<String, List<Long>> vmTimestampsInMinutes = new ConcurrentHashMap<String, List<Long>>();
-    private Cache<String, Map<String, Object>> cache = null;
-
     private SimpleDateFormat originDateFormat = new SimpleDateFormat(
             "yyyy-MM-dd HH:mm:ss");
+    private int processedData = 0;
+    private String tag = "";
+    private long lastUpdateTime;
+
+    public static final String CPU_AVG = "cpu_avg";
     private static final String KEY_DELETEMETER = "::Delimeter::";
     public static final String DATE_TIME_KEY = "datetime";
     public static final String VM_KEY = "vm_uuid";
-    private long lastUpdateTime;
-    private int processedData = 0;
+    private static final String DATE_TIME_LONG = "datetime_in_millis";
 
-    public AverageDataCache() {
+    public DataAggregator() {
         logger = LogManager.getLogger("CRAMS_CONSUMER");
-        cache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
-                .maximumSize(10000).expireAfterWrite(30, TimeUnit.MINUTES)
-                .build();
     }
 
-    public synchronized Map<String, Object> getAverage(Map<String, Object> dataMap)
+    /**
+     * 
+     * @param dataMap
+     * @return
+     * @throws CramsPluginException
+     */
+    public synchronized Map<String, Object> add(Map<String, Object> dataMap)
             throws CramsPluginException {
         lastUpdateTime = System.currentTimeMillis();
 
@@ -56,31 +59,31 @@ public class AverageDataCache {
             Date date = originDateFormat.parse(timestamp);
             addData(vmId, TimeUnit.MILLISECONDS.toMinutes(date.getTime()),
                     dataMap);
-            avgDataMap = getFiveMinuteAvgData(vmId, false);
+            avgDataMap = getFiveMinutesAvgData(vmId, false);
         } catch (ParseException e) {
             logger.warn("failed to parse datetime, " + dataMap, e);
             throw new CramsPluginException(e);
         }
 
-        cache.put(vmId, dataMap);
         return avgDataMap;
     }
 
-    private void addData(String vmId, long timestampInMinutes,
+    private void addData(String vmId, long timestamp,
             Map<String, Object> dataMap) {
        // store new dataMap
         if (null == dataMap || dataMap.isEmpty()) {
             return;
         }
+        
         Map<String, Object> receivedData = new HashMap<String, Object>(dataMap);
-        vmPerfMap.put(vmId + KEY_DELETEMETER + timestampInMinutes, receivedData);
+        receivedData.put(DATE_TIME_LONG, TimeUnit.MINUTES.toMillis(timestamp));
+        vmPerfMap.put(vmId + KEY_DELETEMETER + timestamp, receivedData);
         List<Long> timestamps = vmTimestampsInMinutes.get(vmId);
         if (timestamps == null) {
             timestamps = new ArrayList<Long>();
         }
-        timestamps.add(timestampInMinutes);
+        timestamps.add(timestamp);
         vmTimestampsInMinutes.put(vmId, timestamps);
-
     }
 
     /**
@@ -93,22 +96,28 @@ public class AverageDataCache {
      * @return dataMap has fiveMinutes avg values. return null it needs more
      *         data to calculate avg values
      */
-    private synchronized Map<String, Object> getFiveMinuteAvgData(String vmId,
+    private synchronized Map<String, Object> getFiveMinutesAvgData(String vmId,
             boolean force) {
         // get avgDataMap
         List<Long> timestamps = vmTimestampsInMinutes.get(vmId);
         if (timestamps == null || timestamps.isEmpty()) {
             return null;
         }
-        long firstMinutes = timestamps.get(0);
-        long lastMinutes = timestamps.get(timestamps.size() - 1);
+        long firstTimestamp = timestamps.get(0);
+        long lastTimestamp = timestamps.get(timestamps.size() - 1);
         int dataSizeInSingleFiveMinutes = 0;
-      
+        
         //쌓여있는 모든 데이터를 제거하는 경우 
         processedData++;
+     
         if (true == force) {
             for (long timestamp : timestamps) {
-                if (5 > (timestamp - firstMinutes)) {
+                if (0 > timestamp - firstTimestamp) {
+                    System.out.println("!!!!");
+                    dataSizeInSingleFiveMinutes = 1;
+                    break;
+                }else if (5 > timestamp - firstTimestamp) {
+                    System.out.println("!!");
                     dataSizeInSingleFiveMinutes++;
                 } else {
                     break;
@@ -116,22 +125,25 @@ public class AverageDataCache {
             }
         }
         // 정상적으로 5분 데이터가 수집된 경우
-        else if (4 == (lastMinutes - firstMinutes)) {
+        else if (4 == lastTimestamp - firstTimestamp) {
             dataSizeInSingleFiveMinutes = timestamps.size();
-        }
-        // 5분 이상 데이터가 쌓이는 순간 이전 성능 값을 이용해 평균값을 계산한다.
-        else if (4 < (lastMinutes - firstMinutes)) {
-            System.out.println("!!size " + timestamps.size());
-            dataSizeInSingleFiveMinutes = timestamps.size() - 1;
+        } 
+        // 5분 이상 데이터가 쌓이는 경우, 역순의 데이터가 쌓이는 경우 이전 성능 값을 이용해 평균값을 계산한다.
+        else if ((4 < lastTimestamp - firstTimestamp)  || (0 > lastTimestamp - firstTimestamp)){
+             dataSizeInSingleFiveMinutes = timestamps.size() - 1;
         } else {
             processedData--;
         }
 
         if (0 == dataSizeInSingleFiveMinutes) {
             return null;
-        }
+        } 
+        
+        //update timestamps in datacache
+        System.out.println(dataSizeInSingleFiveMinutes+"!!"+timestamps.toString());
         timestamps = timestamps.subList(dataSizeInSingleFiveMinutes,
-                dataSizeInSingleFiveMinutes);
+                timestamps.size());
+        System.out.println(timestamps.toString());
         if (timestamps.isEmpty()) {
            vmTimestampsInMinutes.remove(vmId); 
         } else {
@@ -140,13 +152,20 @@ public class AverageDataCache {
         
         // calculate avg values
         VMPerfDataUtil perfData = new VMPerfDataUtil();
-        for (int i = 0; i < 5; i++) {
-            String key = vmId + KEY_DELETEMETER + (firstMinutes + i);
-            Map<String, Object> dataMap = vmPerfMap.remove(key);
-            perfData.addPerfData(dataMap);
-        }
         
-        return perfData.getAvgValuesData();
+        for (int i = 0; i < 5; i++) {
+            String key = vmId + KEY_DELETEMETER + (firstTimestamp + i);
+            perfData.addPerfData(vmPerfMap.remove(key));
+        }
+        Map<String, Object> data = perfData.getAvgValuesData();
+        if (null == data || data.isEmpty()) {
+            return null;
+        }
+         Long datetimeInMills = (Long) data.remove(DATE_TIME_LONG);
+        String datetime = originDateFormat.format(new Date(datetimeInMills));  
+        data.put(DATE_TIME_KEY, datetime);
+        //data.remove(DATE_TIME_IN_MINUTES);
+        return data;
     }
 
     /**
@@ -156,7 +175,7 @@ public class AverageDataCache {
      */
     public List<Map<String, Object>> clean(List<Map<String, Object>> avgs) {
         for (String vm : vmTimestampsInMinutes.keySet()) {
-            Map<String, Object> avgData = getFiveMinuteAvgData(vm, true);
+            Map<String, Object> avgData = getFiveMinutesAvgData(vm, true);
             avgs.add(avgData);
         }
         if (vmTimestampsInMinutes.size() != 0) {
@@ -171,7 +190,6 @@ public class AverageDataCache {
      * @return
      */
     public List<Map<String, Object>> cleanIfIdle(long timeDuration) {
-    	System.out.println("!!cleanIfIdle " + lastUpdateTime + "," + timeDuration + "," + System.currentTimeMillis());
         List<Map<String, Object>> avgs = new ArrayList<Map<String, Object>>();
         if ((lastUpdateTime + timeDuration) < System.currentTimeMillis()) {
             avgs = clean(avgs);
@@ -180,7 +198,11 @@ public class AverageDataCache {
     }
     
     public String getStats() {
-        return "processed avg data count=" + processedData + ",remained vm count=" + vmTimestampsInMinutes.size() + ",remained perfData count=" + vmPerfMap.size() ;
+        return tag +" processed avg data count=" + processedData + ",remained vm count=" + vmTimestampsInMinutes.size() + ",remained perfData count=" + vmPerfMap.size() ;
+    }
+
+    public void setTag(String string) {
+        tag  = string; 
     }
     
 }

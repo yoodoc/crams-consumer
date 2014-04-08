@@ -2,17 +2,23 @@ package com.ktcloudware.crams.consumer.plugins;
 
 import java.util.Map;
 
-public class SystemOutPlugin implements CramsConsumerPlugin {
-    public SystemOutPlugin() {
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+public class SimpleLoggingPlugin implements CramsConsumerPlugin {
+    private Logger logger = LogManager.getLogger("PLUGINS");
+    
+    public SimpleLoggingPlugin() {
+        logger = LogManager.getLogger("PLUGINS");
     }
 
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) {
         if (dataMap == null) {
-            System.out.println("!![SystemOutPlugin] null dataMap");
+            logger.info("null dataMap");
         }
-        System.out.println("!![SystemOutPlugin]" + dataMap.toString());
-        return null;
+        logger.info("filtered data" +  dataMap.toString());
+        return dataMap;
     }
 
     @Override

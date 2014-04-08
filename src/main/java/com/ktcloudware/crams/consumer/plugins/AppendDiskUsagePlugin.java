@@ -33,6 +33,9 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
         if (!ready) {
             throw new CramsPluginException("not ready to excute");
         }

@@ -16,7 +16,7 @@ public class UcloudDBSelector {
     private static final String STAGING = "staging";
     private static final String PRODUCT = "product";
 
-    private static Logger logger = LogManager.getLogger("CRAMS_CONSUMER");
+    private static Logger logger = LogManager.getLogger("DB_SELECTOR");
 
     private String driver;
     private String url;

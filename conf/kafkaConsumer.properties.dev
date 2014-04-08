@@ -11,6 +11,6 @@ zookeeper=localhost:2181
 topic=test
 
 # offset policy for new topic 
-#resetOffset=smallest
-resetOffset=largest
+resetOffset=smallest
+#resetOffset=largest
 

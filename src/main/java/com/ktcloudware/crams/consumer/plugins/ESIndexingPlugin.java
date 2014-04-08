@@ -11,8 +11,6 @@ import com.ktcloudware.crams.consumer.datatype.ESConfig;
 import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
 public class ESIndexingPlugin implements CramsConsumerPlugin {
-	private static final String DATETIME = "datetime";
-
 	private ESBulkIndexer esBulkIndexer;
 	private ESConfig esConfig;
 	Logger logger;
@@ -40,7 +38,6 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 					e);
 			throw new CramsPluginException("failed to initiate ESBulkIndexer,"
 					+ e.getMessage(), e);
-
 		}
 	}
 
@@ -75,12 +72,16 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 			String dataTag) throws CramsPluginException {
 		long startTime = System.currentTimeMillis();
 		if (dataMap == null || dataMap.isEmpty()) {
-			throw new CramsPluginException("null data input," + dataMap
-					+ dataTag);
+		    logger.debug("request to flush ES indexer buffer");
+		    sendBulkRequest(startTime);
+		    return null;
+			//throw new CramsPluginException("null data input," + dataMap + dataTag);
 		}
+		
 		String index = parseIndexField(dataMap, esConfig.indexKey);
+		
 		if (index == null || index.isEmpty()) {
-			logger.error("fail to add bulk request data, " + dataMap);
+			logger.error("missing indexKey'" + esConfig.indexKey + "', " + dataMap.toString());
 			throw new CramsPluginException("fail to add bulk request data, "
 					+ dataMap);
 		}
@@ -88,13 +89,22 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 		esBulkIndexer.addRequestData(index, dataMap, dataTag);
 		logger.trace("append bulk request data " + dataMap);
 		long currentTime = System.currentTimeMillis();
-		if (esBulkIndexer.getSizeOfBulkRequest() >= esConfig.bulkRequestSize
+		sendBulkRequest(currentTime);
+		long endTime = System.currentTimeMillis();
+		logger.trace("plugin excution time : " + (endTime - startTime) + "msec");
+		return null;
+	}
+
+    private void sendBulkRequest(long currentTime)
+            throws CramsPluginException {
+        if (esBulkIndexer.getSizeOfBulkRequest() >= esConfig.bulkRequestSize
 				|| ((esBulkIndexer.getSizeOfBulkRequest() != 0) && (currentTime - esBulkIndexer
 						.getLastSendTime()) > esConfig.maxRequestIntervalSec * 1000)) {
 			// insert data To ElasticSearch
 			int count = 0;
+			logger.trace("attempt send ES bulk request, " +  esBulkIndexer.getSizeOfBulkRequest());
 			count = esBulkIndexer.sendBulkRequest();
-			logger.info("send bulk " + index + " request : " + count);
+			logger.info("send bulk request : " + count + ",buffered request count=" + esBulkIndexer.getSizeOfBulkRequest());
 			if (count == 0) {
 				try {
 					esBulkIndexer.initESClient();
@@ -106,10 +116,7 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 				}
 			}
 		}
-		long endTime = System.currentTimeMillis();
-		logger.trace("plugin excution time : " + (endTime - startTime) + "msec");
-		return null;
-	}
+    }
 
 	@Override
 	public boolean needProperties() {
@@ -133,13 +140,13 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 			}
 			return "cdp-" + date.split("T")[0].split(" ")[0];
 		} else if ("test".equalsIgnoreCase(indexKey)) {
-			String date = (String) dataMap.get(indexKey);
+			String date = (String) dataMap.get("datetime");
 			if (date == null) {
 				return null;
 			}
 			return "test-" + date.split("T")[0].split(" ")[0];
 		} else if ("yd".equalsIgnoreCase(indexKey)) {
-			String date = (String) dataMap.get(indexKey);
+			String date = (String) dataMap.get("datetime");
 			if (date == null) {
 				return null;
 			}

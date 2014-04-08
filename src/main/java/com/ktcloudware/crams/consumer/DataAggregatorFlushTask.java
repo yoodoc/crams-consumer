@@ -9,48 +9,55 @@ import java.util.TimerTask;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-public class AverageDataCacheFlushTimerTask extends TimerTask {
-    private List<AverageDataCache> dataAggList = null;
+import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
+
+public class DataAggregatorFlushTask extends TimerTask {
+    private List<DataAggregator> dataCacheList = null;
     private CramsPluginExcutor pluginExcutor;
 	private Logger logger;
 
-    public AverageDataCacheFlushTimerTask(AverageDataCache dataAggregator,
+    public DataAggregatorFlushTask(DataAggregator dataCache,
             CramsPluginExcutor pluginExcutor) {
-        dataAggList = new ArrayList<AverageDataCache>();
-        if (dataAggregator != null) {
-            dataAggList.add(dataAggregator);
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
+        dataCacheList = new ArrayList<DataAggregator>();
+        if (dataCache != null) {
+            dataCacheList.add(dataCache);
         }
         if (pluginExcutor != null) {
             this.pluginExcutor = pluginExcutor;
         }
     }
 
-    public AverageDataCacheFlushTimerTask() {
+    public DataAggregatorFlushTask() {
     	logger = LogManager.getLogger("CRAMS_CONSUMER");
     }
 
     @Override
     public void run() {
-        for (AverageDataCache dataAggregator : dataAggList) {
-        	logger.debug("run flush task at " + (new Date()).toString() + "," + dataAggregator.getStats() );
+        for (DataAggregator dataCache : dataCacheList) {
+            logger.debug("run flush task at " + (new Date()).toString() + "," + dataCache.getStats() );
             if (pluginExcutor == null) {
                 return;
             }
-            List<Map<String, Object>> dataList = dataAggregator
+            List<Map<String, Object>> dataList = dataCache
                     .cleanIfIdle(1000L);
             logger.debug("flushed data: " + dataList.toString());
+            if (dataList == null || dataList.size() == 0) {
+                pluginExcutor.excute(null, "aggregatedData");
+            }
+                
             for (Map<String, Object> dataMap : dataList) {
                 pluginExcutor.excute(dataMap, "aggregatedData");
             }
         }
     }
 
-    public void addAverageDataCache(AverageDataCache dataAggregator) {
-        if (dataAggList == null) {
-            dataAggList = new ArrayList<AverageDataCache>();
+    public void addAverageDataCache(DataAggregator dataAggregator) {
+        if (dataCacheList == null) {
+            dataCacheList = new ArrayList<DataAggregator>();
         }
         if (dataAggregator != null) {
-            dataAggList.add(dataAggregator);
+            dataCacheList.add(dataAggregator);
         }
 
     }

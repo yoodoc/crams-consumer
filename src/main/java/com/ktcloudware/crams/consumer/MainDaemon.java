@@ -85,20 +85,21 @@ public class MainDaemon implements Daemon {
             List<KafkaStream<byte[], byte[]>> streams = consumerGroup
                     .getKafkaStreams(topic);
             
-            CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
-
             //create dataAggregator & flushing task for over stacked data
-            AverageDataCache dataAggregator = new AverageDataCache();
-            AverageDataCacheFlushTimerTask flushTimerTask = new AverageDataCacheFlushTimerTask();
-            flushTimerTask.addAverageDataCache(dataAggregator);
+            CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
+            DataAggregatorFlushTask flushTimerTask = new DataAggregatorFlushTask();
             flushTimerTask.addCramsPluginExcutor(pluginExcutor);
            
             try {
                 for (int i = 0; i < streams.size(); i++) {
+                    DataAggregator dataCache = new DataAggregator();
+                    dataCache.setTag("topic["+i+"]");
+                    flushTimerTask.addAverageDataCache(dataCache);
+                    
                     //create plugin runner
                     logger.info("start thread=" + i + " for topic=" + topic
                             + " " + streams.size());
-                    Runnable worker = new KafkaConsumerService(streams.get(i), topic, pluginExcutor, dataAggregator);
+                    Runnable worker = new KafkaConsumerService(streams.get(i), topic, pluginExcutor, dataCache);
                     executor.execute(worker);
                 }
             } catch (Exception e) {
@@ -109,7 +110,6 @@ public class MainDaemon implements Daemon {
             }
             
             //run flushing task 
-            
             flushingTaskScheduler.scheduleAtFixedRate(flushTimerTask, 10000, 10000);
             logger.info("run data aggregator");
         }

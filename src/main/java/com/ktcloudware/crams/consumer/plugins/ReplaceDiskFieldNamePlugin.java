@@ -17,6 +17,10 @@ public class ReplaceDiskFieldNamePlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
+        
         Map<String, Object> newData = new HashMap<String, Object>();
         for (String keyName : dataMap.keySet()) {
             Matcher hdxMatcher = hdxPattern.matcher(keyName);

@@ -19,6 +19,9 @@ public class CpuAvgPlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
         try {
             dataMap = KafkaConsumerPluginUtil.addAverageValue("cpu[0-9]+",
                     CPU_AVG, dataMap);

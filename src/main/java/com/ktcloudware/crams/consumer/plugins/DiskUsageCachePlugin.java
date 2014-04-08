@@ -42,10 +42,9 @@ public class DiskUsageCachePlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
-        // calculate disk usage rate
-        if (dataMap == null || dataMap.isEmpty())
-            return null;
-
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
         // parsing disk_usage data
         String vmUuid = null;
         String vdiName = null;

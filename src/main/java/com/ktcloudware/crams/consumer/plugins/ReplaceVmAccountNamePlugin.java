@@ -17,6 +17,10 @@ public class ReplaceVmAccountNamePlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
+        
         Object originName = dataMap.get(VM_ACCOUNT_NAME);
 
         if (!(originName instanceof String)) {

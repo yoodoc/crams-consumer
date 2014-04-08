@@ -77,6 +77,10 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	@Override
 	public Map<String, Object> excute(Map<String, Object> xenRrd, String dataTag)
 			throws CramsPluginException {
+	    if (xenRrd == null || xenRrd.isEmpty()) {
+            return xenRrd;
+        }
+	    
 		// make avg data from vm rrd
 		xenRrd = excuteCramsPlugins(xenRrd, dataTag);
 

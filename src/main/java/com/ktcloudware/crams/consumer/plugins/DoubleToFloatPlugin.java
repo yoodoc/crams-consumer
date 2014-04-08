@@ -7,6 +7,9 @@ public class DoubleToFloatPlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
         Map<String, Object> newData = new HashMap<String, Object>();
         for (String dataKey : dataMap.keySet()) {
             Object value = dataMap.get(dataKey);

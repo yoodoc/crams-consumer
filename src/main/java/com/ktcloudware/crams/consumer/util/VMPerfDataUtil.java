@@ -6,7 +6,8 @@ import java.util.Map;
 public class VMPerfDataUtil {
     int count = 0;
     Map<String, Object> avgDataMap = null;
-
+    private static final String DATETIME_IN_MILLIS = "datetime_in_millis";
+    
     Long memory_internal_free;
    
     Long vbd_a_read;
@@ -52,17 +53,23 @@ public class VMPerfDataUtil {
     Float cpu13 = null;
     Float cpu14 = null;
     Float cpu15 = null;
-    
+     
+    /**
+     * 
+     * @param dataMap
+     * @param datetimeInMinutes
+     */
     public void addPerfData(Map<String, Object> dataMap){
         if (dataMap == null || dataMap.isEmpty()) {
             return;
         }
-        System.out.println("!!!add" + dataMap.toString());
+     
         count++;
         if(avgDataMap == null || avgDataMap.isEmpty()) {
             avgDataMap = new HashMap<String, Object>(dataMap);
             return;
         }
+       
         for (String keyName: dataMap.keySet()) { 
             if (keyName.matches("cpu[0-9]+")) {
                 Float cpuValue =  null;
@@ -83,10 +90,17 @@ public class VMPerfDataUtil {
                 }
                 cpuValueTotal = cpuValueTotal * (count-1);
                 cpuValueTotal += cpuValue;
-                System.out.println("!total" + cpuValueTotal);
                this.avgDataMap.put(keyName, new Float(cpuValueTotal/count));
-            } else if (keyName.matches("vbd_[a-z]_[read|write]") || keyName.matches("vif_[0-9]_[rx|tx]") || keyName.equals("memory_internal_free")) {
-                Long value = (Long) dataMap.get(keyName);
+            } else if (keyName.equals(DATETIME_IN_MILLIS) || keyName.matches("vbd_[a-z]_[read|write]") || keyName.matches("vif_[0-9]_[rx|tx]") || keyName.equals("memory_internal_free")) {
+                Long value;
+                if (dataMap.get(keyName) instanceof Integer) {
+                    value = ((Integer) dataMap.get(keyName)).longValue();
+                }
+                if (dataMap.get(keyName) instanceof Long) {
+                    value = (Long) dataMap.get(keyName);
+                } else {
+                    continue;
+                }
                 Long valueTotal = (Long) this.avgDataMap.get(keyName);
                 if (valueTotal == null) { 
                     continue;
@@ -95,7 +109,7 @@ public class VMPerfDataUtil {
                 valueTotal += value;
                 this.avgDataMap.put(keyName, valueTotal/count);
             }
-        }
+         }
         
        /* vbd_a_read =(Long)dataMap.get("vbd_a_read");
           vbd_b_read =(Long)dataMap.get("vbd_b_read");
@@ -148,14 +162,12 @@ public class VMPerfDataUtil {
         if (avgDataMap == null || avgDataMap.isEmpty()) {
             return null;
         }
-        System.out.println("!!!!!!add" + avgDataMap.toString());
         Map<String, Object> avgFloatValuesData = new HashMap<String, Object>();
         for(String key: avgDataMap.keySet()) {
             Object value = avgDataMap.get(key);
             if (value instanceof Double) {
                 avgFloatValuesData.put(key, ((Double)value).floatValue());
             } else {
-                System.out.println("!! here" + key + value);
                 avgFloatValuesData.put(key, value);
             }
         }

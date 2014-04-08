@@ -39,12 +39,13 @@
 			<outputDirectory>lib</outputDirectory>
 			<useStrictFiltering>true</useStrictFiltering>
 			<useProjectArtifact>true</useProjectArtifact>
-			<excludes>
+			<!-- <excludes>
 				<exclude>com.ktcloudware:crams-consumer</exclude>
-			</excludes>
+			</excludes>-->
 			<unpack>false</unpack>
-			<scope>runtime</scope>
+			<scope>runtime</scope> 
 		</dependencySet>
+		<!-- 
 		<dependencySet>
 			<outputDirectory>/</outputDirectory>
 			<useStrictFiltering>true</useStrictFiltering>
@@ -54,7 +55,8 @@
 			</includes>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
-		</dependencySet>
+		</dependencySet>		
+	-->
 	</dependencySets>
 </assembly>
 
