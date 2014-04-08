@@ -9,8 +9,6 @@ import java.util.TimerTask;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
-
 public class DataAggregatorFlushTask extends TimerTask {
     private List<DataAggregator> dataCacheList = null;
     private CramsPluginExcutor pluginExcutor;
@@ -36,7 +34,7 @@ public class DataAggregatorFlushTask extends TimerTask {
     public void run() {
         for (DataAggregator dataCache : dataCacheList) {
             if (!dataCache.getStats().contains("remained perfData count=0")) {
-                logger.debug("run flush task at " + (new Date()).toString() + "," + dataCache.getStats() );
+                logger.info("run flush task at " + (new Date()).toString() + "," + dataCache.getStats() );
             } 
             if (pluginExcutor == null) {
                 return;
