@@ -21,6 +21,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	private static final String UCLOUD_SERVER_NAMESPACE = "ucloud/server";
 	private static final String UCLOUD_RDBAAS_NAMESPACE = "ucloud/db";
 	private static final String UCLOUD_VR_NAMESPACE = "ucloud/vr";
+    private static final String VM_ACCOUNT_NAME = "vm_account_name";
 
 	private String properties;
 	private Logger logger;
@@ -113,7 +114,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		for (int i = 0; i < MAX_RETRY; i++) {
 			String response = send(ucloudWatchRequestParmaeter);
 			if (response == null) {
-				System.out.println("!! failed");
 				logger.error(ucloudWatchRequestParmaeter
 						+ ": failed to send watch request at " + dataTag
 						+ ", data map :" + xenRrd);
@@ -128,6 +128,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	}
 
 	private String send(String ucloudWatchRequestParmaeter) {
+	    System.out.println("!!" + ucloudWatchRequestParmaeter);
 		return HttpClient.sendRequest(ucloudWatchRequestParmaeter);
 	}
 
@@ -152,12 +153,13 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 			// create "name" demension value
 			
 			String vmName = (String) xenRrd.get(VM_NAME);
+			
 			String vmUuid = (String) xenRrd.get(VM_UUID);
 			if (null == vmName || null == vmUuid) {
 				throw new CramsPluginException("failed to create demension field," + xenRrd.toString());
 			}
 			if (UCLOUD_SERVER_NAMESPACE.equalsIgnoreCase(namespace)) {
-				vmName = "(" + vmUuid + ")";
+				vmName += "(" + vmUuid + ")";
 				String vmTemplateName = (String) xenRrd.get("vm_template_name");
 				if (!"".equals(vmTemplateName)) {
 					demensionList.add(new UcloudWatchDemension("templatename",
@@ -294,7 +296,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 
 	private String parseOwnerField(Map<String, Object> xenRrd) {
 		try {
-			return (String) xenRrd.get("vm_account_name");
+			return (String) xenRrd.get(VM_ACCOUNT_NAME);
 		} catch (Exception e) {
 			logger.error("failed to parse vm_account_name, " + xenRrd, e);
 		}

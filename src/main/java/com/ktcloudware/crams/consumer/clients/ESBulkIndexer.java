@@ -112,12 +112,17 @@ public class ESBulkIndexer {
     private void appendBulkRequestBuilder(String index, String typeName,
             Map<String, Object> data, String dataTag) {
         // create new index if does not exist.
-
-        boolean result = createIndexAndMappingsIfNeeded(index, indexSettings,
-                indexMappings);
-        if (result) {
-            logger.info("create new index=" + index + " with mapping="
-                    + indexMappings + ", dataTag=" + dataTag);
+        boolean result;
+        try {
+            result = createIndexAndMappingsIfNeeded(index, indexSettings,
+                    indexMappings);
+            if (result) {
+                logger.info("create new index=" + index + " with mapping="
+                        + indexMappings + ", dataTag=" + dataTag);
+            } 
+        } catch (CramsException e) {
+            logger.error("failed to create new index, index='" + index + "'");
+            return;
         }
 
         // set routing key for single index request, then add it to
@@ -195,9 +200,10 @@ public class ESBulkIndexer {
      * @param settings
      * @param mappings
      * @return
+     * @throws CramsException 
      */
     private boolean createIndexAndMappingsIfNeeded(String index,
-            String settings, String mappings) {
+            String settings, String mappings) throws CramsException {
         if (indexListToCheckExistance.contains(index)) {
             return false;
         }
@@ -206,21 +212,23 @@ public class ESBulkIndexer {
             indexResult = createIndexIfNeeded(index, settings);
         } catch (Exception e) {
             logger.error("index creation failed", e);
+            throw new CramsException("index creation failed", e);
         }
 
         if (!indexResult) {
-            logger.error("index creation failed");
+            logger.info("index '" + index + "' already exist");
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                logger.error("sleep interrupted", e);
+                logger.warn("sleep interrupted", e);
             }
-        }
+        } 
 
         try {
             pushMappingIfNeeded(index, mappings);
         } catch (Exception e) {
-            logger.error("index creation failed", e);
+            logger.warn("index creation failed", e);
+            return false;
         }
 
         indexListToCheckExistance.add(index);
@@ -233,17 +241,19 @@ public class ESBulkIndexer {
      * @param index
      * @param settings
      * @return
+     * @throws CramsException 
      */
-    public boolean createIndexIfNeeded(String index, String settings) {
+    public boolean createIndexIfNeeded(String index, String settings) throws CramsException {
         boolean isExist = false;
         try {
             isExist = doesIndexExist(client, index);
             if(isExist) {
-                return true;
+                return false;
             }
         } catch (Exception e) {
-            logger.error("failed to check index existance", e);
-            return false;
+            String errmsg = "failed to check index existance";
+            logger.error(errmsg, e);
+            throw new CramsException(errmsg, e);
         }
        
         CreateIndexRequestBuilder cirb = client.admin().indices()
@@ -253,14 +263,15 @@ public class ESBulkIndexer {
         CreateIndexResponse createIndexResponse = cirb.execute()
                 .actionGet();
         if (!createIndexResponse.isAcknowledged()) {
-            logger.error("ES_REQUEST_RESULT: create index failed. index name="
-                    + index);
-        } else {
+            String errmsg = "ES_REQUEST_RESULT: create index failed. index name="
+                    + index;
+            logger.error(errmsg);
+            throw new CramsException(errmsg);
+        } 
+        
             logger.info("ES_REQUEST_RESULT: success to create index. name="
                     + index);
             return true;
-        }
-        return false;
     }       
 
 

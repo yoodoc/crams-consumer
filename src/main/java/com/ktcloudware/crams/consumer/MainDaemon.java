@@ -28,6 +28,7 @@ public class MainDaemon implements Daemon {
 
     private Logger logger = LogManager.getLogger("CRAMS_CONSUMER");
     private Timer flushingTaskScheduler;
+    private DataAggregatorFlushTask flushTimerTask;
 
     @Override
     public void init(DaemonContext arg0) throws CramsException {
@@ -64,6 +65,7 @@ public class MainDaemon implements Daemon {
         	flushingTaskScheduler.purge();
         	flushingTaskScheduler = null;
         }
+        flushTimerTask.clean();
         
         logger.info("daemon shutdown");
     }
@@ -87,7 +89,7 @@ public class MainDaemon implements Daemon {
             
             //create dataAggregator & flushing task for over stacked data
             CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
-            DataAggregatorFlushTask flushTimerTask = new DataAggregatorFlushTask();
+            flushTimerTask = new DataAggregatorFlushTask();
             flushTimerTask.addCramsPluginExcutor(pluginExcutor);
            
             try {

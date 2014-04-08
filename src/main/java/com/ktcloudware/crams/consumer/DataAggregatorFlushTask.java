@@ -31,6 +31,26 @@ public class DataAggregatorFlushTask extends TimerTask {
 
     @Override
     public void run() {
+        clean();
+    }
+
+    public void addAverageDataCache(DataAggregator dataAggregator) {
+        if (dataCacheList == null) {
+            dataCacheList = new ArrayList<DataAggregator>();
+        }
+        if (dataAggregator != null) {
+            dataCacheList.add(dataAggregator);
+        }
+
+    }
+
+    public void addCramsPluginExcutor(CramsPluginExcutor pluginExcutor) {
+        if (pluginExcutor != null) {
+            this.pluginExcutor = pluginExcutor;
+        }
+    }
+
+    public synchronized void clean() {
         for (DataAggregator dataCache : dataCacheList) {
             if (pluginExcutor == null) {
                 return;
@@ -48,21 +68,6 @@ public class DataAggregatorFlushTask extends TimerTask {
                 pluginExcutor.excute(dataMap, "aggregatedData");
             }
         }
-    }
-
-    public void addAverageDataCache(DataAggregator dataAggregator) {
-        if (dataCacheList == null) {
-            dataCacheList = new ArrayList<DataAggregator>();
-        }
-        if (dataAggregator != null) {
-            dataCacheList.add(dataAggregator);
-        }
-
-    }
-
-    public void addCramsPluginExcutor(CramsPluginExcutor pluginExcutor) {
-        if (pluginExcutor != null) {
-            this.pluginExcutor = pluginExcutor;
-        }
+        
     }
 }
