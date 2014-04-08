@@ -26,8 +26,6 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 			throw new CramsPluginException(e.getMessage(), e);
 		}
 
-		logger.info("load es indexer properites : " + esConfig.toString());
-
 		// create ESBulkIndexer instance
 		try {
 			esBulkIndexer = new ESBulkIndexer(esConfig.esAddressList,
@@ -72,7 +70,6 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 			String dataTag) throws CramsPluginException {
 		long startTime = System.currentTimeMillis();
 		if (dataMap == null || dataMap.isEmpty()) {
-		    logger.debug("request to flush ES indexer buffer");
 		    sendBulkRequest(startTime);
 		    return null;
 			//throw new CramsPluginException("null data input," + dataMap + dataTag);
@@ -87,11 +84,11 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 		}
 
 		esBulkIndexer.addRequestData(index, dataMap, dataTag);
-		logger.trace("append bulk request data " + dataMap);
+		//logger.trace("append bulk request data " + dataMap);
 		long currentTime = System.currentTimeMillis();
 		sendBulkRequest(currentTime);
 		long endTime = System.currentTimeMillis();
-		logger.trace("plugin excution time : " + (endTime - startTime) + "msec");
+		//logger.trace("plugin excution time : " + (endTime - startTime) + "msec");
 		return null;
 	}
 
@@ -102,9 +99,9 @@ public class ESIndexingPlugin implements CramsConsumerPlugin {
 						.getLastSendTime()) > esConfig.maxRequestIntervalSec * 1000)) {
 			// insert data To ElasticSearch
 			int count = 0;
-			logger.trace("attempt send ES bulk request, " +  esBulkIndexer.getSizeOfBulkRequest());
+			int bufferedRequestSize = esBulkIndexer.getSizeOfBulkRequest();
 			count = esBulkIndexer.sendBulkRequest();
-			logger.info("send bulk request : " + count + ",buffered request count=" + esBulkIndexer.getSizeOfBulkRequest());
+			logger.info("send bulk request : " + count + ",buffered request count=" + bufferedRequestSize + "--> " + esBulkIndexer.getSizeOfBulkRequest());
 			if (count == 0) {
 				try {
 					esBulkIndexer.initESClient();
