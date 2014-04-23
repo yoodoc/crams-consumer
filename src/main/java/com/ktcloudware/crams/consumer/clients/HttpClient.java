@@ -12,7 +12,7 @@ public class HttpClient {
     private static Logger logger;
 
     public static String sendRequest(String requestUrl) {
-        logger = LogManager.getLogger("HTTP");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
         HttpURLConnection httpConnection = null;
         InputStream responseStream = null;
         long elapsedTime = -1;
@@ -20,20 +20,16 @@ public class HttpClient {
         String response = null;
         try {
             long startTime = System.currentTimeMillis();
-
             URL url = new URL(requestUrl);
-
             httpConnection = (HttpURLConnection) url.openConnection();
             httpConnection.setRequestMethod("GET");
             responseStream = httpConnection.getInputStream();
-
             StringBuffer sb = new StringBuffer();
             byte[] b = new byte[4096];
             for (int n; (n = responseStream.read(b)) != -1;) {
                 sb.append(new String(b, 0, n));
             }
             responseStream.close();
-
             response = sb.toString();
             logger.trace("response:" + response);
             int responseCode = httpConnection.getResponseCode();
@@ -41,11 +37,10 @@ public class HttpClient {
                 throw new IOException("abnormal HTTP response code:"
                         + responseCode);
             }
-
-            elapsedTime = System.currentTimeMillis() - startTime;
-
-            logger.trace("single transaction took " + elapsedTime + " msec");
+           elapsedTime = System.currentTimeMillis() - startTime;
+           logger.trace("single transaction took " + elapsedTime + " msec");
         } catch (IOException e) {
+        	e.printStackTrace();
             if (httpConnection != null) {
                 try {
                     InputStream in = httpConnection.getErrorStream();

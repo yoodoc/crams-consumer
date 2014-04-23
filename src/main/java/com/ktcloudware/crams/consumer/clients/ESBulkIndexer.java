@@ -40,7 +40,7 @@ public class ESBulkIndexer {
     private String routingKeyName;
     private List<String> indexListToCheckExistance = null;
 
-    private Logger logger = LogManager.getLogger("ESCLIENT");
+    private Logger logger = LogManager.getLogger("ES_CLIENT");
     private String clusterName;
     private List<InetSocketTransportAddress> esAddressList;
 
@@ -52,16 +52,12 @@ public class ESBulkIndexer {
      * @param routingKeyName
      * @param indexSettings
      * @param indexMappings
-<<<<<<< HEAD
      * @throws CramsException
-=======
-     * @throws CramsException 
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
      */
     public ESBulkIndexer(List<InetSocketTransportAddress> esAddressList,
             String clusterName, String type, String routingKeyName,
             String indexSettings, String indexMappings) throws CramsException {
-        logger = LogManager.getLogger("ESCLIENT");
+        logger = LogManager.getLogger("ES_CLIENT");
 
         this.routingKeyName = routingKeyName;
         this.typeInIndex = type;
@@ -74,18 +70,13 @@ public class ESBulkIndexer {
 
     }
 
-<<<<<<< HEAD
     public void initESClient() throws CramsException {
-=======
-    public void initESClient() throws CramsException{
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         Settings settings = ImmutableSettings.settingsBuilder()
                 .put("cluster.name", clusterName).build();
         TransportClient transportClient = null;
         try {
             transportClient = new TransportClient(settings);
         } catch (Exception e) {
-<<<<<<< HEAD
             throw new CramsException(
                     "failed to create ES TransportClient instance", e);
         }
@@ -93,21 +84,6 @@ public class ESBulkIndexer {
             // TODO 일부 es master 접속 불가시에 가용한 es master에만 접속하도록 하는 부분이며, 수정이
             // 필요하다.
             transportClient.addTransportAddress(address);
-=======
-            throw new CramsException("failed to create ES TransportClient instance", e);
-        }
-        for (InetSocketTransportAddress address : esAddressList) {
-            // FIXME 일부 es master 접속 불가시에 가용한 es master에만 접속하도록 하는 부분이며, 수정이
-            // 필요하다.
-            System.out.println("!!!!! init es" + address.toString());
-
-            try {
-                transportClient.addTransportAddress(address);
-            } catch (Exception e) {
-                logger.error("ES connection error. failed to connect to "
-                        + address.toString(), e);
-            }
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
         this.client = transportClient;
 
@@ -136,69 +112,34 @@ public class ESBulkIndexer {
     private void appendBulkRequestBuilder(String index, String typeName,
             Map<String, Object> data, String dataTag) {
         // create new index if does not exist.
-<<<<<<< HEAD
-
-        boolean result = createIndexAndMappingsIfNeeded(index, indexSettings,
-                indexMappings);
-        if (result) {
-            logger.info("create new index=" + index + " with mapping="
-                    + indexMappings + ", dataTag=" + dataTag);
-=======
+        boolean result;
         try {
-            boolean result = createIndexAndMappingsIfNeeded(index,
-                    indexSettings, indexMappings);
-            if (result == true) {
+            result = createIndexAndMappingsIfNeeded(index, indexSettings,
+                    indexMappings);
+            if (result) {
                 logger.info("create new index=" + index + " with mapping="
                         + indexMappings + ", dataTag=" + dataTag);
-            }
-        } catch (Exception e1) {
-            logger.error("failed to create index ES request, " + index + ", "
-                    + e1.getMessage(), e1);
+            } 
+        } catch (CramsException e) {
+            logger.error("failed to create new index, index='" + index + "'");
             return;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
 
         // set routing key for single index request, then add it to
         // bulkRequestBuilder
         IndexRequestBuilder source = null;
-<<<<<<< HEAD
 
         Object routingKey = data.get(routingKeyName);
-        if (routingKey instanceof String && ((String) routingKey).isEmpty()) {
+        if (routingKey instanceof String && !((String) routingKey).isEmpty()) {
             routingKey = (String) data.get(routingKeyName);
         } else {
-            logger.warn("can't find routing key");
+            logger.warn("can't find routing key," + routingKeyName +", data=" + data.toString());
         }
 
         source = client.prepareIndex(index, typeName).setSource(data)
                 .setRouting((String) routingKey);
         this.bulkRequestBuilder.add(source);
 
-=======
-        try {
-            Object routingKey = data.get(routingKeyName);
-            if (routingKey == null) {
-                logger.warn("can't find routing key");
-                return;
-            } else if (routingKey instanceof String) {
-                routingKey = (String) data.get(routingKeyName);
-            } else {
-                routingKey = String.valueOf(data.get(routingKeyName));
-            }
-
-            if (routingKey != null && !((String) routingKey).isEmpty()) {
-                source = client.prepareIndex(index, typeName).setSource(data)
-                        .setRouting((String) routingKey);
-                this.bulkRequestBuilder.add(source);
-            } else {
-                // routingKey에 해당하는 필드가 json 메시지에 포함되지 않는 경우에 해당 메시지는 전달되지 않는다.
-                logger.warn("Missing field to generate routing key. data:"
-                        + data);
-            }
-        } catch (Exception e) {
-            logger.error("failed to append ES request, " + e.getMessage(), e);
-        }
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     }
 
     /**
@@ -206,22 +147,15 @@ public class ESBulkIndexer {
      * data
      * 
      * @return num of sended data
-<<<<<<< HEAD
      * @throws CramsException
      */
     public int sendBulkRequest() {
-=======
-     * @throws CramsException 
-     */
-    public int sendBulkRequest() throws CramsException {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         // send bulk request using bulkRequestBulker
         int sizeOfBulkRequest = this.bulkRequestBuilder.numberOfActions();
         try {
             BulkResponse bulkResponse = this.bulkRequestBuilder.execute()
                     .actionGet();
             if (bulkResponse.hasFailures()) {
-<<<<<<< HEAD
                 throw new CramsException("bulk insert fail: "
                         + bulkResponse.buildFailureMessage() + ", "
                         + bulkResponse.getItems());
@@ -234,34 +168,17 @@ public class ESBulkIndexer {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // re-init client
-=======
-                throw new Exception("bulk insert fail: "
-                        + bulkResponse.buildFailureMessage() + ", "
-                        + bulkResponse.getItems());
-            } else {
-                logger.info("ES_RESULT: send " + sizeOfBulkRequest
-                        + "data, it took " + bulkResponse.getTookInMillis()
-                        + "msec");
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            //re-init client
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             client.close();
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e1) {
                 logger.error("sleep interrupted", e1);
             }
-<<<<<<< HEAD
             try {
                 initESClient();
             } catch (CramsException e1) {
                 logger.error("ES client init error", e);
             }
-=======
-            initESClient();
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             this.bulkRequestBuilder = client.prepareBulk();
             return 0;
         }
@@ -283,9 +200,10 @@ public class ESBulkIndexer {
      * @param settings
      * @param mappings
      * @return
+     * @throws CramsException 
      */
     private boolean createIndexAndMappingsIfNeeded(String index,
-            String settings, String mappings) {
+            String settings, String mappings) throws CramsException {
         if (indexListToCheckExistance.contains(index)) {
             return false;
         }
@@ -294,29 +212,23 @@ public class ESBulkIndexer {
             indexResult = createIndexIfNeeded(index, settings);
         } catch (Exception e) {
             logger.error("index creation failed", e);
+            throw new CramsException("index creation failed", e);
         }
 
-<<<<<<< HEAD
         if (!indexResult) {
-=======
-        if (indexResult == false) {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
-            logger.error("index creation failed");
+            logger.info("index '" + index + "' already exist");
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                logger.error("sleep interrupted", e);
+                logger.warn("sleep interrupted", e);
             }
-        }
+        } 
 
         try {
-<<<<<<< HEAD
             pushMappingIfNeeded(index, mappings);
-=======
-            PushMappingIfNeeded(index, mappings);
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         } catch (Exception e) {
-            logger.error("index creation failed", e);
+            logger.warn("index creation failed", e);
+            return false;
         }
 
         indexListToCheckExistance.add(index);
@@ -329,33 +241,39 @@ public class ESBulkIndexer {
      * @param index
      * @param settings
      * @return
+     * @throws CramsException 
      */
-    public boolean createIndexIfNeeded(String index, String settings) {
+    public boolean createIndexIfNeeded(String index, String settings) throws CramsException {
         boolean isExist = false;
         try {
             isExist = doesIndexExist(client, index);
-        } catch (Exception e) {
-            logger.error("failed to check index existance", e);
-            return false;
-        }
-        if (!isExist) {
-            CreateIndexRequestBuilder cirb = client.admin().indices()
-                    .prepareCreate(index);
-            String source = settings;
-            cirb.setSettings(source);
-            CreateIndexResponse createIndexResponse = cirb.execute()
-                    .actionGet();
-            if (!createIndexResponse.isAcknowledged()) {
-                logger.error("ES_REQUEST_RESULT: create index failed. index name="
-                        + index);
-            } else {
-                logger.trace("ES_REQUEST_RESULT: success to create index. name="
-                        + index);
-                return true;
+            if(isExist) {
+                return false;
             }
+        } catch (Exception e) {
+            String errmsg = "failed to check index existance";
+            logger.error(errmsg, e);
+            throw new CramsException(errmsg, e);
         }
-        return false;
-    }
+       
+        CreateIndexRequestBuilder cirb = client.admin().indices()
+                .prepareCreate(index);
+        String source = settings;
+        cirb.setSettings(source);
+        CreateIndexResponse createIndexResponse = cirb.execute()
+                .actionGet();
+        if (!createIndexResponse.isAcknowledged()) {
+            String errmsg = "ES_REQUEST_RESULT: create index failed. index name="
+                    + index;
+            logger.error(errmsg);
+            throw new CramsException(errmsg);
+        } 
+        
+            logger.info("ES_REQUEST_RESULT: success to create index. name="
+                    + index);
+            return true;
+    }       
+
 
     /**
      * delete index
@@ -367,16 +285,10 @@ public class ESBulkIndexer {
         try {
             DeleteIndexResponse deleteResponse = client.admin().indices()
                     .delete(new DeleteIndexRequest(indexName)).get();
-<<<<<<< HEAD
             if (!deleteResponse.isAcknowledged()) {
                 throw new CramsException("Could not create index [" + indexName
                         + "].");
             }
-=======
-            if (!deleteResponse.isAcknowledged())
-                throw new Exception("Could not create index [" + indexName
-                        + "].");
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         } catch (Exception e) {
             logger.error(
                     "failed to delete index, " + indexName + ", "
@@ -427,11 +339,7 @@ public class ESBulkIndexer {
         return null;
     }
 
-<<<<<<< HEAD
     public boolean pushMappingIfNeeded(String index, String mappings) {
-=======
-    public boolean PushMappingIfNeeded(String index, String mappings) {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         try {
             if (null != getMapping(index, typeInIndex)) {
                 return false;

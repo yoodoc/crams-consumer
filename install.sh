@@ -1,6 +1,5 @@
 #!/bin/bash
 
-<<<<<<< HEAD
 ORIGIN_DIR=$(pwd)
 uname=$(uname -a|grep -i 'ubuntu')
 if [ "$uname" ];
@@ -15,7 +14,6 @@ fi
 case "$1" in
     develop)
         #set configuration for develop environment
-        cp $PROJECT_DIR/conf/*.properites.dev $PROJECT_DIR/conf/*.properties
         for i in `ls $PROJECT_DIR/conf|grep dev`
         do
             #name=$(echo $i|awk -F . '/.dev/{print $1"."$2}')
@@ -24,16 +22,16 @@ case "$1" in
         done
         for i in `ls $PROJECT_DIR/bin|grep dev`
         do
-            name=$(echo $i|sed 's/sh.dev/properties/')
+            name=$(echo $i|sed 's/sh.dev/sh/')
             cp $PROJECT_DIR/bin/$i $PROJECT_DIR/bin/$name
         done
-        1;;
+        ;;
     staging)
-        1;;
+        ;;
     product)
-        1;;
+        ;;
     *)
-        1;;
+        ;;
 esac
 
 cd $PROJECT_DIR
@@ -44,15 +42,4 @@ mvn install:install-file -Dfile=$PROJECT_DIR/src/main/lib/kafka_2.8.0-0.8.0.jar 
 mvn install:install-file -Dfile=$PROJECT_DIR/src/main/lib/kafka_2.8.0-0.8.0.jar -DgroupId=com.ktcloudware.kafka -DartifactId=kafka_2.8.0 -Dversion=0.8.0 -Dpackaging=jar
 mvn assembly:assembly -DskipTests
 cd $ORIGIN_DIR
-=======
-mvn clean
-
-#mvn install:install-file -Dfile=$PWD/src/main/lib/kafka_2.8.0-0.8.0-beta1.jar -DgroupId=com.ktcloudware.kafka -DartifactId=kafka_2.8.0 -Dversion=0.8.0-beta1 -Dpackaging=jar
-
-#mvn install:install-file -Dfile=src/main/lib/kafka-assembly-0.8.0-beta1-deps.jar -DgroupId=com.ktcloudware.kafka -DartifactId=kafka_assembly -Dversion=0.8.0-beta1 -Dpackaging=jar
-
-mvn install:install-file -Dfile=$PWD/src/main/lib/kafka_2.8.0-0.8.0.jar -DgroupId=com.ktcloudware.kafka -DartifactId=kafka_2.8.0 -Dversion=0.8.0 -Dpackaging=jar
-
-mvn assembly:assembly -DskipTests
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 

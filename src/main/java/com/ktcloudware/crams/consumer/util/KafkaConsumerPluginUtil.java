@@ -2,11 +2,7 @@ package com.ktcloudware.crams.consumer.util;
 
 import java.util.Map;
 
-<<<<<<< HEAD
 import com.ktcloudware.crams.consumer.CramsException;
-=======
-import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
 public class KafkaConsumerPluginUtil {
     private KafkaConsumerPluginUtil() {
@@ -14,11 +10,7 @@ public class KafkaConsumerPluginUtil {
 
     public static synchronized Map<String, Object> addAverageValue(
             String sourceKeyRegex, String avgElementName,
-<<<<<<< HEAD
             Map<String, Object> dataMap) throws CramsException {
-=======
-            Map<String, Object> dataMap) throws CramsPluginException {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
         long totalValueLong = 0L;
         float totalValueFloat = (float) 0;
@@ -41,22 +33,14 @@ public class KafkaConsumerPluginUtil {
                     }
 
                 } catch (Exception e) {
-<<<<<<< HEAD
                     throw new CramsException("!!failed", e);
-=======
-                    throw new CramsPluginException("!!failed", e);
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
                 }
             }
         }
 
         int sourceCount = numOfFloat + numOfLong;
         if (sourceCount < 1) {
-<<<<<<< HEAD
             throw new CramsException("no matched values");
-=======
-            throw new CramsPluginException("no matched values");
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
 
         Object average;

@@ -1,20 +1,14 @@
 package com.ktcloudware.crams.consumer.clients;
 
-<<<<<<< HEAD
 import static org.junit.Assert.*;
 
-=======
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import kafka.consumer.KafkaStream;
 
-<<<<<<< HEAD
-=======
 import org.junit.Ignore;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.clients.KafkaConsumerGroup;
@@ -25,8 +19,7 @@ public class KafkaConsumerIntergratedTest {
     private ExecutorService executor;
     private KafkaConsumerGroup consumerGroup;
 
-<<<<<<< HEAD
-//    @Ignore
+    @Ignore
     @Test
     public void test() {
         try {
@@ -36,34 +29,19 @@ public class KafkaConsumerIntergratedTest {
         Thread.sleep(10 * 1000);
         stop();
         } catch (Exception e) {
+        	e.printStackTrace();
             fail();
         }
        }
 
     public void init() throws Exception {
         kafkaConfig = new KafkaConfig();
-        kafkaConfig.zookeeper = "14.63.226.175:2184";
-=======
-    @Ignore
-    @Test
-    public void test() throws Exception {
-        init();
-        Thread.sleep(2 * 1000);
-        start();
-        Thread.sleep(120 * 1000);
-        stop();
-    }
-
-    public void init() throws Exception {
-        kafkaConfig = new KafkaConfig();
-        kafkaConfig.zookeeper = "14.63.226.175";
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
+        kafkaConfig.zookeeper = "14.63.213.13:2181";
         kafkaConfig.groupId = "ydTest";
-        String topics = "yd1031";
+        String topics = "test";
         kafkaConfig.topics.add(topics);
         kafkaConfig.numOfThread = 1;
         kafkaConfig.resetPolicy = "smallest";
-
     }
 
     public void start() throws Exception {

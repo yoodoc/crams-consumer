@@ -27,8 +27,10 @@ public class DateFormatPlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
-        Map<String, Object> newDataMap = new HashMap<String, Object>();
-        newDataMap.putAll(dataMap);
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
+        Map<String, Object> newDataMap = new HashMap<String, Object>(dataMap);
         try {
             String datetime = (String) newDataMap.get(this.dateFieldName);
             Date date = originDateFormat.parse(datetime);

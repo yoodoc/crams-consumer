@@ -17,13 +17,13 @@ public class ReplaceVmAccountNamePlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
+        
         Object originName = dataMap.get(VM_ACCOUNT_NAME);
 
-<<<<<<< HEAD
         if (!(originName instanceof String)) {
-=======
-        if (originName == null || !(originName instanceof String)) {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             return null;
         }
         Matcher vmAccountNameMatcher = vmAccountNamePattern
@@ -36,37 +36,20 @@ public class ReplaceVmAccountNamePlugin implements CramsConsumerPlugin {
             dataMap.put(VM_ACCOUNT, originName);
         }
 
-<<<<<<< HEAD
-=======
-        // TODO Auto-generated method stub
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         return dataMap;
     }
 
     @Override
     public void setProperties(String pluginProperties) {
-<<<<<<< HEAD
-=======
-        // TODO Auto-generated method stub
-
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     }
 
     @Override
     public String getProperties() {
-<<<<<<< HEAD
-=======
-        // TODO Auto-generated method stub
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         return null;
     }
 
     @Override
     public boolean needProperties() {
-<<<<<<< HEAD
-=======
-        // TODO Auto-generated method stub
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         return false;
     }
 

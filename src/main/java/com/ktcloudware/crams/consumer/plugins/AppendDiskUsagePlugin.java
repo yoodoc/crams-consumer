@@ -33,11 +33,10 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
-<<<<<<< HEAD
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
         if (!ready) {
-=======
-        if (ready == false) {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
             throw new CramsPluginException("not ready to excute");
         }
 
@@ -66,10 +65,6 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
                 String[] vdiNames = cacheClient.get(vdiName).split(",");
 
                 if (vdiNames.length != 3) {
-<<<<<<< HEAD
-=======
-                    System.out.println("!!");
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
                     throw new CramsPluginException(
                             "wrong formmated vdi usage values in cache object. :"
                                     + vdi);

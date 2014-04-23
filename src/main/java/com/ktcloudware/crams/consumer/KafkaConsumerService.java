@@ -7,7 +7,6 @@
 package com.ktcloudware.crams.consumer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.LogManager;
@@ -18,7 +17,6 @@ import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.message.MessageAndMetadata;
 
-import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
 
 /**
  * date format is hardcoded
@@ -29,24 +27,36 @@ import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
 public class KafkaConsumerService implements Runnable {
     // public List<String> result;
     private KafkaStream<byte[], byte[]> stream;
-    private List<CramsConsumerPlugin> plugins;
     private ObjectMapper mapper;
     private String topicName;
     private Logger logger;
     private Logger logger2;
+    private CramsPluginExcutor runner;
+    private DataAggregator dataStorage;
+    private boolean disableAggregation = false;
 
+    /**
+     * 
+     * @param kafkaStream
+     * @param topicName
+     * @param runner
+     * @param dataStorage
+     * @throws CramsException 
+     */
     public KafkaConsumerService(KafkaStream<byte[], byte[]> kafkaStream,
-            List<CramsConsumerPlugin> plugins, String topicName) {
+             String topicName, CramsPluginExcutor runner, DataAggregator dataStorage, boolean disableAggregation) throws CramsException {
         this.topicName = topicName;
-        logger = LogManager.getLogger("CONSUMER.MAIN");
-        logger2 = LogManager.getLogger("CONSUMER.KAFKADATA");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
+        logger2 = LogManager.getLogger("KAFKADATA");
         stream = kafkaStream;
-        this.plugins = plugins;
-        for (CramsConsumerPlugin plugin : plugins) {
-            logger.info("load plugin" + plugin.getClass().getName());
-        }
-        logger.info("total " + plugins.size() + " plugins are loaded.");
         mapper = new ObjectMapper();
+        this.runner = runner;
+        this.dataStorage = dataStorage;
+        this.disableAggregation = disableAggregation;
+        
+        if (this.disableAggregation == false && this.dataStorage == null) {
+            throw new CramsException("failed to init");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -80,22 +90,15 @@ public class KafkaConsumerService implements Runnable {
                     continue;
                 }
 
-                // kafka message processing
-                try {
-                    for (CramsConsumerPlugin plugin : plugins) {
-                        userData = plugin.excute(userData, dataTag);
-                        logger.trace("PLUGIN_RESULT:filtering kafka message with "
-                                + plugin.getClass().getName()
-                                + ", filtered message:" + userData);
-                        if (userData == null) {
-                            break;
-                        }
+                //make average 
+                if (disableAggregation == false) {
+                    userData = dataStorage.add(userData);
+                    if (null != userData) {
+                        logger.trace("produced avg data = " + userData);
                     }
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                    // TODO 데몬 동작을 종료해야하는 에러에 대한 처리가 필요하다.
                 }
-
+                runner.excute(userData,dataTag);
+                
                 logger.trace("total processing data : " + kafkaCount);
                 for (Integer partition : lastOffsetForPartition.keySet()) {
                     logger.trace("last [" + partition + "] offset is "

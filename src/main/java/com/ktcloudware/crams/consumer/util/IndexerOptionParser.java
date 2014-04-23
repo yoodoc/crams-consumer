@@ -12,17 +12,13 @@ import com.ktcloudware.crams.consumer.CramsException;
 import com.ktcloudware.crams.consumer.datatype.ESConfig;
 import com.ktcloudware.crams.consumer.datatype.KafkaConfig;
 import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
-<<<<<<< HEAD
-=======
-import com.ktcloudware.crams.consumer.plugins.CramsPluginException;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
 public class IndexerOptionParser {
     private static final String OPTION_ZOOKEEPER = "zookeeper";
     private static final String OPTION_GROUP = "groupId";
     private static final String OPTION_ES_ADDRESS = "esAddress";
     private static final String OPTION_ES_CLUSTER_NAME = "clusterName";
-    private static final String OPTION_ES_INDEX_NAME = "indexer";
+    private static final String OPTION_ES_INDEX_NAME = "indexKey";
     private static final String OPTION_ES_BULK_INTERVAL_SEC = "requestIntervalMaxSec";
     private static final String OPTION_ES_BULKSIZE = "bulkRequestSize";
     private static final String OPTION_ES_ROUTINGKEY = "routingKey";
@@ -32,10 +28,10 @@ public class IndexerOptionParser {
     private static final String OPTION_INDEX_SETTING_FILE = "indexSettingJsonFile";
     private static final String OPTION_MAPPING_INFO_FILE = "mappingInfoJsonFile";
     private static final String OPTION_RESET_OFFSET = "resetOffset";
-<<<<<<< HEAD
 
     private static final String ES_PROPERTIES_FILE = "esIndexer.properties";
     private static final String KAFKA_PROPERTIES_FILE = "kafkaConsumer.properties";
+    private static final String DISABLE_AGGREGATION = "disableAggregation";
 
     static Logger logger = LogManager.getLogger("UTIL.OptionParser");
 
@@ -43,30 +39,13 @@ public class IndexerOptionParser {
 
     }
 
-=======
- 
-    private static final String ES_PROPERTIES_FILE = "esIndexer.properties";
-    private static final String KAFKA_PROPERTIES_FILE = "kafkaConsumer.properties";
-    
-    static Logger logger = LogManager.getLogger("MAIN");
-
-    private IndexerOptionParser() {
-        
-    }
-    
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     /**
      * esIndexer.properties 파일을 ESConfig.class 로 parsing 한다.
      * 
      * @return
      * @throws CramsException
      */
-<<<<<<< HEAD
     public static ESConfig parseESProperties() throws CramsException {
-=======
-    public static ESConfig parseESProperties()
-            throws CramsException {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         Properties properties = null;
         try {
             properties = FileUtil.getProperties(ES_PROPERTIES_FILE);
@@ -155,7 +134,8 @@ public class IndexerOptionParser {
             kafkaConfig.topics.add(topic);
         }
         kafkaConfig.numOfThread = 1;
-
+        kafkaConfig.disableAggregation = properties
+                .getProperty(IndexerOptionParser.DISABLE_AGGREGATION);
         return kafkaConfig;
 
     }
@@ -184,7 +164,6 @@ public class IndexerOptionParser {
                         + pluginName, e);
             }
 
-<<<<<<< HEAD
             CramsConsumerPlugin plugin;
             try {
                 plugin = (CramsConsumerPlugin) pluginClass.newInstance();
@@ -207,30 +186,6 @@ public class IndexerOptionParser {
             }
             plugins.add(plugin);
             logger.info("load pluging : " + pluginClass.getName());
-=======
-            try {
-                CramsConsumerPlugin plugin;
-                try {
-                    plugin = (CramsConsumerPlugin) pluginClass.newInstance();
-                } catch (IllegalAccessException e1) {
-                    logger.error(e1.getMessage(), e1);
-                    throw new CramsException(e1.getMessage(), e1);
-                }
-                String pluginProperties = properties.getProperty(pluginName);
-                if (pluginProperties != null) {
-                    try {
-                        plugin.setProperties(pluginProperties);
-                    } catch (CramsPluginException e) {
-                        logger.error("failed to set property", e);
-                        throw new CramsException(e.getMessage(), e);
-                    }
-                }
-                plugins.add(plugin);
-                logger.info("load pluging : " + pluginClass.getName());
-            } catch (InstantiationException e) {
-                throw new CramsException("instantiation failed", e);
-            }
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         }
         return plugins;
 

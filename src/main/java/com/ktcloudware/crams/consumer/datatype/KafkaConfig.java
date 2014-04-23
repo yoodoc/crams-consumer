@@ -10,6 +10,7 @@ public class KafkaConfig {
     public int numOfThread;
     public String cacheServer;
     public String resetPolicy;
+    public String disableAggregation;
 
     public KafkaConfig() {
         topics = new ArrayList<String>();

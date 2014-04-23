@@ -19,7 +19,7 @@ public class ESConfig {
     public String type = "";
     public String routingKey = "";
     public int bulkRequestSize = -1;
-    public int maxRequestIntervalSec = -1;
+    public int maxRequestIntervalSec = 10;
     public List<InetSocketTransportAddress> esAddressList = new ArrayList<InetSocketTransportAddress>();
     public String settings;
     public String mappings;

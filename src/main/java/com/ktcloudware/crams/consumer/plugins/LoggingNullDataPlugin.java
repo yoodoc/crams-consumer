@@ -27,6 +27,9 @@ public class LoggingNullDataPlugin implements CramsConsumerPlugin {
     @Override
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException {
+        if (dataMap == null || dataMap.isEmpty()) {
+            return dataMap;
+        }
         String[] keyNamesForCheckNullValue = properties.split(",");
         for (String keyName : keyNamesForCheckNullValue) {
             Object value = dataMap.get(keyName);

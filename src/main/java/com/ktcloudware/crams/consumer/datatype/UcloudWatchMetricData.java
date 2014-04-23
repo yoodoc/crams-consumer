@@ -3,13 +3,7 @@ package com.ktcloudware.crams.consumer.datatype;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-<<<<<<< HEAD
 import java.util.List;
-=======
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
 import com.ktcloudware.crams.consumer.CramsException;
 
@@ -20,24 +14,18 @@ public class UcloudWatchMetricData {
     public String unit;
     public String value;
     public String timestamp;
-
+    public String sampleCount;
+    
     public UcloudWatchMetricData() {
         demension = new ArrayList<UcloudWatchDemension>();
     }
 
-<<<<<<< HEAD
-=======
-    public String getMetricData() {
-        return null;
-    }
-
-    public Map<String, String> getMetricDataMap() {
-        Map<String, String> metricData = new HashMap<String, String>();
-
-        return metricData;
-    }
-
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
+    /**
+     * return &<prefix>key=<prefix>value&<prefix>key2=<prefix>value2... 
+     * @param prefix
+     * @return
+     * @throws CramsException
+     */
     public String getRequestParameter(String prefix) throws CramsException {
         String requestParameter = null;
         String metricName = null;
@@ -45,7 +33,7 @@ public class UcloudWatchMetricData {
         String dimension = null;
         String value = null;
         String timestamp = null;
-
+        String sampleCount = null;
         try {
             metricName = "&" + prefix + "MetricName="
                     + getUrlEncodedValue(this.metricName);
@@ -54,16 +42,17 @@ public class UcloudWatchMetricData {
             value = "&" + prefix + "Value=" + getUrlEncodedValue(this.value);
             timestamp = "&" + prefix + "Timestamp="
                     + getUrlEncodedValue(this.timestamp);
+            sampleCount = "&" + prefix + "SampleCount=" + getUrlEncodedValue(this.sampleCount);
         } catch (UnsupportedEncodingException e) {
              throw new CramsException("failed to create request parameter, unsupportedEncodeing:", e);
         }
 
-        requestParameter = metricName + unit + dimension + value + timestamp;
+        requestParameter = dimension + metricName + unit + value + timestamp;
         return requestParameter;
     }
 
     private String getDemesionParameter(String prefix) throws UnsupportedEncodingException {
-        String demensionParameter = "";
+    	String demensionParameter = "";
         for (int i = 0; i < this.demension.size(); i++) {
             String demensionNameParameter = "&" + prefix + "Dimensions.member."
                         + String.valueOf(i + 1) + ".Name="
@@ -79,11 +68,6 @@ public class UcloudWatchMetricData {
     }
 
     private String getUrlEncodedValue(String value) throws UnsupportedEncodingException {
-<<<<<<< HEAD
         return URLEncoder.encode(value, "UTF-8");
-=======
-        String encodedValue = URLEncoder.encode(value, "UTF-8");
-        return encodedValue;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
     }
 }

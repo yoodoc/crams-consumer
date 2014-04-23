@@ -4,20 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import kafka.consumer.KafkaStream;
-
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
-<<<<<<< HEAD
-=======
-import org.apache.commons.daemon.DaemonInitException;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import kafka.consumer.KafkaStream;
 import com.ktcloudware.crams.consumer.clients.ESBulkIndexer;
 import com.ktcloudware.crams.consumer.clients.KafkaConsumerGroup;
 import com.ktcloudware.crams.consumer.datatype.KafkaConfig;
@@ -25,25 +21,19 @@ import com.ktcloudware.crams.consumer.util.IndexerOptionParser;
 
 public class MainDaemon implements Daemon {
 
-<<<<<<< HEAD
     protected KafkaConfig kafkaConfig = null;
     private List<KafkaConsumerGroup> consumerGroupList;
     private ESBulkIndexer esBulkIndexer;
     protected Map<String, ExecutorService> executorMap;
-=======
-    private KafkaConfig kafkaConfig = null;
-    private List<KafkaConsumerGroup> consumerGroupList;
-    private ESBulkIndexer esBulkIndexer;
-    // private CacheClient cacheClient;
-    private Map<String, ExecutorService> executorMap;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 
-    Logger logger = LogManager.getLogger("MAIN");
+    private Logger logger = LogManager.getLogger("CRAMS_CONSUMER");
+    private Timer flushingTaskScheduler;
+    private DataAggregatorFlushTask flushTimerTask;
+    private boolean disableAggregation = false;
 
     @Override
-<<<<<<< HEAD
     public void init(DaemonContext arg0) throws CramsException {
-        logger = LogManager.getLogger("MAIN");
+        logger = LogManager.getLogger("CRAMS_CONSUMER");
 
         // read kafka client configuration
         try {
@@ -52,21 +42,22 @@ public class MainDaemon implements Daemon {
             logger.error("daemon initiation error", e);
             throw new CramsException("daemon initiation error", e);
         }
-=======
-    public void init(DaemonContext arg0) throws DaemonInitException, Exception {
-        logger = LogManager.getLogger("MAIN");
 
-        // read kafka client configuration
-        kafkaConfig = IndexerOptionParser.parseKafkaConsumerProperties();
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
-
+        if (null != kafkaConfig.disableAggregation && "true".equalsIgnoreCase(kafkaConfig.disableAggregation)) {
+            disableAggregation = true;
+        }  else {
+            logger.info("disable aggregation false" + disableAggregation);
+        }
         // create empty thread pool for each kafka topic
         executorMap = new HashMap<String, ExecutorService>();
         for (String topic : kafkaConfig.topics) {
-            ExecutorService executor = Executors
-                    .newFixedThreadPool(kafkaConfig.numOfThread);
+            ExecutorService executor = Executors.newFixedThreadPool(kafkaConfig.numOfThread);
+                     
             executorMap.put(topic, executor);
         }
+        
+        //create scheduler for dataAggregator flushing task 
+        flushingTaskScheduler = new Timer();
     }
 
     @Override
@@ -75,15 +66,18 @@ public class MainDaemon implements Daemon {
             executorMap.get(topic).shutdownNow();
         }
 
+        if (flushingTaskScheduler != null) {
+        	flushingTaskScheduler.cancel();
+        	flushingTaskScheduler.purge();
+        	flushingTaskScheduler = null;
+        }
+        flushTimerTask.clean();
+        
         logger.info("daemon shutdown");
     }
 
     @Override
-<<<<<<< HEAD
     public void start() throws CramsException {
-=======
-    public void start() throws Exception {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         // create kafka consumer group & make consumer stream
         consumerGroupList = new ArrayList<KafkaConsumerGroup>();
         KafkaConsumerGroup consumerGroup = new KafkaConsumerGroup(
@@ -91,25 +85,29 @@ public class MainDaemon implements Daemon {
                 kafkaConfig.numOfThread, kafkaConfig.topics,
                 kafkaConfig.resetPolicy);
         consumerGroupList.add(consumerGroup);
-
+        
         // get kafka consuming streams for each kafka topic. and assign consumer
         // service thread for them
         for (String topic : kafkaConfig.topics) {
             ExecutorService executor = executorMap.get(topic);
             List<KafkaStream<byte[], byte[]>> streams = consumerGroup
                     .getKafkaStreams(topic);
-
+            
+            //create dataAggregator & flushing task for over stacked data
+            CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
+            flushTimerTask = new DataAggregatorFlushTask();
+            flushTimerTask.addCramsPluginExcutor(pluginExcutor);
+           
             try {
                 for (int i = 0; i < streams.size(); i++) {
+                    DataAggregator dataCache = new DataAggregator();
+                    dataCache.setTag("topic["+i+"]");
+                    flushTimerTask.addAverageDataCache(dataCache);
+                    
+                    //create plugin runner
                     logger.info("start thread=" + i + " for topic=" + topic
                             + " " + streams.size());
-<<<<<<< HEAD
-=======
-                    System.out.println("start thread=" + i + " for topic="
-                            + topic + " " + streams.size());
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
-                    Runnable worker = new KafkaConsumerService(streams.get(i),
-                            IndexerOptionParser.loadKafkaPlugins(topic), topic);
+                    Runnable worker = new KafkaConsumerService(streams.get(i), topic, pluginExcutor, dataCache, disableAggregation);
                     executor.execute(worker);
                 }
             } catch (Exception e) {
@@ -118,17 +116,19 @@ public class MainDaemon implements Daemon {
                 stop();
                 return;
             }
+         
+            if (disableAggregation == false) {
+                         //run flushing task 
+                flushingTaskScheduler.scheduleAtFixedRate(flushTimerTask, 10000, 10000);
+                logger.info("run data aggregator");
+            }
         }
 
         logger.info("start all service threads");
     }
 
     @Override
-<<<<<<< HEAD
     public void stop() throws CramsException {
-=======
-    public void stop() throws Exception {
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
         for (KafkaConsumerGroup consumerGroup : consumerGroupList) {
             consumerGroup.shutdown();
         }

@@ -1,32 +1,42 @@
-# <topic name>=plugin,plugin,....						    #	
-# prefixed path = com.ktcloudware.crams.consumer.plugins.   #
+# <topic name>=plugin,plugin,...				   
+# prefixed path = com.ktcloudware.crams.consumer.plugins.   
 
-#vm_perf_rrd=FiveMinutesFilterPlugin,LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,AppendDiskUsagePlugin,ESIndexingPlugin
-yoodoc=UcloudWatchPlugin
+test=LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,SimpleLoggingPlugin
+
+#for analysis ES indexer
+#vm_perf_rrd=LoggingNullDataPlugin,DateFormatPlugin,ReplaceDiskFieldNamePlugin,CpuAvgPlugin,MemoryUsagePlugin,VbdReadWriteAvgPlugin,VifAvgPlugin,ReplaceVmAccountNamePlugin,ESIndexingPlugin
 #disk_usage=DiskUsageCachePlugin
-#disk_usage=DateFormatPlugin,DiskUsageESIndexingPlugin
+
+#for watch agent 
+#yoodoc=UcloudWatchPlugin
+
 
 # set comma seperated properties for specific plugins  
-
-# <redis server address>
-DiskUsageCachePlugin=172.27.24.142,3000
-
-
-# <redis server address>
-AppendDiskUsagePlugin=172.27.24.142
-
 
 # <date fieldName>,<input format>,<output format>
 DateFormatPlugin=datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ssZZ
 
-
-# <date fieldName>
-FiveMinutesFilterPlugin=datetime,3
-
 # key name to check null
 LoggingNullDataPlugin=vm_uuid
 
-# <DB type>,<ucloud watch url>
-# DB type: unittest, staging or product
-#UcloudWatchPlugin=unittest,localhost:8080/watch
-UcloudWatchPlugin=staging,http://172.27.205.175:8080/watch
+# <ucloud watch url>
+#UcloudWatchPlugin=localhost:8080/watch
+UcloudWatchPlugin=http://172.27.205.175:8080/watch
+
+
+
+
+#deprecated
+# <redis server address>
+#DiskUsageCachePlugin=localhost,3000
+#DiskUsageCachePlugin=172.27.24.142,3000
+
+#deprecated
+# <redis server address>
+#AppendDiskUsagePlugin=localhost,3000
+#AppendDiskUsagePlugin=172.27.24.142
+
+#deprecated
+# <date fieldName>
+#FiveMinutesFilterPlugin=datetime,3
+

@@ -4,10 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 
-<<<<<<< HEAD
-=======
 import org.junit.Ignore;
->>>>>>> e78ac19f5440d48ea70e632fa092a3a030f29ee6
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.clients.RedisClient;
@@ -15,7 +12,7 @@ import com.ktcloudware.crams.consumer.plugins.DiskUsageCachePlugin;
 import com.ktcloudware.crams.consumer.util.FileUtil;
 
 public class DiskUsageCachePluginTest {
-    // @Ignore
+    @Ignore
     @Test
     public void testRedisCache() throws Exception {
         RedisClient redis = new RedisClient("localhost");

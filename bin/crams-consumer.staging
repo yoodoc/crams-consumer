@@ -1,6 +1,6 @@
 #!/bin/sh
 #set environment
-JAVA_HOME=$JAVA_HOME/bin
+JAVA_HOME=$JAVA_HOME
 JSVC=jsvc
 DAEMON_USER=$(whoami)
 #DAEMON_HOME=$(dirname $0)/..
@@ -9,7 +9,7 @@ ORIGIN_DIR=$(pwd)
 uname=$(uname -a|grep -i 'ubuntu')
 if [ "$uname" ];
 then
-    $PROJECT_DIR=$(readlink -f $0|xargs dirname)/..
+    PROJECT_DIR=$(readlink -f $0|xargs dirname)/..
 else
     echo this scipt need ubuntu environment
     exit
@@ -22,15 +22,19 @@ $PROJECT_DIR:\
 $PROJECT_DIR/lib:\
 $PROJECT_DIR/lib/*:\
 $PROJECT_DIR/conf
+LOG4J_CONF=$PROJECT_DIR/conf/log4j.properties
 
 #run daemon 
 case "$1" in
     start)
+        #set logging path
+        sed -i s@PROJECT_DIR@$PROJECT_DIR@g $LOG4J_CONF
+
         #
         # Start Daemon
         #
 
-        exec $PROJECT_DIR/$JSVC \
+        exec $JSVC \
         -user $DAEMON_USER \
         -debug \
         -home $JAVA_HOME \
@@ -44,7 +48,7 @@ case "$1" in
         ;;
 
     stop)
-        exec $PROJECT_DIR/$JSVC \
+        exec $JSVC \
         -stop \
         -pidfile $PROJECT_DIR/jsvc.pid \
         com.ktcloudware.crams.consumer.MainDaemon
