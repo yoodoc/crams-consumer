@@ -372,7 +372,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		}
 		
 		UcloudWatchMetricData cpuUtilization = new UcloudWatchMetricData();
-		cpuUtilization.metricName = "CPUUtillization";
+		cpuUtilization.metricName = "CPUUtilization";
 		cpuUtilization.unit = "Percent";
 		cpuUtilization.value = cpuUtilizationValue;
 		cpuUtilization.timestamp = timestamp;
