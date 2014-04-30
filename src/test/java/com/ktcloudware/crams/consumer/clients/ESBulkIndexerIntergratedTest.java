@@ -169,14 +169,12 @@ public class ESBulkIndexerIntergratedTest {
         SearchResponse response = client.prepareSearch(index).setTypes(type)
                 .setQuery(QueryBuilders.termQuery("owner", owner))
                 .setExplain(true).execute().actionGet();
-        // System.out.println("!!" + response.toString());
         Pattern shardPattern = Pattern
                 .compile("\"_shard\"[\\s]*:[\\s]*([0-9]+),");
         Matcher matcher = shardPattern.matcher(response.toString());
         String lastGroup = null;
         while (matcher.find()) {
             String group = matcher.group(1);
-            System.out.println("\"shard\" : " + group);
             if (lastGroup == null) {
                 lastGroup = group;
             } else if (!group.equals(lastGroup)) {

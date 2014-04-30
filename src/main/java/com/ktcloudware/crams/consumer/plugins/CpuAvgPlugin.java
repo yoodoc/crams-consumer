@@ -53,4 +53,10 @@ public class CpuAvgPlugin implements CramsConsumerPlugin {
         dataMap.put(CPU_AVG, (float) 0.0);
         return dataMap;
     }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
 }

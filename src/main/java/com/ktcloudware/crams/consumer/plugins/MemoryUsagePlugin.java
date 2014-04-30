@@ -96,4 +96,10 @@ public class MemoryUsagePlugin implements CramsConsumerPlugin {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
 }

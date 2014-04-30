@@ -92,9 +92,14 @@ public class KafkaConsumerService implements Runnable {
 
                 //make average 
                 if (disableAggregation == false) {
-                    userData = dataStorage.add(userData);
-                    if (null != userData) {
-                        logger.trace("produced avg data = " + userData);
+                    try {
+                        userData = dataStorage.add(userData);
+                        if (null != userData) {
+                            logger.trace("produced avg data = " + userData);
+                        }
+                    } catch (Exception e) {
+                        logger.warn("missing vm perf parameter values: " + e.getMessage(), e);
+                        userData = null;
                     }
                 }
                 runner.excute(userData,dataTag);

@@ -61,4 +61,9 @@ public class VifAvgPlugin implements CramsConsumerPlugin {
         dataMap.put(key, (long) 0.0);
         return dataMap;
     }
+
+    @Override
+    public void stop() {
+     
+    }
 }

@@ -66,4 +66,10 @@ public class DateFormatPlugin implements CramsConsumerPlugin {
         return properties;
     }
 
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

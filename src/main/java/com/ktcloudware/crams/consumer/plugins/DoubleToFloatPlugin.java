@@ -36,4 +36,10 @@ public class DoubleToFloatPlugin implements CramsConsumerPlugin {
         return false;
     }
 
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

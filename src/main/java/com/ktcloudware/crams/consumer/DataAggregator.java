@@ -116,11 +116,9 @@ public class DataAggregator {
         if (true == force) {
             for (long timestamp : timestamps) {
                 if (0 > timestamp - firstTimestamp) {
-                    System.out.println("!!!!");
                     dataSizeInSingleFiveMinutes = 1;
                     break;
                 }else if (5 > timestamp - firstTimestamp) {
-                    System.out.println("!!");
                     dataSizeInSingleFiveMinutes++;
                 } else {
                     break;
@@ -143,10 +141,8 @@ public class DataAggregator {
         } 
         
         //update timestamps in datacache
-        System.out.println(dataSizeInSingleFiveMinutes+"!!"+timestamps.toString());
         timestamps = timestamps.subList(dataSizeInSingleFiveMinutes,
                 timestamps.size());
-        System.out.println(timestamps.toString());
         if (timestamps.isEmpty()) {
            vmTimestampsInMinutes.remove(vmId); 
         } else {
@@ -189,7 +185,7 @@ public class DataAggregator {
 
     /**
      * if datacache is idle for timeDuration, clean cache and return averages for all vm
-     * @param timeDuration
+     * @param timeDuration millis
      * @return
      */
     public List<Map<String, Object>> cleanIfIdle(long timeDuration) {

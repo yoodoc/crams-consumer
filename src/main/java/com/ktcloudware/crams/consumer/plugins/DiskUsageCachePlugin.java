@@ -97,4 +97,10 @@ public class DiskUsageCachePlugin implements CramsConsumerPlugin {
         return true;
     }
 
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

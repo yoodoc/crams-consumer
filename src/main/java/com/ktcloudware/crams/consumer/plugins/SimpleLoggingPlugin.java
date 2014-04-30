@@ -6,7 +6,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class SimpleLoggingPlugin implements CramsConsumerPlugin {
-    private Logger logger = LogManager.getLogger("PLUGINS");
+    private Logger logger;
     
     public SimpleLoggingPlugin() {
         logger = LogManager.getLogger("PLUGINS");
@@ -16,8 +16,9 @@ public class SimpleLoggingPlugin implements CramsConsumerPlugin {
             String dataTag) {
         if (dataMap == null) {
             logger.info("null dataMap");
+        } else {
+            logger.info("filtered data" +  dataMap.toString());
         }
-        logger.info("filtered data" +  dataMap.toString());
         return dataMap;
     }
 
@@ -36,5 +37,11 @@ public class SimpleLoggingPlugin implements CramsConsumerPlugin {
     public String getProperties() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
     }
 }

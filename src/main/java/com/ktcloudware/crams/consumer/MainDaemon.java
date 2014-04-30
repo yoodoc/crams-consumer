@@ -30,6 +30,7 @@ public class MainDaemon implements Daemon {
     private Timer flushingTaskScheduler;
     private DataAggregatorFlushTask flushTimerTask;
     private boolean disableAggregation = false;
+    private List<CramsPluginExcutor> pluginExcutors;
 
     @Override
     public void init(DaemonContext arg0) throws CramsException {
@@ -55,6 +56,8 @@ public class MainDaemon implements Daemon {
                      
             executorMap.put(topic, executor);
         }
+        
+        pluginExcutors = new ArrayList<CramsPluginExcutor>();
         
         //create scheduler for dataAggregator flushing task 
         flushingTaskScheduler = new Timer();
@@ -95,6 +98,7 @@ public class MainDaemon implements Daemon {
             
             //create dataAggregator & flushing task for over stacked data
             CramsPluginExcutor pluginExcutor = new CramsPluginExcutor(IndexerOptionParser.loadKafkaPlugins(topic));
+            pluginExcutors.add(pluginExcutor);
             flushTimerTask = new DataAggregatorFlushTask();
             flushTimerTask.addCramsPluginExcutor(pluginExcutor);
            
@@ -129,6 +133,11 @@ public class MainDaemon implements Daemon {
 
     @Override
     public void stop() throws CramsException {
+        for (CramsPluginExcutor pluginExcutor: this.pluginExcutors) {
+            if (pluginExcutor != null) {
+                pluginExcutor.stop();
+            }
+        }
         for (KafkaConsumerGroup consumerGroup : consumerGroupList) {
             consumerGroup.shutdown();
         }

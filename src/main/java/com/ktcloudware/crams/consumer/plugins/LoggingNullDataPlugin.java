@@ -51,4 +51,10 @@ public class LoggingNullDataPlugin implements CramsConsumerPlugin {
         return false;
     }
 
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

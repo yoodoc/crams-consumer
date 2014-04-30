@@ -56,7 +56,7 @@ public class DataAggregatorFlushTask extends TimerTask {
                 return;
             }
             List<Map<String, Object>> dataList = dataCache
-                    .cleanIfIdle(1000L);
+                    .cleanIfIdle(30000L);
             if (dataList != null && dataList.size() != 0) {
                 logger.info("run flush task," + dataCache.getStats() +", flushed data: " + dataList.toString());
             }

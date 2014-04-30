@@ -46,7 +46,7 @@ public class UcloudWatchPluginTest {
             data.put("cpu3", 0.08545827027426656);
             data.put("cpu4", 0.7659032390437487);
             data.put("vm_uuid", "uu_id");
-            data.put("vm_name", "test_vm");
+            data.put("vm_display_name", null);
             data.put("vm_account_name", "EPC_M1111112_S1111");
             data.put("vm_template_name", "template");
             data.put("vm_service_offering_name", "serviceoffering");

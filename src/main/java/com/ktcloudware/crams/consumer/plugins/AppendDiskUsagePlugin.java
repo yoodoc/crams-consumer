@@ -115,4 +115,10 @@ public class AppendDiskUsagePlugin implements CramsConsumerPlugin {
         data.put(DISK_AVG_USAGE, (float) 0.0);
         return data;
     }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
 }

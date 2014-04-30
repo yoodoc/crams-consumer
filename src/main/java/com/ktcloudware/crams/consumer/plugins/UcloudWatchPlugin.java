@@ -5,6 +5,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,7 +18,7 @@ import com.ktcloudware.crams.consumer.datatype.UcloudWatchMetricData;
 public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	private static final Object VM_TYPE = "vm_type";
 	private static final Object VM_UUID = "vm_uuid";
-	private static final Object VM_NAME = "vm_name";
+	private static final Object VM_DISPLAY_NAME = "vm_display_name";
 	private static final int MAX_RETRY = 5;
 	private static final String UCLOUD_SERVER_NAMESPACE = "ucloud/server";
 	private static final String UCLOUD_RDBAAS_NAMESPACE = "ucloud/db";
@@ -28,9 +30,17 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	private List<CramsConsumerPlugin> plugins;
 	private String uwatchBaseUrl = "http://localhost:8080/watch";
 	private String uwatchPutMetricCmdParam = "?command=putMetricData";
+    private UWatchPutMetricRequestQueue requestQueue;
+    private ExecutorService executor;
 
 	public UcloudWatchPlugin() {
 		logger = LogManager.getLogger("PLUGINS");
+		requestQueue = new UWatchPutMetricRequestQueue();
+        executor = Executors.newFixedThreadPool(100);
+        for (int i = 0; i < 100; i++) {
+            HttpClient httpClient = new HttpClient(requestQueue);
+            executor.execute(httpClient);
+        }
 	}
 
 	/**
@@ -45,7 +55,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		String[] propertiesArray = properties.split(",");
 		if (properties == null || propertiesArray.length != 1) {
 			throw new CramsPluginException(
-					"property is required for UcloudWatchPlugin, ucloud watch baseurl requried.");
+					"property is required for UcloudWatchPlugin, ucloud watch baseurl required.");
 		}
 
 		this.uwatchBaseUrl = propertiesArray[0];
@@ -60,6 +70,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		plugin.setProperties("datetime,yyyy-MM-dd HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS");
 		plugins.add(plugin);
 		//plugins.add(new ReplaceVmAccountNamePlugin());
+		plugins.add(new LoggingNullDataPlugin());
 		plugins.add(new ReplaceDiskFieldNamePlugin());
 		plugins.add(new CpuAvgPlugin());
 		plugins.add(new VbdReadWriteAvgPlugin());
@@ -83,15 +94,22 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
         }
 	    
 		// make avg data from vm rrd
-		xenRrd = excuteCramsPlugins(xenRrd, dataTag);
-
+	    try {
+	        xenRrd = excuteCramsPlugins(xenRrd, dataTag);
+	    } catch (Exception e) {
+	        logger.error("plugin error:" + e.getMessage(),e);
+	        return null;
+	    }
+		if (xenRrd == null || xenRrd.isEmpty()) {
+            return null;
+        }
 		// parse namespace
 		String namespace = null;
 		namespace = createUWatchNamespace(xenRrd);
 
 		// parse ownerField
 		String owner = parseOwnerField(xenRrd);
-		if (owner == null) {
+		if (owner == null || owner.isEmpty()) {
 			return null;
 		}
 
@@ -110,8 +128,11 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 			logger.error("noting to send, original data:" + xenRrd);
 			return null;
 		}
+		
+		requestQueue.put(ucloudWatchRequestParmaeter);
+		return null;
 		// send metric data
-		for (int i = 0; i < MAX_RETRY; i++) {
+		/*for (int i = 0; i < MAX_RETRY; i++) {
 			String response = send(ucloudWatchRequestParmaeter);
 			if (response == null) {
 				logger.error(ucloudWatchRequestParmaeter
@@ -124,13 +145,10 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 				break;
 			}
 		}
-		return null;
+		return null;*/
 	}
 
-	private String send(String ucloudWatchRequestParmaeter) {
-	    System.out.println("!!" + ucloudWatchRequestParmaeter);
-		return HttpClient.sendRequest(ucloudWatchRequestParmaeter);
-	}
+
 
 	/**
 	 * create UcloudWatchDemension list, that has demension name & demension
@@ -152,14 +170,18 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		try {
 			// create "name" demension value
 			
-			String vmName = (String) xenRrd.get(VM_NAME);
+			String vmDisplayName = (String) xenRrd.get(VM_DISPLAY_NAME);
+			if (vmDisplayName == null) {
+			    vmDisplayName = "";
+			}
 			
 			String vmUuid = (String) xenRrd.get(VM_UUID);
-			if (null == vmName || null == vmUuid) {
+			if (null == vmUuid) {
 				throw new CramsPluginException("failed to create demension field," + xenRrd.toString());
 			}
 			if (UCLOUD_SERVER_NAMESPACE.equalsIgnoreCase(namespace)) {
-				vmName += "(" + vmUuid + ")";
+			    vmDisplayName += "(" + vmUuid + ")";
+			  //  System.out.println("!!!" + vmDisplayName);
 				String vmTemplateName = (String) xenRrd.get("vm_template_name");
 				if (!"".equals(vmTemplateName)) {
 					demensionList.add(new UcloudWatchDemension("templatename",
@@ -171,19 +193,20 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 							vmGuestOsName));
 				}
 				// create "AutoScalingGroupName" demension value
-				if (vmName.startsWith("uas-")) {
-					String[] nameSeries = vmName.split("-");
+				if (vmDisplayName.startsWith("uas-")) {
+					String[] nameSeries = vmDisplayName.split("-");
 					String autoscalingGroupName = nameSeries[1];
 					demensionList.add(new UcloudWatchDemension(
 							"AutoScalingGroupName", autoscalingGroupName));
 				}
 			} else if (UCLOUD_RDBAAS_NAMESPACE.equalsIgnoreCase(namespace)) {
-				vmName = vmUuid;
+			    vmDisplayName = vmUuid;
 			} else if (UCLOUD_VR_NAMESPACE.equalsIgnoreCase(namespace)) {
-				//nothing 
+			    vmDisplayName = "vr(" + vmUuid + ")";
 			}
 
-			demensionList.add(new UcloudWatchDemension("name", vmName));
+			//System.out.println("!!!" + vmDisplayName);
+			demensionList.add(new UcloudWatchDemension("name", vmDisplayName));
 		} catch (Exception e) {
 			logger.error("failed to create demension field,", e);
 			throw new CramsPluginException("failed to create demension field,",
@@ -311,7 +334,10 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	 */
 	private String createUWatchNamespace(Map<String, Object> dataMap) {
 		try {
-			String displayName = (String) dataMap.get("vm_display_name");
+			String displayName = (String) dataMap.get(VM_DISPLAY_NAME);
+			if (displayName == null) {
+			    displayName = "";
+			}
 			String vmType = (String) dataMap.get(VM_TYPE);
 			if ("rdbaas-instance".equalsIgnoreCase(displayName)
 					|| "rdbaas_instance".equalsIgnoreCase(displayName)) {
@@ -346,7 +372,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		String timestamp = (String) xenRrd.get("datetime");
 		String cpuUtilizationValue = String.valueOf(xenRrd
 				.get(CpuAvgPlugin.CPU_AVG));
-		String memomyTargetValue = String.valueOf(xenRrd.get("memory_target"));
+		String memomyTargetValue = String.valueOf(xenRrd.get("memory"));
 		String memoryInternalFreeValue = String.valueOf(xenRrd
 				.get("memory_internal_free"));
 		String vbdReadAvgValue = String.valueOf(xenRrd
@@ -357,15 +383,10 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 				.get(VifAvgPlugin.VIF_RX_AVG));
 		String vifTxAvgValue = String.valueOf(xenRrd
 				.get(VifAvgPlugin.VIF_TX_AVG));
-		if (timestamp == null || "null".equalsIgnoreCase(cpuUtilizationValue)
-				|| "null".equalsIgnoreCase(memomyTargetValue)
-				|| "null".equalsIgnoreCase(memoryInternalFreeValue)
-				|| "null".equalsIgnoreCase(vbdReadAvgValue)
-				|| "null".equalsIgnoreCase(vbdWriteAvgValue)
-				|| "null".equalsIgnoreCase(vifRxAvgValue)
-				|| "null".equalsIgnoreCase(vifTxAvgValue)) {
+		if (timestamp == null) {
 			return metricData;
 		}
+		
 		Integer sampleCount =(Integer) xenRrd.get("sample_count");
 		if (sampleCount == null ) {
 		    sampleCount = 1;
@@ -380,6 +401,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		cpuUtilization.sampleCount = String.valueOf(sampleCount);
 		metricData.add(cpuUtilization);
 
+		if (!"null".equalsIgnoreCase(memomyTargetValue)) {
 		UcloudWatchMetricData memoryTarget = new UcloudWatchMetricData();
 		memoryTarget.metricName = "MemoryTarget";
 		memoryTarget.unit = "Bytes";
@@ -388,16 +410,20 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		memoryTarget.demension.addAll(demensionList);
 		memoryTarget.sampleCount = String.valueOf(sampleCount);
 		metricData.add(memoryTarget);
+		}
+		
+		if (!"null".equalsIgnoreCase(memoryInternalFreeValue)) {
+    		UcloudWatchMetricData memoryInternalFree = new UcloudWatchMetricData();
+    		memoryInternalFree.metricName = "MemoryInternalFree";
+    		memoryInternalFree.unit = "Bytes";
+    		memoryInternalFree.value = memoryInternalFreeValue;
+    		memoryInternalFree.timestamp = timestamp;
+    		memoryInternalFree.demension.addAll(demensionList);
+    		memoryInternalFree.sampleCount = String.valueOf(sampleCount);
+    		metricData.add(memoryInternalFree);
+		}
 
-		UcloudWatchMetricData memoryInternalFree = new UcloudWatchMetricData();
-		memoryInternalFree.metricName = "MemoryInternalFree";
-		memoryInternalFree.unit = "Bytes";
-		memoryInternalFree.value = memoryInternalFreeValue;
-		memoryInternalFree.timestamp = timestamp;
-		memoryInternalFree.demension.addAll(demensionList);
-		memoryInternalFree.sampleCount = String.valueOf(sampleCount);
-		metricData.add(memoryInternalFree);
-
+		if (!"null".equalsIgnoreCase(vbdReadAvgValue)) {
 		UcloudWatchMetricData vbdReadAvg = new UcloudWatchMetricData();
 		vbdReadAvg.metricName = "DiskReadBytes";
 		vbdReadAvg.unit = "Bytes";
@@ -406,7 +432,9 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vbdReadAvg.demension.addAll(demensionList);
 		vbdReadAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vbdReadAvg);
+		}
 
+		if (!"null".equalsIgnoreCase(vbdWriteAvgValue)) {
 		UcloudWatchMetricData vbdWriteAvg = new UcloudWatchMetricData();
 		vbdWriteAvg.metricName = "DiskWriteBytes";
 		vbdWriteAvg.unit = "Bytes";
@@ -415,7 +443,9 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vbdWriteAvg.demension.addAll(demensionList);
 		vbdWriteAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vbdWriteAvg);
-
+		}
+		
+		if (!"null".equalsIgnoreCase(vifRxAvgValue)) {
 		UcloudWatchMetricData vifRxAvg = new UcloudWatchMetricData();
 		vifRxAvg.metricName = "NetworkIn";
 		vifRxAvg.unit = "Bytes";
@@ -424,7 +454,9 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vifRxAvg.demension.addAll(demensionList);
 		vifRxAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vifRxAvg);
+		}
 
+		if (!"null".equalsIgnoreCase(vifTxAvgValue)) {
 		UcloudWatchMetricData vifTxAvg = new UcloudWatchMetricData();
 		vifTxAvg.metricName = "NetworkOut";
 		vifTxAvg.unit = "Bytes";
@@ -433,7 +465,13 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		vifTxAvg.demension.addAll(demensionList);
 		vifTxAvg.sampleCount = String.valueOf(sampleCount);
 		metricData.add(vifTxAvg);
-
+		}
+		
 		return metricData;
 	}
+
+    @Override
+    public void stop() {
+        this.executor.shutdown();
+    }
 }

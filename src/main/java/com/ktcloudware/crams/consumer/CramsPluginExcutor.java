@@ -38,4 +38,12 @@ public class CramsPluginExcutor {
             // TODO 데몬 동작 종료시 발생하는 에러에 대한 처리가 필요하다.
         }
     }
+
+    public void stop() {
+        for (CramsConsumerPlugin plugin: plugins) {
+            plugin.stop();
+        }
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -69,4 +69,10 @@ public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
         dataMap.put(key, (float) 0.0);
         return dataMap;
     }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
 }

@@ -26,4 +26,6 @@ public interface CramsConsumerPlugin {
 
     public Map<String, Object> excute(Map<String, Object> dataMap,
             String dataTag) throws CramsPluginException;
+
+    public void stop();
 }

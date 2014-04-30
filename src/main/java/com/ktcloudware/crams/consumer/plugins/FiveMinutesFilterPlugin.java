@@ -52,4 +52,10 @@ public class FiveMinutesFilterPlugin implements CramsConsumerPlugin {
     public boolean needProperties() {
         return true;
     }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
 }

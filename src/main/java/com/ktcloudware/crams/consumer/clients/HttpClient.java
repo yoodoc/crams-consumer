@@ -8,13 +8,34 @@ import java.net.URL;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-public class HttpClient {
-    private static Logger logger;
+import com.ktcloudware.crams.consumer.plugins.UWatchPutMetricRequestQueue;
 
-    public static String sendRequest(String requestUrl) {
+public class HttpClient implements Runnable{
+    private static Logger logger;
+    private UWatchPutMetricRequestQueue requestQueue;
+    HttpURLConnection httpConnection = null;
+    public HttpClient(UWatchPutMetricRequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
+    }
+    
+    @Override
+    public void run() {
+        while (true) {
+            String request = requestQueue.take();
+            String response = sendRequest(request);
+            if (response == null) {
+                logger.error(request + ": failed to send watch request");
+            } else {
+                logger.trace("send ucloud watch request : " + request
+                        + ", response : " + response);
+            }
+        }
+    }
+    
+    public String sendRequest(String requestUrl) {
         logger = LogManager.getLogger("CRAMS_CONSUMER");
-        HttpURLConnection httpConnection = null;
         InputStream responseStream = null;
+       
         long elapsedTime = -1;
 
         String response = null;
@@ -23,6 +44,7 @@ public class HttpClient {
             URL url = new URL(requestUrl);
             httpConnection = (HttpURLConnection) url.openConnection();
             httpConnection.setRequestMethod("GET");
+            httpConnection.setConnectTimeout(10000);
             responseStream = httpConnection.getInputStream();
             StringBuffer sb = new StringBuffer();
             byte[] b = new byte[4096];
@@ -31,7 +53,7 @@ public class HttpClient {
             }
             responseStream.close();
             response = sb.toString();
-            logger.trace("response:" + response);
+          //  logger.trace("response:" + response);
             int responseCode = httpConnection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 throw new IOException("abnormal HTTP response code:"
@@ -66,4 +88,6 @@ public class HttpClient {
         }
         return response;
     }
+
+   
 }
