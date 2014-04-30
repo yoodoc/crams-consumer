@@ -29,7 +29,7 @@ LOG4J_CONF=$PROJECT_DIR/conf/log4j.properties
 case "$1" in
     start)
         #set logging path
-        sed -i s@PROJECT_DIR@$PROJECT_DIR@g $LOG4J_CONF
+        sed -i s@LOGGING_PATH@$PROJECT_DIR@g $LOG4J_CONF
 
         #
         # Start Daemon

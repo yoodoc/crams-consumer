@@ -1,7 +1,7 @@
 #!/bin/sh
 #set environment
 #JAVA_HOME=$JAVA_HOME
-JAVA_HOME=/usr/lib/jvm/jdk1.7.0_51/
+JAVA_HOME=/usr/lib/jvm/jre1.7.0_45/
 JSVC=jsvc
 DAEMON_USER=$(whoami)
 #DAEMON_HOME=$(dirname $0)/..
@@ -29,7 +29,7 @@ LOG4J_CONF=$PROJECT_DIR/conf/log4j.properties
 case "$1" in
     start)
         #set logging path
-        sed -i s@PROJECT_DIR@$PROJECT_DIR@g $LOG4J_CONF
+        sed -i s@LOGGING_PATH@$PROJECT_DIR@g $LOG4J_CONF
 
         #
         # Start Daemon
