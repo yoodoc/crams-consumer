@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ktcloudware.crams.consumer.plugins.CramsConsumerPlugin;
@@ -16,6 +17,7 @@ import com.ktcloudware.crams.consumer.plugins.SimpleLoggingPlugin;
 
 public class DataAggregatorFlushTaskTest {
 
+    @Ignore
     @Test
     public void test() {
         //create dataAggregator & flushing task for over stacked data

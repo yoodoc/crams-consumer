@@ -5,11 +5,12 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ESIndexingPluginTest {
 
-   // @Ignore
+    @Ignore
     @Test
     public void test() {
         ESIndexingPlugin esIndexingPlugin = null;

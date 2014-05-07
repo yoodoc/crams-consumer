@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.common.mvel2.ast.AssertNode;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -123,8 +124,9 @@ public class UcloudWatchPluginTest {
 
         for (Map<String, Object> data : dataList) {
             try {
-                uwp.excute(data, "unittest");
-                Assert.fail("expect exception");
+                data = uwp.excute(data, "unittest");
+                Assert.assertNull(data);
+//                Assert.fail("expect exception");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -213,9 +215,8 @@ public class UcloudWatchPluginTest {
 
         for (Map<String, Object> data : dataList) {
             try {
-                uwp.excute(data, "unittest");
-                Assert.fail("expect exception");
-                ;
+                data = uwp.excute(data, "unittest");
+                Assert.assertNull(data);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

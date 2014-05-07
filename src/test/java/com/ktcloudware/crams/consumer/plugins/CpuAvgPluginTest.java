@@ -19,10 +19,10 @@ public class CpuAvgPluginTest {
         testData.put("vm_uuid", "u-n-i-t-e-s-t");
         testData.put("vm_cpu", 1);
         testData.put("vm_type", "VR");
-        testData.put("cpu0", 0.0000000005);
-        testData.put("cpu1", 0.000000005);
+        testData.put("cpu0", 0.5);
+        testData.put("cpu1", 0);
         CpuAvgPlugin plugin = new CpuAvgPlugin();
-        assertEquals((float) 0.00000000275,
+        assertEquals((float) 0.25,
                 plugin.excute(testData, null).get("cpu_avg"));
     }
 

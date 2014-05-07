@@ -29,8 +29,7 @@ public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
         dataMap = replaceName.excute(dataMap, dataTag);
 
         try {
-            dataMap = KafkaConsumerPluginUtil.addAverageValue(
-                    "vbd_[a-z]+_read", VBD_READ_AVG, dataMap);
+            dataMap = KafkaConsumerPluginUtil.addLongTypeAverageValue("vbd_[a-z]+_read", VBD_READ_AVG, dataMap);
         } catch (CramsException e) {
             logger.warn("can't get average vbd read values from data="
                     + dataMap, e);
@@ -38,7 +37,7 @@ public class VbdReadWriteAvgPlugin implements CramsConsumerPlugin {
         }
 
         try {
-            dataMap = KafkaConsumerPluginUtil.addAverageValue(
+            dataMap = KafkaConsumerPluginUtil.addLongTypeAverageValue(
                     "vbd_[a-z]+_write", VBD_WRITE_AVG, dataMap);
         } catch (CramsException e) {
             logger.warn("can't get average vbd write values from data="

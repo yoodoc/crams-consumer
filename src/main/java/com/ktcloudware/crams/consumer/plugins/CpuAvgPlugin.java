@@ -23,7 +23,7 @@ public class CpuAvgPlugin implements CramsConsumerPlugin {
             return dataMap;
         }
         try {
-            dataMap = KafkaConsumerPluginUtil.addAverageValue("cpu[0-9]+",
+            dataMap = KafkaConsumerPluginUtil.addFloatTypeAverageValue("cpu[0-9]+",
                     CPU_AVG, dataMap);
         } catch (CramsException e) {
             logger.error(e.getMessage(), e);

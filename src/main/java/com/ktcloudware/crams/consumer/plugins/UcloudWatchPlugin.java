@@ -92,7 +92,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 	    if (xenRrd == null || xenRrd.isEmpty()) {
             return xenRrd;
         }
-	    
 		// make avg data from vm rrd
 	    try {
 	        xenRrd = excuteCramsPlugins(xenRrd, dataTag);
@@ -116,6 +115,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		// parse demension list
 		List<UcloudWatchDemension> demensionList = parseUWatchDemensionList(
 				namespace, xenRrd);
+		System.out.println("!!! here");
 		if (demensionList == null || demensionList.isEmpty()) {
 			return null;
 		}
@@ -370,8 +370,8 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 
 		// get metric data
 		String timestamp = (String) xenRrd.get("datetime");
-		String cpuUtilizationValue = String.valueOf(xenRrd
-				.get(CpuAvgPlugin.CPU_AVG));
+		String cpuUtilizationValue = String.valueOf((Float)xenRrd
+				.get(CpuAvgPlugin.CPU_AVG) * 100);
 		String memomyTargetValue = String.valueOf(xenRrd.get("memory"));
 		String memoryInternalFreeValue = String.valueOf(xenRrd
 				.get("memory_internal_free"));
