@@ -116,11 +116,20 @@ public class KafkaConsumerPluginUtil {
             if (keyName.matches(sourceKeyRegex)) {
                 Object object = dataMap.get(keyName);
                 try {
-                    totalValue += Long.parseLong(String.valueOf(object));
-                } catch (Exception e) {
-                    throw new CramsException("!!failed", e);
+                if (object instanceof Integer || object instanceof Long) {
+                    totalValue += Long
+                            .parseLong(String.valueOf(object));
+                } else if (object instanceof Float) {
+                    totalValue = ((Float) object).longValue();
+                } else if (object instanceof Double) {
+                    totalValue = ((Double) object).longValue();
+                } else {
+                    continue;
                 }
                 count++;
+                } catch (Exception e) {
+                    throw new CramsException("failed with " + e.getMessage() , e);
+                }
             }
         }
 

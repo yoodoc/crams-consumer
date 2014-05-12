@@ -150,9 +150,10 @@ public class ESBulkIndexer {
      * @throws CramsException
      */
     public int sendBulkRequest() {
-        // send bulk request using bulkRequestBulker
-        int sizeOfBulkRequest = this.bulkRequestBuilder.numberOfActions();
         try {
+            // send bulk request using bulkRequestBulker
+            int sizeOfBulkRequest = this.bulkRequestBuilder.numberOfActions();
+
             BulkResponse bulkResponse = this.bulkRequestBuilder.execute()
                     .actionGet();
             if (bulkResponse.hasFailures()) {
@@ -165,6 +166,14 @@ public class ESBulkIndexer {
                         + "data, it took " + bulkResponse.getTookInMillis()
                         + "msec");
             
+            // update last bulk request time
+            lastSendTime = System.currentTimeMillis();
+            
+            // flush bulk requests list
+            // TODO bulkRequestBuilder를 새로 생성할 필요가 있을까? 확인이 필요하다.
+            this.bulkRequestBuilder = client.prepareBulk();
+            return sizeOfBulkRequest;
+        
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             // re-init client
@@ -182,15 +191,6 @@ public class ESBulkIndexer {
             this.bulkRequestBuilder = client.prepareBulk();
             return 0;
         }
-
-        // update last bulk request time
-        lastSendTime = System.currentTimeMillis();
-
-        // flush bulk requests list
-        // TODO bulkRequestBuilder를 새로 생성할 필요가 있을까? 확인이 필요하다.
-        this.bulkRequestBuilder = client.prepareBulk();
-
-        return sizeOfBulkRequest;
     }
 
     /**
