@@ -41,11 +41,11 @@ public class UcloudWatchPluginTest {
             data.put("memory_target", 100000000000L);
             data.put("memory_target", 100000000000L);
             data.put("memory_internal_free", 100000000);
-            data.put("cpu0", 0.38738647169767515);
-            data.put("cpu1", 0.635808734557892);
-            data.put("cpu2", 0.9888381871688897);
-            data.put("cpu3", 0.08545827027426656);
-            data.put("cpu4", 0.7659032390437487);
+            data.put("cpu0", 0.5);
+            data.put("cpu1", 0.5);
+            data.put("cpu2", 0.5);
+            data.put("cpu3", 0);
+            data.put("cpu4", 1);
             data.put("vm_uuid", "uu_id");
             data.put("vm_display_name", null);
             data.put("vm_account_name", "EPC_M1111112_S1111");

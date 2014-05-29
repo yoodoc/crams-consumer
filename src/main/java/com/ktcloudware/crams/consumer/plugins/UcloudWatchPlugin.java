@@ -115,7 +115,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		// parse demension list
 		List<UcloudWatchDemension> demensionList = parseUWatchDemensionList(
 				namespace, xenRrd);
-		System.out.println("!!! here");
 		if (demensionList == null || demensionList.isEmpty()) {
 			return null;
 		}
@@ -181,7 +180,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 			}
 			if (UCLOUD_SERVER_NAMESPACE.equalsIgnoreCase(namespace)) {
 			    vmDisplayName += "(" + vmUuid + ")";
-			  //  System.out.println("!!!" + vmDisplayName);
 				String vmTemplateName = (String) xenRrd.get("vm_template_name");
 				if (!"".equals(vmTemplateName)) {
 					demensionList.add(new UcloudWatchDemension("templatename",
@@ -205,7 +203,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 			    vmDisplayName = "vr(" + vmUuid + ")";
 			}
 
-			//System.out.println("!!!" + vmDisplayName);
 			demensionList.add(new UcloudWatchDemension("name", vmDisplayName));
 		} catch (Exception e) {
 			logger.error("failed to create demension field,", e);
@@ -391,7 +388,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 		if (sampleCount == null ) {
 		    sampleCount = 1;
 		}
-		
 		UcloudWatchMetricData cpuUtilization = new UcloudWatchMetricData();
 		cpuUtilization.metricName = "CPUUtilization";
 		cpuUtilization.unit = "Percent";
