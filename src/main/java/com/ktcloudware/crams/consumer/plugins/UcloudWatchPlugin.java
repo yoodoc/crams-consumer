@@ -127,7 +127,6 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 			logger.error("noting to send, original data:" + xenRrd);
 			return null;
 		}
-		
 		requestQueue.put(ucloudWatchRequestParmaeter);
 		return null;
 		// send metric data
@@ -179,7 +178,7 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 				throw new CramsPluginException("failed to create demension field," + xenRrd.toString());
 			}
 			if (UCLOUD_SERVER_NAMESPACE.equalsIgnoreCase(namespace)) {
-			    vmDisplayName += "(" + vmUuid + ")";
+			   
 				String vmTemplateName = (String) xenRrd.get("vm_template_name");
 				if (!"".equals(vmTemplateName)) {
 					demensionList.add(new UcloudWatchDemension("templatename",
@@ -192,11 +191,14 @@ public class UcloudWatchPlugin implements CramsConsumerPlugin {
 				}
 				// create "AutoScalingGroupName" demension value
 				if (vmDisplayName.startsWith("uas-")) {
-					String[] nameSeries = vmDisplayName.split("-");
-					String autoscalingGroupName = nameSeries[1];
+				    int lastDashIndex = vmDisplayName.lastIndexOf("-");
+				    int firstDashIndex = vmDisplayName.indexOf("-");
+  					String autoscalingGroupName = vmDisplayName.substring(firstDashIndex + 1, lastDashIndex);
 					demensionList.add(new UcloudWatchDemension(
-							"AutoScalingGroupName", autoscalingGroupName));
+							"AutoscalingGroupName", autoscalingGroupName));
 				}
+				
+				 vmDisplayName += "(" + vmUuid + ")";
 			} else if (UCLOUD_RDBAAS_NAMESPACE.equalsIgnoreCase(namespace)) {
 			    vmDisplayName = vmUuid;
 			} else if (UCLOUD_VR_NAMESPACE.equalsIgnoreCase(namespace)) {
